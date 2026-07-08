@@ -1,0 +1,10 @@
+{
+  "name": "eta-market-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plateforme ETA MARKET",
+  "dependencies": {
+    "@netlify/database": "^1.0.0",
+    "@netlify/blobs": "^8.1.0"
+  }
+}
