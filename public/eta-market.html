@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETA MARKET — Le e-commerce n°1 à Brazzaville</title>
+<meta name="description" content="ETA MARKET — Téléphones, mode et maison livrés à Brazzaville. Paiement MTN MoMo et Airtel Money.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#E63946;
+    --red-dark:#B4222D;
+    --black:#1D1D1D;
+    --white:#FFFFFF;
+    --yellow:#FCA311;
+    --line:rgba(255,255,255,0.1);
+    --line-dark:rgba(29,29,29,0.1);
+    --radius:16px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--white);
+    color:var(--black);
+    font-family:'Poppins', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.mont{ font-family:'Montserrat', sans-serif; font-weight:800; letter-spacing:-0.01em; }
+  a{ color:inherit; text-decoration:none; }
+  img{ display:block; max-width:100%; }
+  ::selection{ background:var(--red); color:#fff; }
+
+  .btn{
+    position:relative; overflow:hidden; border:none; cursor:pointer;
+    border-radius:100px; font-family:'Poppins',sans-serif; font-weight:600;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .btn::after{
+    content:''; position:absolute; top:0; left:-120%; width:60%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform:skewX(-20deg); transition:left .5s ease;
+  }
+  .btn:hover::after{ left:130%; }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--red), var(--red-dark));
+    color:#fff; padding:15px 30px; font-size:0.95rem;
+    box-shadow:0 8px 20px rgba(230,57,70,0.35);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 14
