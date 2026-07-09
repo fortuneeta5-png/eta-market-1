@@ -261,3 +261,101 @@
     <div class="logo">ETA <span>MARKET</span></div>
     <nav class="catnav">
       <a href="#tech">Téléphones &amp; Tech</a>
+      <a href="#mode">Mode &amp; Beauté</a>
+      <a href="#maison">Maison</a>
+    </nav>
+    <div class="header-actions">
+      <button class="cart-btn" onclick="openCart()">🛒 Panier <span class="cart-count" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">🔥 <b>Promo du moment</b> — jusqu'à -20% cette semaine</div>
+      <h1>Tout Brazzaville<br>achète sur <span>ETA MARKET</span></h1>
+      <p>Téléphones, mode et électroménager livrés chez toi. Paie en toute simplicité avec MTN MoMo ou Airtel Money, directement depuis ton téléphone.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">Découvrir la boutique</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('tech').scrollIntoView({behavior:'smooth'})">Voir les tendances</button>
+      </div>
+      <div class="pay-row">
+        <span class="pay-pill">📲 MTN MoMo</span>
+        <span class="pay-pill">📲 Airtel Money</span>
+        <span class="pay-pill">🛵 Livraison 24-48h</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <span class="hero-float">Nouveau</span>
+        <img src="https://images.pexels.com/photos/3945672/pexels-photo-3945672.jpeg?auto=compress&cs=tinysrgb&w=800" alt="iPhone 15 Pro">
+        <div class="hc-row">
+          <span class="hc-name">iPhone 15 Pro 128GB</span>
+        </div>
+        <div class="hc-row" style="margin-top:6px;">
+          <span class="hc-price">950 000 FCFA</span>
+          <span style="font-size:0.72rem; opacity:0.5;">★★★★★ (128)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cat-strip" id="catStrip"></div>
+
+<div class="section-head">
+  <h2 id="sectionTitle">Nos <span>meilleures ventes</span></h2>
+  <p id="prodCount">9 produits</p>
+</div>
+<div class="grid" id="grid"></div>
+
+<section class="features">
+  <div class="features-inner">
+    <div class="feature"><div class="ic">📲</div><h4>Mobile Money</h4><p>Paiement instantané via MTN MoMo et Airtel Money, sans carte bancaire.</p></div>
+    <div class="feature"><div class="ic">🛵</div><h4>Livraison rapide</h4><p>Sous 24 à 48h à Brazzaville, Pointe-Noire et environs.</p></div>
+    <div class="feature"><div class="ic">🛡️</div><h4>Achat garanti</h4><p>Produits vérifiés, retour possible sous 7 jours.</p></div>
+    <div class="feature"><div class="ic">💬</div><h4>Support client</h4><p>Une équipe disponible 7j/7 pour répondre à tes questions.</p></div>
+  </div>
+</section>
+
+<div class="cta-banner">
+  <div class="cta-inner">
+    <h2>Ta prochaine commande, payée en 30 secondes</h2>
+    <p>MTN MoMo ou Airtel Money — choisis, valide, c'est livré.</p>
+    <button class="btn btn-primary" onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">Commencer mes achats</button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">ETA <span>MARKET</span></div>
+      <p style="max-width:32ch;">Le marché en ligne pensé pour Brazzaville. Simple, rapide, payé avec ton Mobile Money.</p>
+    </div>
+    <div>
+      <h5>Boutique</h5>
+      <a href="#tech">Téléphones &amp; Tech</a>
+      <a href="#mode">Mode &amp; Beauté</a>
+      <a href="#maison">Maison</a>
+    </div>
+    <div>
+      <h5>Aide</h5>
+      <a href="#">Livraison</a>
+      <a href="#">Paiement Mobile Money</a>
+      <a href="#">Retours</a>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <a href="#">Brazzaville, Congo</a>
+      <a href="#">+242 06 000 00 00</a>
+      <a href="#">contact@etamarket.cg</a>
+    </div>
+  </div>
+  <div class="footer-bottom">ETA MARKET © 2026 — Tous droits réservés</div>
+</footer>
+
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+
+  <div class="step active" id="stepCart" style="display:flex; flex-direction:column; height:100%;">
