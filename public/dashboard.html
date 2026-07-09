@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETA MARKET — Crée ta boutique en ligne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1D1D1D; --paper:#FAFAFA; --line:rgba(20,18,31,0.1);
+    --primary:#E63946; --primary-dark:#B4222D; --lavender:#FDEDEE;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--paper); color:var(--ink); font-family:'Poppins',sans-serif; min-height:100vh; }
+  h1,h2,h3{ font-family:'Montserrat',sans-serif; font-weight:800; letter-spacing:-0.01em; }
+  .btn{ border:none; cursor:pointer; border-radius:12px; font-weight:600; transition:transform .15s ease, box-shadow .15s ease; font-family:'Poppins',sans-serif; }
+  .btn-primary{ background:var(--primary); color:#fff; padding:14px 26px; font-size:0.95rem; box-shadow:0 8px 20px rgba(230,57,70,0.3); }
+  .btn-primary:hover{ background:var(--primary-dark); transform:translateY(-2px); }
+  .btn-primary:disabled{ opacity:0.5; cursor:not-allowed; transform:none; }
+  .btn-ghost{ background:var(--lavender); color:var(--primary-dark); padding:10px 18px; font-size:0.85rem; }
+  .btn-ghost:hover{ background:#FBDADC; }
+  .btn-danger{ background:#fff; color:#DC2626; border:1.5px solid #FCA5A5; padding:8px 14px; font-size:0.78rem; }
+  .btn-danger:hover{ background:#FEF2F2; }
+
+  /* ---------- auth ---------- */
+  #authScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, var(--ink) 0%, #B4222D 100%); padding:24px; }
+  .auth-card{ background:#fff; border-radius:22px; padding:40px 32px; width:100%; max-width:400px; box-shadow:0 30px 60px rgba(0,0,0,0.35); }
+  .auth-logo{ font-size:1.6rem; font-weight:800; margin-bottom:6px; text-align:center; }
+  .auth-logo span{ color:var(--primary); }
+  .auth-sub{ font-size:0.88rem; opacity:0.55; margin-bottom:26px; text-align:center; }
+  .tabs{ display:flex; background:var(--lavender); border-radius:12px; padding:4px; margin-bottom:24px; }
+  .tab{ flex:1; text-align:center; padding:10px; border-radius:9px; font-size:0.85rem; font-weight:600; cursor:pointer; color:var(--primary-dark); opacity:0.5; }
+  .tab.active{ background:#fff; opacity:1; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600; }
+  .field input, .field select, .field textarea{ width:100%; padding:13px 14px; border-radius:10px; border:1.5px solid var(--line); font-family:'Poppins',sans-serif; font-size:0.95rem; }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--primary); outline-offset:1px; border-color:var(--primary); }
+  #authBtn{ width:100%; padding:14px; margin-top:6px; }
+  .auth-msg{ font-size:0.82rem; margin-top:14px; text-align:center; font-weight:600; display:none; }
+  .auth-msg.err{ color:#DC2626; }
+  .auth-msg.ok{ color:#059669; }
+
+  /* ---------- create store ---------- */
+  #createStoreScreen{ display:none; min-height:100vh; align-items:center; justify-content:center; background:var(--lavender); padding:24px; }
+  .cs-card{ background:#fff; border-radius:22px; padding:40px 32px; width:100%; max-width:460px; box-shadow:0 20px 50px rgba(230,57,70,0.15); }
+  .cs-card h2{ font-size:1.4rem; margin-bottom:6px; }
+  .cs-card .sub{ font-size:0.88rem; opacity:0.6; margin-bottom:26px; }
+  .color-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  .color-dot{ width:36px; height:36px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:transform .15s ease; }
+  .color-dot.selected{ border-color:var(--ink); transform:scale(1.1); }
+  .slug-preview{ font-size:0.8rem; opacity:0.55; margin-top:6px; font-family:monospace; }
+
+  /* ---------- dashboard ---------- */
+  #dashboard{ display:none; }
+  header{ background:#fff; border-bottom:1px solid var(--line); padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+  .logo{ font-size:1.25rem; font-weight:800; }
+  .logo span{ color:var(--primary); }
+  .header-right{ display:flex; gap:10px; align-items:center; }
+  .logout-btn{ background:none; border:1px solid var(--line); color:var(--ink); padding:9px 16px; border-radius:100px; font-size:0.82rem; cursor:pointer; }
+  .logout-btn:hover{ background:#f5f5f5; }
+
+  .wrap{ max-width:1000px; margin:0 auto; padding:28px 20px 60px; }
+  .store-banner{
+    border-radius:18px; padding:26px; color:#fff; margin-bottom:24px;
+    display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  .store-banner h2{ font-size:1.3rem; margin-bottom:4px; }
+  .store-banner p{ font-size:0.85rem; opacity:0.9; }
+  .link-box{ background:rgba(255,255,255,0.15); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:0.82rem; font-family:monospace; }
+  .link-box button{ background:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:0.76rem; font-weight:700; cursor:pointer; white-space:nowrap; }
+
+  .panel{ background:#fff; border-radius:16px; border:1px solid var(--line); overflow:hidden; margin-bottom:20px; }
+  .panel-head{ padding:18px 22px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+  .panel-head h3{ font-size:1.02rem; }
+  .panel-body{ padding:22px; }
+
+  .upload-zone{
+    border:2px dashed var(--line); border-radius:14px; padding:22px; text-align:center; cursor:pointer;
+    margin-bottom:18px; position:relative; overflow:hidden;
+  }
+  .upload-zone:hover{ border-color:var(--primary); background:var(--lavender); }
+  .upload-zone img{ max-width:100%; max-height:150px; border-radius:10px; margin-bottom:10px; }
+  .upload-zone .hint{ font-size:0.82rem; opacity:0.55; }
+  .upload-zone input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .form-msg{ font-size:0.85rem; margin-top:12px; font-weight:600; display:none; }
+  .form-msg.ok{ color:#059669; }
+  .form-msg.err{ color:#DC2626; }
+
+  .prod-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px; }
+  .prod-card{ border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .prod-card img{ width:100%; aspect-ratio:1; object-fit:cover; }
+  .prod-card .pc-body{ padding:12px; }
+  .prod-card h4{ font-size:0.85rem; font-weight:700; margin-bottom:4px; }
+  .prod-card .price{ font-size:0.82rem; font-weight:700; color:var(--primary); margin-bottom:8px; }
+  .prod-card .pc-actions{ display:flex; gap:6px; }
+  .prod-card .pc-actions button{ flex:1; font-size:0.7rem; padding:6px; }
+  .empty{ text-align:center; padding:40px 20px; opacity:0.5; font-size:0.88rem; }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">ETA MARKET<span>.</span></div>
+    <div class="auth-sub">Crée ta boutique en ligne en quelques minutes</div>
+
+    <div class="tabs">
+      <div class="tab active" id="tabLogin" onclick="switchTab('login')">Connexion</div>
+      <div class="tab" id="tabSignup" onclick="switchTab('signup')">Créer un compte</div>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="authEmail" placeholder="toi@exemple.com">
+    </div>
+    <div class="field">
+      <label>Mot de passe</label>
+      <input type="password" id="authPassword" placeholder="••••••••">
+    </div>
+
+    <button class="btn btn-primary" id="authBtn" onclick="handleAuth()">Se connecter</button>
+    <div class="auth-msg" id="authMsg"></div>
+  </div>
+</div>
+
+<!-- CREATE STORE -->
+<div id="createStoreScreen">
+  <div class="cs-card">
+    <h2>Crée ta boutique 🎉</h2>
+    <div class="sub">Ça prend 1 minute. Tu pourras tout modifier plus tard.</div>
+
+    <div class="field">
+      <label>Nom de ta boutique</label>
+      <input type="text" id="storeName" placeholder="Ex: Boutique Marie" oninput="updateSlugPreview()">
+      <div class="slug-preview" id="slugPreview"></div>
+    </div>
+    <div class="field">
+      <label>Description courte</label>
+      <textarea id="storeDesc" rows="2" placeholder="Ex: Mode et accessoires faits main à Brazzaville"></textarea>
+    </div>
+    <div class="field">
+      <label>Couleur de ta boutique</label>
+      <div class="color-row" id="colorRow"></div>
+    </div>
+
+    <button class="btn btn-primary" id="createStoreBtn" style="width:100%; margin-top:8px;" onclick="createStore()">Créer ma boutique</button>
+    <div class="form-msg" id="createStoreMsg"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header>
+    <div class="logo">ETA MARKET<span>.</span></div>
+    <div class="header-right">
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="store-banner" id="storeBanner">
+      <div>
+        <h2 id="bannerStoreName">—</h2>
+        <p id="bannerStoreDesc"></p>
+      </div>
+      <div class="link-box">
+        <span id="storeLinkText">—</span>
+        <button onclick="copyStoreLink()">Copier</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>Ajouter un produit</h3></div>
+      <div class="panel-body">
+        <label class="upload-zone" id="uploadZone">
+          <div id="uploadPlaceholder">
+            <div style="font-size:1.8rem; margin-bottom:8px;">📷</div>
+            <div class="hint">Touche pour choisir une photo</div>
+          </div>
+          <img id="imagePreview" style="display:none;">
+          <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+        </label>
+
+        <div class="field">
+          <label>Nom du produit</label>
+          <input type="text" id="pName" placeholder="Ex: Sac à main artisanal">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Prix (FCFA)</label>
+            <input type="number" id="pPrice" placeholder="15000">
+          </div>
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="pDesc" rows="2" placeholder="Décris ton produit en une phrase"></textarea>
+        </div>
+
+        <button class="btn btn-primary" id="publishBtn" style="width:100%;" onclick="publishProduct()">Publier le produit</button>
+        <div class="form-msg" id="formMsg"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Mes produits</h3>
+        <button class="btn btn-ghost" onclick="loadProducts()">Actualiser</button>
+      </div>
+      <div class="panel-body">
+        <div class="prod-grid" id="prodGrid">
+          <div class="empty">Chargement…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
+  const STORE_URL_BASE = window.location.origin + window.location.pathname.replace('dashboard.html', 'store.html');
+
+  const COLORS = ["#4F46E5","#E63946","#059669","#EA580C","#DB2777","#0891B2","#7C3AED","#14121F"];
+
+  let session = JSON.parse(localStorage.getItem('vendoSession') || 'null');
+  let currentStore = null;
+  let selectedColor = COLORS[0];
+  let selectedImageFile = null;
+
+  // ---------- Auth ----------
+  let authMode = 'login';
+  function switchTab(mode){
+    authMode = mode;
+    document.getElementById('tabLogin').classList.toggle('active', mode==='login');
+    document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
+    document.getElementById('authBtn').textContent = mode==='login' ? 'Se connecter' : 'Créer mon compte';
+  }
+
+  async function handleAuth(){
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const msg = document.getElementById('authMsg');
+    const btn = document.getElementById('authBtn');
+    msg.style.display = 'none';
+
+    if(!email || !password){
+      msg.textContent = "Remplis email et mot de passe."; msg.className = "auth-msg err"; msg.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = "Patiente…";
+
+    try {
+      const endpoint = authMode === 'login' ? 'token?grant_type=password' : 'signup';
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error_description || data.msg || data.error || "Échec");
+
+      if(authMode === 'signup' && !data.access_token){
+        msg.textContent = "Compte créé ! Connecte-toi maintenant."; msg.className = "auth-msg ok"; msg.style.display = "block";
+        switchTab('login');
+        return;
+      }
+
+      session = { access_token: data.access_token, user: data.user };
+      localStorage.setItem('vendoSession', JSON.stringify(session));
+      await afterLogin();
+    } catch(err){
+      msg.textContent = err.message; msg.className = "auth-msg err"; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = authMode==='login' ? 'Se connecter' : 'Créer mon compte';
+    }
+  }
+
+  function logout(){
+    localStorage.removeItem('vendoSession');
+    session = null; currentStore = null;
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('createStoreScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+
+  async function afterLogin(){
+    document.getElementById('authScreen').style.display = 'none';
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${session.user.id}&select=*`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+    });
+    const stores = await res.json();
+    if(stores && stores.length > 0){
+      currentStore = stores[0];
+      showDashboard();
+    } else {
+      renderColorPicker();
+      document.getElementById('createStoreScreen').style.display = 'flex';
+    }
+  }
+
+  // ---------- Create store ----------
+  function renderColorPicker(){
+    const row = document.getElementById('colorRow');
+    row.innerHTML = COLORS.map(c => `<div class="color-dot ${c===selectedColor?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join('');
+  }
+  function selectColor(c){ selectedColor = c; renderColorPicker(); }
+
+  function slugify(text){
+    return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+  }
+  function updateSlugPreview(){
+    const name = document.getElementById('storeName').value;
+    document.getElementById('slugPreview').textContent = name ? STORE_URL_BASE + "?s=" + slugify(name) : "";
+  }
+
+  async function createStore(){
+    const name = document.getElementById('storeName').value.trim();
+    const description = document.getElementById('storeDesc').value.trim();
+    const msg = document.getElementById('createStoreMsg');
+    const btn = document.getElementById('createStoreBtn');
+    if(!name){
+      msg.textContent = "Donne un nom à ta boutique."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Création…";
+    try {
+      let slug = slugify(name);
+      const check = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?slug=eq.${slug}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const existing = await check.json();
+      if(existing.length > 0) slug = slug + '-' + Math.floor(Math.random()*1000);
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=representation',
+        },
+        body: JSON.stringify({ vendor_id: session.user.id, name, slug, description, accent_color: selectedColor }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.message || "Échec de la création");
+
+      currentStore = data[0];
+      document.getElementById('createStoreScreen').style.display = 'none';
+      showDashboard();
+    } catch(err){
+      msg.textContent = err.message; msg.className = "form-msg err"; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Créer ma boutique";
+    }
+  }
+
+  // ---------- Dashboard ----------
+  function showDashboard(){
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('storeBanner').style.background = `linear-gradient(120deg, ${currentStore.accent_color}, ${currentStore.accent_color}dd)`;
+    document.getElementById('bannerStoreName').textContent = currentStore.name;
+    document.getElementById('bannerStoreDesc').textContent = currentStore.description || '';
+    document.getElementById('storeLinkText').textContent = `store.html?s=${currentStore.slug}`;
+    loadProducts();
+  }
+
+  function copyStoreLink(){
+    const link = `${STORE_URL_BASE}?s=${currentStore.slug}`;
+    navigator.clipboard.writeText(link).then(()=>{
+      const btn = event.target;
+      const old = btn.textContent;
+      btn.textContent = "Copié !";
+      setTimeout(()=>btn.textContent = old, 1500);
+    });
+  }
+
+  function previewImage(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imagePreview').src = e.target.result;
+      document.getElementById('imagePreview').style.display = 'block';
+      document.getElementById('uploadPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function publishProduct(){
+    const name = document.getElementById('pName').value.trim();
+    const price = document.getElementById('pPrice').value;
+    const description = document.getElementById('pDesc').value.trim();
+    const msg = document.getElementById('formMsg');
+    const btn = document.getElementById('publishBtn');
+
+    if(!name || !price || !selectedImageFile){
+      msg.textContent = "Remplis le nom, le prix et ajoute une photo."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Publication…"; msg.style.display = "none";
+
+    try {
+      const ext = (selectedImageFile.name.split('.').pop() || 'jpg').toLowerCase();
+      const fileName = `${currentStore.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': selectedImageFile.type,
+        },
+        body: selectedImageFile,
+      });
+      if(!uploadRes.ok) throw new Error("Échec de l'upload de la photo");
+      const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
+
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=representation',
+        },
+        body: JSON.stringify({ store_id: currentStore.id, name, description, price_fcfa: parseInt(price,10), image_url: imageUrl }),
+      });
+      const productData = await insertRes.json();
+      if(!insertRes.ok) throw new Error(productData.message || "Échec de la publication");
+
+      const productLink = `${STORE_URL_BASE}?s=${currentStore.slug}&p=${productData[0].id}`;
+      msg.innerHTML = `✅ Produit publié !<br><span style="font-family:monospace; font-size:0.78rem; word-break:break-all;">${productLink}</span>`;
+      msg.className = "form-msg ok"; msg.style.display = "block";
+
+      document.getElementById('pName').value = '';
+      document.getElementById('pPrice').value = '';
+      document.getElementById('pDesc').value = '';
+      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('uploadPlaceholder').style.display = 'block';
+      document.getElementById('imageInput').value = '';
+      selectedImageFile = null;
+
+      loadProducts();
+    } catch(err){
+      msg.textContent = "❌ " + err.message; msg.className = "form-msg err"; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Publier le produit";
+    }
+  }
+
+  async function loadProducts(){
+    const grid = document.getElementById('prodGrid');
+    grid.innerHTML = '<div class="empty">Chargement…</div>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?store_id=eq.${currentStore.id}&is_active=eq.true&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const products = await res.json();
+      if(products.length === 0){
+        grid.innerHTML = '<div class="empty">Aucun produit pour l\'instant. Ajoute le premier ci-dessus !</div>';
+        return;
+      }
+      grid.innerHTML = products.map(p => `
+        <div class="prod-card">
+          <img src="${p.image_url}" alt="${p.name}">
+          <div class="pc-body">
+            <h4>${p.name}</h4>
+            <div class="price">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</div>
+            <div class="pc-actions">
+              <button class="btn btn-ghost" onclick="copyProductLink('${p.id}')">Copier le lien</button>
+              <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">✕</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch(err){
+      grid.innerHTML = '<div class="empty">Impossible de charger les produits.</div>';
+    }
+  }
+
+  function copyProductLink(id){
+    const link = `${STORE_URL_BASE}?s=${currentStore.slug}&p=${id}`;
+    navigator.clipboard.writeText(link).then(()=>{
+      alert("Lien copié !\n" + link);
+    });
+  }
+
+  async function deleteProduct(id){
+    if(!confirm("Supprimer ce produit ?")) return;
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_products?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ is_active: false }),
+      });
+      loadProducts();
+    } catch(err){
+      alert("Erreur lors de la suppression.");
+    }
+  }
+
+  // ---------- Init ----------
+  if(session && session.access_token){
+    afterLogin();
+  }
+</script>
+
+</body>
+</html>
