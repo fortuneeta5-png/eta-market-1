@@ -423,3 +423,80 @@
     {id:2, cat:"Téléphones & Tech", catId:"tech", name:"Samsung Galaxy A54 5G", price:320000, old:365000, desc:"Écran AMOLED 120Hz, batterie longue durée.", img:"https://images.pexels.com/photos/47261/pexels-photo-47261.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"promo"},
     {id:3, cat:"Téléphones & Tech", catId:"tech", name:"Écouteurs Bluetooth Pro", price:45000, old:null, desc:"Son immersif, réduction de bruit active.", img:"https://images.pexels.com/photos/3945697/pexels-photo-3945697.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"new"},
     {id:4, cat:"Mode & Beauté", catId:"mode", name:"Robe Wax Élégance", price:25000, old:32000, desc:"Tissu wax authentique, coupe moderne.", img:"https://images.pexels.com/photos/1391499/pexels-photo-1391499.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"promo"},
+    {id:5, cat:"Mode & Beauté", catId:"mode", name:"Sneakers Urban Style", price:38000, old:null, desc:"Confort et style pour toute la journée.", img:"https://images.pexels.com/photos/18212364/pexels-photo-18212364.jpeg?auto=compress&cs=tinysrgb&w=800", badge:null},
+    {id:6, cat:"Mode & Beauté", catId:"mode", name:"Sac à Main Cuir Premium", price:42000, old:null, desc:"Cuir véritable, finition soignée.", img:"https://images.pexels.com/photos/2433862/pexels-photo-2433862.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"new"},
+    {id:7, cat:"Maison & Électroménager", catId:"maison", name:"Mixeur Multifonction 5L", price:28000, old:34000, desc:"Puissant et polyvalent pour ta cuisine.", img:"https://images.pexels.com/photos/6803737/pexels-photo-6803737.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"promo"},
+    {id:8, cat:"Maison & Électroménager", catId:"maison", name:"Téléviseur LED 43 pouces Smart", price:185000, old:null, desc:"Image nette, apps intégrées, Wi-Fi.", img:"https://images.pexels.com/photos/1571459/pexels-photo-1571459.jpeg?auto=compress&cs=tinysrgb&w=800", badge:null},
+    {id:9, cat:"Maison & Électroménager", catId:"maison", name:"Fer à Repasser Vapeur Pro", price:22000, old:null, desc:"Vapeur puissante, semelle anti-adhésive.", img:"https://images.pexels.com/photos/4440650/pexels-photo-4440650.jpeg?auto=compress&cs=tinysrgb&w=800", badge:null},
+  ];
+
+  let products = fallbackProducts;
+
+  const catMap = { tech: "Téléphones & Tech", mode: "Mode & Beauté", maison: "Maison & Électroménager" };
+
+  function apiProductToLocal(p, index) {
+    const catId = (p.category || "tech").toLowerCase();
+    return {
+      id: p.id || index + 1,
+      cat: catMap[catId] || "Téléphones & Tech",
+      catId: catId,
+      name: p.name,
+      price: Number(p.price_fcfa) || 0,
+      old: p.compare_at_price_fcfa ? Number(p.compare_at_price_fcfa) : null,
+      desc: p.description || "",
+      img: p.image_url,
+      badge: p.badge || null,
+    };
+  }
+
+  async function loadProductsFromApi() {
+    try {
+      const res = await fetch('/.netlify/functions/list-products');
+      const data = await res.json();
+      const list = data.products || [];
+      if (list.length > 0) {
+        products = list.map(apiProductToLocal);
+      }
+    } catch (err) {
+      console.warn("Impossible de charger les produits depuis la base, utilisation des produits de secours.", err);
+    }
+  }
+
+  const cats = [
+    {id:"all", label:"Tout"},
+    {id:"tech", label:"Téléphones & Tech"},
+    {id:"mode", label:"Mode & Beauté"},
+    {id:"maison", label:"Maison & Électroménager"},
+  ];
+  let activeCat = "all";
+  let cart = {};
+  let selectedOp = null;
+
+  function fmt(n){ return n.toLocaleString('fr-FR') + " FCFA"; }
+
+  function renderCats(){
+    document.getElementById('catStrip').innerHTML = cats.map(c =>
+      `<button class="cat-chip ${c.id===activeCat?'active':''}" onclick="setCat('${c.id}')">${c.label}</button>`
+    ).join('');
+  }
+  function setCat(id){
+    activeCat = id;
+    renderCats();
+    renderGrid();
+    const label = cats.find(c=>c.id===id).label;
+    document.getElementById('sectionTitle').innerHTML = id==='all'
+      ? 'Nos <span>meilleures ventes</span>' : `<span>${label}</span>`;
+  }
+
+  function renderGrid(){
+    const list = activeCat==="all" ? products : products.filter(p=>p.catId===activeCat);
+    document.getElementById('prodCount').textContent = `${list.length} produits`;
+    document.getElementById('grid').innerHTML = list.map(p => `
+      <div class="card" id="tech">
+        <div class="card-img">
+          ${p.badge ? `<span class="badge ${p.badge}">${p.badge==='promo'?'Promo':'Nouveau'}</span>` : ''}
+          <img src="${p.img}" alt="${p.name}" loading="lazy">
+        </div>
+        <div class="card-body">
+          <span class="card-cat">${p.cat}</span>
+          <h3>${p.name}</h3>
