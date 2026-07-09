@@ -500,3 +500,128 @@
         <div class="card-body">
           <span class="card-cat">${p.cat}</span>
           <h3>${p.name}</h3>
+          <p>${p.desc}</p>
+          <div class="card-foot">
+            <div class="price-block">
+              ${p.old ? `<span class="old">${fmt(p.old)}</span>` : ''}
+              <span class="price">${fmt(p.price)}</span>
+            </div>
+            <button class="add-btn" onclick="addToCart(${p.id})">+</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function addToCart(id){
+    cart[id] = (cart[id]||0)+1;
+    updateCartCount();
+    renderCartBody();
+    pulseCart();
+  }
+  function pulseCart(){
+    const b = document.getElementById('cartCount');
+    b.style.transform="scale(1.35)";
+    setTimeout(()=>b.style.transform="scale(1)",150);
+  }
+  function updateCartCount(){
+    document.getElementById('cartCount').textContent = Object.values(cart).reduce((a,b)=>a+b,0);
+  }
+  function cartTotal(){
+    return Object.entries(cart).reduce((sum,[id,qty])=>{
+      const p = products.find(x=>x.id==id);
+      return sum + p.price*qty;
+    },0);
+  }
+  function renderCartBody(){
+    const entries = Object.entries(cart);
+    const body = document.getElementById('cartBody');
+    if(entries.length===0){
+      body.innerHTML = `<div class="empty-cart">Ton panier est vide.<br>Ajoute des produits pour commencer.</div>`;
+      document.getElementById('checkoutBtn').disabled = true;
+    } else {
+      body.innerHTML = entries.map(([id,qty])=>{
+        const p = products.find(x=>x.id==id);
+        return `
+          <div class="cart-line">
+            <img src="${p.img}" alt="${p.name}">
+            <div class="info">
+              <h4>${p.name}</h4>
+              <div class="p">${fmt(p.price)}</div>
+            </div>
+            <div class="qty">
+              <button onclick="changeQty(${id},-1)">−</button>
+              <span>${qty}</span>
+              <button onclick="changeQty(${id},1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('checkoutBtn').disabled = false;
+    }
+    document.getElementById('subtotal').textContent = fmt(cartTotal());
+    document.getElementById('payTotal').textContent = fmt(cartTotal());
+  }
+  function changeQty(id,delta){
+    cart[id] += delta;
+    if(cart[id]<=0) delete cart[id];
+    updateCartCount();
+    renderCartBody();
+  }
+
+  function openCart(){
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+    goToStep('stepCart');
+  }
+  function closeCart(){
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+  }
+  function goToStep(stepId){
+    document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+    document.getElementById(stepId).classList.add('active');
+  }
+
+  function selectOp(op){
+    selectedOp = op;
+    document.querySelectorAll('.pay-opt').forEach(el=>el.classList.remove('selected'));
+    document.querySelector(`.pay-opt[data-op="${op}"]`).classList.add('selected');
+    checkPayReady();
+  }
+  document.getElementById('phoneInput').addEventListener('input', checkPayReady);
+  function checkPayReady(){
+    const phone = document.getElementById('phoneInput').value.trim();
+    document.getElementById('payBtn').disabled = !(selectedOp && phone.length>=6);
+  }
+
+  function startPayment(){
+    const opName = selectedOp==='mtn' ? 'MTN MoMo' : 'Airtel Money';
+    document.getElementById('confirmText').textContent =
+      `Une demande de paiement de ${fmt(cartTotal())} a été envoyée sur ton numéro via ${opName}. Valide-la avec ton code secret pour finaliser la commande.`;
+    goToStep('stepConfirm');
+    setTimeout(()=>{
+      document.getElementById('successAmt').textContent = fmt(cartTotal());
+      goToStep('stepSuccess');
+    }, 2600);
+  }
+
+  function resetAll(){
+    cart = {};
+    selectedOp = null;
+    document.getElementById('phoneInput').value = '';
+    updateCartCount();
+    renderCartBody();
+    closeCart();
+  }
+
+  (async function init() {
+    await loadProductsFromApi();
+    renderCats();
+    renderGrid();
+    renderCartBody();
+  })();
+</script>
+
+</body>
+</html>
