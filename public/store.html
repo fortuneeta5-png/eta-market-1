@@ -66,10 +66,39 @@
         <h2 id="pName"></h2>
         <div class="price" id="pPrice"></div>
         <p id="pDesc"></p>
-        <button class="btn btn-primary" onclick="alert('Le paiement en ligne arrive bientôt sur cette boutique !')">Acheter maintenant</button>
+        <button class="btn btn-primary" id="buyBtn" onclick="openCheckout()">Acheter maintenant</button>
       </div>
     </div>
     <a class="back-link" href="#" id="backLink">← Voir tous les produits de la boutique</a>
+  </div>
+</div>
+
+<!-- checkout modal -->
+<div id="checkoutOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
+    <div id="checkoutForm">
+      <h3 style="font-size:1.15rem; margin-bottom:6px;">Finaliser la commande</h3>
+      <p style="font-size:0.85rem; opacity:0.6; margin-bottom:18px;">Le vendeur te contactera pour confirmer le paiement et la livraison.</p>
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton nom</label>
+        <input type="text" id="custName" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton numéro de téléphone</label>
+        <input type="tel" id="custPhone" placeholder="06 XXX XX XX" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+      </div>
+      <div id="checkoutMsg" style="font-size:0.82rem; color:#DC2626; margin-bottom:10px; display:none;"></div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeCheckout()">Annuler</button>
+        <button class="btn btn-primary" style="flex:1;" id="confirmOrderBtn" onclick="submitOrder()">Confirmer</button>
+      </div>
+    </div>
+    <div id="checkoutSuccess" style="display:none; text-align:center;">
+      <div style="font-size:2.4rem; margin-bottom:10px;">✅</div>
+      <h3 style="font-size:1.1rem; margin-bottom:8px;">Commande envoyée !</h3>
+      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Le vendeur va te contacter très vite pour finaliser ta commande.</p>
+      <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
+    </div>
   </div>
 </div>
 
@@ -80,8 +109,61 @@
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('s');
   const productId = params.get('p');
+  let currentStore = null;
+  let currentProduct = null;
 
   function fmt(n){ return Number(n).toLocaleString('fr-FR') + " FCFA"; }
+
+  async function logPageview(storeId, prodId){
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_pageviews`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ store_id: storeId, product_id: prodId || null }),
+      });
+    } catch(err){ /* silencieux, le suivi n'est pas critique */ }
+  }
+
+  function openCheckout(){
+    document.getElementById('checkoutOverlay').style.display = 'flex';
+    document.getElementById('checkoutForm').style.display = 'block';
+    document.getElementById('checkoutSuccess').style.display = 'none';
+  }
+  function closeCheckout(){
+    document.getElementById('checkoutOverlay').style.display = 'none';
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+  }
+
+  async function submitOrder(){
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const msg = document.getElementById('checkoutMsg');
+    const btn = document.getElementById('confirmOrderBtn');
+    if(!name || !phone){
+      msg.textContent = "Merci de remplir ton nom et ton numéro."; msg.style.display = "block";
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Envoi…";
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          store_id: currentStore.id, product_id: currentProduct.id,
+          product_name_snapshot: currentProduct.name, amount_fcfa: currentProduct.price_fcfa,
+          customer_name: name, customer_phone: phone,
+        }),
+      });
+      if(!res.ok) throw new Error();
+      document.getElementById('checkoutForm').style.display = 'none';
+      document.getElementById('checkoutSuccess').style.display = 'block';
+    } catch(err){
+      msg.textContent = "Erreur, réessaie."; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Confirmer";
+    }
+  }
 
   async function init(){
     if(!slug){
@@ -98,6 +180,7 @@
       return;
     }
     const store = stores[0];
+    currentStore = store;
 
     document.documentElement.style.setProperty('--accent', store.accent_color || '#4F46E5');
     document.getElementById('storeName').textContent = store.name;
@@ -113,10 +196,13 @@
     if(productId){
       const p = products.find(x => x.id === productId);
       if(p){
+        currentProduct = p;
+        logPageview(store.id, p.id);
         showProduct(p);
         return;
       }
     }
+    logPageview(store.id, null);
     showGrid(products);
   }
 
