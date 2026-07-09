@@ -23,6 +23,7 @@
   .btn-ghost-danger{ background:#fff; color:var(--red); border:1.5px solid var(--red); padding:8px 14px; font-size:0.78rem; }
   .btn-ghost-danger:hover{ background:var(--red); color:#fff; }
 
+  /* ---------- login ---------- */
   #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(125deg, var(--red) 0%, var(--red-dark) 45%, var(--black) 100%); padding:24px; }
   .login-card{ background:#fff; border-radius:20px; padding:40px 32px; width:100%; max-width:380px; box-shadow:0 30px 60px rgba(0,0,0,0.3); text-align:center; }
   .login-logo{ font-size:1.6rem; font-weight:900; margin-bottom:6px; }
@@ -36,6 +37,7 @@
   .login-error{ color:var(--red); font-size:0.82rem; margin-top:12px; display:none; font-weight:600; }
   .login-note{ margin-top:22px; font-size:0.72rem; opacity:0.4; line-height:1.5; }
 
+  /* ---------- dashboard ---------- */
   #dashboard{ display:none; }
   header{ background:var(--black); color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; }
   .logo{ font-size:1.3rem; font-weight:900; }
@@ -63,6 +65,7 @@
   .panel-head h3{ font-size:1.05rem; }
   .panel-body{ padding:22px; }
 
+  /* form */
   .upload-zone{
     border:2px dashed var(--line); border-radius:14px; padding:22px; text-align:center; cursor:pointer;
     margin-bottom:18px; transition:border-color .15s ease, background .15s ease; position:relative; overflow:hidden;
@@ -76,6 +79,7 @@
   .form-msg.ok{ color:#1F6F63; }
   .form-msg.err{ color:var(--red); }
 
+  /* product list */
   table{ width:100%; border-collapse:collapse; font-size:0.86rem; }
   th{ text-align:left; padding:12px 22px; background:#faf9f7; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.03em; opacity:0.55; font-weight:700; }
   td{ padding:12px 22px; border-top:1px solid var(--line); vertical-align:middle; }
@@ -91,6 +95,7 @@
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">ETA <span>MARKET</span></div>
@@ -105,6 +110,7 @@
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="dashboard">
   <header>
     <div class="logo">ETA <span>MARKET</span> · Admin</div>
@@ -128,6 +134,7 @@
     </div>
 
     <div class="grid2">
+      <!-- FORM -->
       <div class="panel">
         <div class="panel-head"><h3>Ajouter un produit</h3></div>
         <div class="panel-body">
@@ -182,6 +189,7 @@
         </div>
       </div>
 
+      <!-- LIST -->
       <div class="panel">
         <div class="panel-head">
           <h3>Mes produits</h3>
@@ -199,7 +207,14 @@
 </div>
 
 <script>
+  // ============================================================
+  // ATTENTION SÉCURITÉ : ce mot de passe est vérifié côté
+  // navigateur uniquement — suffisant pour un usage simple, pas
+  // pour une vraie protection bancaire.
+  // ============================================================
   const ADMIN_PASSWORD = "etamarket2026";
+  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
 
   function tryLogin(){
     const val = document.getElementById('passwordInput').value;
@@ -224,24 +239,23 @@
     loadProducts();
   }
 
-  let selectedImageBase64 = null;
-  let selectedImageType = null;
+  // ---------- Upload photo (aperçu avant envoi) ----------
+  let selectedImageFile = null;
 
   function previewImage(event){
     const file = event.target.files[0];
     if(!file) return;
-    selectedImageType = file.type;
+    selectedImageFile = file;
     const reader = new FileReader();
     reader.onload = function(e){
-      const dataUrl = e.target.result;
-      selectedImageBase64 = dataUrl.split(",")[1];
-      document.getElementById('imagePreview').src = dataUrl;
+      document.getElementById('imagePreview').src = e.target.result;
       document.getElementById('imagePreview').style.display = 'block';
       document.getElementById('uploadPlaceholder').style.display = 'none';
     };
     reader.readAsDataURL(file);
   }
 
+  // ---------- Publier un produit ----------
   async function publishProduct(){
     const name = document.getElementById('fName').value.trim();
     const price = document.getElementById('fPrice').value;
@@ -252,7 +266,7 @@
     const msg = document.getElementById('formMsg');
     const btn = document.getElementById('publishBtn');
 
-    if(!name || !price || !selectedImageBase64){
+    if(!name || !price || !selectedImageFile){
       msg.textContent = "Merci de remplir le nom, le prix et d'ajouter une photo.";
       msg.className = "form-msg err"; msg.style.display = "block";
       return;
@@ -262,16 +276,38 @@
     msg.style.display = "none";
 
     try {
-      const res = await fetch('/.netlify/functions/create-product', {
+      const ext = (selectedImageFile.name.split('.').pop() || 'jpg').toLowerCase();
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${fileName}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': selectedImageFile.type,
+        },
+        body: selectedImageFile,
+      });
+      if(!uploadRes.ok) throw new Error("Échec de l'upload de la photo");
+
+      const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/product-images/${fileName}`;
+
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
         body: JSON.stringify({
-          name, price, oldPrice: oldPrice || null, description, category, badge,
-          imageBase64: selectedImageBase64, imageType: selectedImageType,
+          name,
+          price_fcfa: parseInt(price, 10),
+          compare_at_price_fcfa: oldPrice ? parseInt(oldPrice, 10) : null,
+          description, category, badge: badge || null, image_url: imageUrl,
         }),
       });
-      const data = await res.json();
-      if(!res.ok) throw new Error(data.error || "Erreur inconnue");
+      if(!insertRes.ok) throw new Error("Échec de l'enregistrement du produit");
 
       msg.textContent = "✅ Produit publié ! Il est déjà visible sur le site.";
       msg.className = "form-msg ok"; msg.style.display = "block";
@@ -283,7 +319,7 @@
       document.getElementById('imagePreview').style.display = 'none';
       document.getElementById('uploadPlaceholder').style.display = 'block';
       document.getElementById('imageInput').value = '';
-      selectedImageBase64 = null;
+      selectedImageFile = null;
 
       loadProducts();
     } catch(err){
@@ -294,12 +330,14 @@
     }
   }
 
+  // ---------- Charger / afficher les produits ----------
   async function loadProducts(){
     document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="3" class="loading">Chargement…</td></tr>';
     try {
-      const res = await fetch('/.netlify/functions/list-products');
-      const data = await res.json();
-      const products = data.products || [];
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?is_active=eq.true&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const products = await res.json();
       renderStats(products);
       renderTable(products);
     } catch(err){
@@ -338,10 +376,15 @@
   async function deleteProduct(id){
     if(!confirm("Supprimer ce produit ?")) return;
     try {
-      await fetch('/.netlify/functions/delete-product', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: id }),
+      await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ is_active: false }),
       });
       loadProducts();
     } catch(err){
@@ -351,4 +394,4 @@
 </script>
 
 </body>
-  </html>
+</html>
