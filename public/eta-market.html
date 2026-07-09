@@ -394,6 +394,10 @@
         </div>
       </div>
       <div class="field">
+        <label>Ton nom</label>
+        <input type="text" id="custNameInput" placeholder="Nom et prénom">
+      </div>
+      <div class="field">
         <label>Numéro de téléphone</label>
         <input type="tel" id="phoneInput" placeholder="06 XXX XX XX">
       </div>
@@ -615,60 +619,38 @@
   document.getElementById('phoneInput').addEventListener('input', checkPayReady);
   function checkPayReady(){
     const phone = document.getElementById('phoneInput').value.trim();
-    document.getElementById('payBtn').disabled = !(selectedOp && phone.length>=6);
+    const name = document.getElementById('custNameInput').value.trim();
+    document.getElementById('payBtn').disabled = !(selectedOp && phone.length>=6 && name.length>=2);
   }
+  document.getElementById('custNameInput').addEventListener('input', checkPayReady);
 
   async function startPayment(){
     const amount = cartTotal();
     const phone = document.getElementById('phoneInput').value.trim();
+    const customerName = document.getElementById('custNameInput').value.trim();
+    const opName = selectedOp === 'mtn' ? 'MTN MoMo' : 'Airtel Money';
 
-    if(selectedOp === 'mtn'){
-      document.getElementById('confirmText').textContent =
-        `Une demande de paiement de ${fmt(amount)} a été envoyée sur ton numéro via MTN MoMo. Valide-la avec ton code secret pour finaliser la commande.`;
-      goToStep('stepConfirm');
+    document.getElementById('confirmText').textContent =
+      `Redirection vers la page de paiement sécurisée pour finaliser via ${opName}...`;
+    goToStep('stepConfirm');
 
-      try {
-        const initRes = await fetch(`${SUPABASE_URL}/functions/v1/mtn-request-to-pay`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount, phone, orderId: 'ETA-' + Date.now() }),
-        });
-        const initData = await initRes.json();
-        if(!initRes.ok) throw new Error(initData.error || 'Échec de la demande de paiement');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/moneroo-initialize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount, phone, customerName,
+          orderId: 'ETA-' + Date.now(),
+          returnUrl: window.location.href.split('?')[0],
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok || !data.checkoutUrl) throw new Error(data.error || "Échec de l'initialisation du paiement");
 
-        let attempts = 0;
-        const poll = setInterval(async () => {
-          attempts++;
-          try {
-            const statusRes = await fetch(`${SUPABASE_URL}/functions/v1/mtn-check-payment?referenceId=${initData.referenceId}`);
-            const statusData = await statusRes.json();
-            if(statusData.status === 'SUCCESSFUL'){
-              clearInterval(poll);
-              document.getElementById('successAmt').textContent = fmt(amount);
-              goToStep('stepSuccess');
-            } else if(statusData.status === 'FAILED' || attempts >= 15){
-              clearInterval(poll);
-              document.getElementById('confirmText').textContent = "Le paiement a échoué ou a expiré. Réessaie.";
-              setTimeout(() => goToStep('stepPay'), 2500);
-            }
-          } catch(err){
-            clearInterval(poll);
-          }
-        }, 3000);
-      } catch(err){
-        document.getElementById('confirmText').textContent = "Erreur : " + err.message;
-        setTimeout(() => goToStep('stepPay'), 2500);
-      }
-
-    } else {
-      // Airtel Money : encore simulé, en attente de la vraie intégration API
-      document.getElementById('confirmText').textContent =
-        `Une demande de paiement de ${fmt(amount)} a été envoyée sur ton numéro via Airtel Money. Valide-la avec ton code secret pour finaliser la commande.`;
-      goToStep('stepConfirm');
-      setTimeout(()=>{
-        document.getElementById('successAmt').textContent = fmt(amount);
-        goToStep('stepSuccess');
-      }, 2600);
+      window.location.href = data.checkoutUrl;
+    } catch(err){
+      document.getElementById('confirmText').textContent = "Erreur : " + err.message;
+      setTimeout(() => goToStep('stepPay'), 2500);
     }
   }
 
@@ -681,11 +663,28 @@
     closeCart();
   }
 
+  function checkPaymentReturn(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status') || urlParams.get('paymentStatus');
+    if(status){
+      openCart();
+      if(status === 'success' || status === 'successful'){
+        goToStep('stepSuccess');
+        document.getElementById('successAmt').textContent = "ta commande";
+      } else {
+        goToStep('stepPay');
+        document.getElementById('checkoutMsg') && (document.getElementById('checkoutMsg').textContent = "Le paiement n'a pas abouti. Réessaie.");
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+
   (async function init() {
     await loadProductsFromApi();
     renderCats();
     renderGrid();
     renderCartBody();
+    checkPaymentReturn();
   })();
 </script>
 
