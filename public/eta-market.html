@@ -618,15 +618,58 @@
     document.getElementById('payBtn').disabled = !(selectedOp && phone.length>=6);
   }
 
-  function startPayment(){
-    const opName = selectedOp==='mtn' ? 'MTN MoMo' : 'Airtel Money';
-    document.getElementById('confirmText').textContent =
-      `Une demande de paiement de ${fmt(cartTotal())} a été envoyée sur ton numéro via ${opName}. Valide-la avec ton code secret pour finaliser la commande.`;
-    goToStep('stepConfirm');
-    setTimeout(()=>{
-      document.getElementById('successAmt').textContent = fmt(cartTotal());
-      goToStep('stepSuccess');
-    }, 2600);
+  async function startPayment(){
+    const amount = cartTotal();
+    const phone = document.getElementById('phoneInput').value.trim();
+
+    if(selectedOp === 'mtn'){
+      document.getElementById('confirmText').textContent =
+        `Une demande de paiement de ${fmt(amount)} a été envoyée sur ton numéro via MTN MoMo. Valide-la avec ton code secret pour finaliser la commande.`;
+      goToStep('stepConfirm');
+
+      try {
+        const initRes = await fetch(`${SUPABASE_URL}/functions/v1/mtn-request-to-pay`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, phone, orderId: 'ETA-' + Date.now() }),
+        });
+        const initData = await initRes.json();
+        if(!initRes.ok) throw new Error(initData.error || 'Échec de la demande de paiement');
+
+        let attempts = 0;
+        const poll = setInterval(async () => {
+          attempts++;
+          try {
+            const statusRes = await fetch(`${SUPABASE_URL}/functions/v1/mtn-check-payment?referenceId=${initData.referenceId}`);
+            const statusData = await statusRes.json();
+            if(statusData.status === 'SUCCESSFUL'){
+              clearInterval(poll);
+              document.getElementById('successAmt').textContent = fmt(amount);
+              goToStep('stepSuccess');
+            } else if(statusData.status === 'FAILED' || attempts >= 15){
+              clearInterval(poll);
+              document.getElementById('confirmText').textContent = "Le paiement a échoué ou a expiré. Réessaie.";
+              setTimeout(() => goToStep('stepPay'), 2500);
+            }
+          } catch(err){
+            clearInterval(poll);
+          }
+        }, 3000);
+      } catch(err){
+        document.getElementById('confirmText').textContent = "Erreur : " + err.message;
+        setTimeout(() => goToStep('stepPay'), 2500);
+      }
+
+    } else {
+      // Airtel Money : encore simulé, en attente de la vraie intégration API
+      document.getElementById('confirmText').textContent =
+        `Une demande de paiement de ${fmt(amount)} a été envoyée sur ton numéro via Airtel Money. Valide-la avec ton code secret pour finaliser la commande.`;
+      goToStep('stepConfirm');
+      setTimeout(()=>{
+        document.getElementById('successAmt').textContent = fmt(amount);
+        goToStep('stepSuccess');
+      }, 2600);
+    }
   }
 
   function resetAll(){
