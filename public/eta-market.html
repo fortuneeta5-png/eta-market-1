@@ -32,6 +32,7 @@
   img{ display:block; max-width:100%; }
   ::selection{ background:var(--red); color:#fff; }
 
+  /* ---------- shiny button ---------- */
   .btn{
     position:relative; overflow:hidden; border:none; cursor:pointer;
     border-radius:100px; font-family:'Poppins',sans-serif; font-weight:600;
@@ -54,9 +55,11 @@
   }
   .btn-dark:hover{ background:var(--red); transform:translateY(-2px); }
 
+  /* ---------- top bar ---------- */
   .topbar{ background:var(--black); color:#fff; text-align:center; font-size:0.76rem; padding:8px 12px; letter-spacing:0.03em; }
   .topbar b{ color:var(--yellow); }
 
+  /* ---------- header ---------- */
   header{ position:sticky; top:0; z-index:60; background:#fff; border-bottom:1px solid var(--line-dark); }
   .header-inner{ max-width:1240px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
   .logo{ font-size:1.5rem; font-weight:900; font-family:'Montserrat',sans-serif; white-space:nowrap; }
@@ -74,6 +77,7 @@
   .cart-btn:hover{ background:var(--red); transform:translateY(-1px); }
   .cart-count{ background:var(--yellow); color:var(--black); border-radius:100px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; padding:0 5px;}
 
+  /* ---------- hero ---------- */
   .hero{
     position:relative; background:linear-gradient(125deg, var(--red) 0%, var(--red-dark) 45%, var(--black) 100%);
     color:#fff; overflow:hidden;
@@ -83,7 +87,7 @@
     background:
       radial-gradient(circle at 85% 20%, rgba(252,163,17,0.35), transparent 40%),
       radial-gradient(circle at 10% 90%, rgba(255,255,255,0.12), transparent 45%);
-    }
+  }
   .hero-inner{
     position:relative; max-width:1240px; margin:0 auto; padding:80px 24px 90px;
     display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center;
@@ -122,6 +126,7 @@
     box-shadow:0 10px 20px rgba(0,0,0,0.25);
   }
 
+  /* ---------- category strip ---------- */
   .cat-strip{ max-width:1240px; margin:0 auto; padding:36px 24px 8px; display:flex; gap:12px; overflow-x:auto; }
   .cat-chip{
     flex:none; padding:11px 20px; border-radius:100px; border:1.5px solid var(--line-dark);
@@ -135,6 +140,7 @@
   .section-head h2 span{ color:var(--red); }
   .section-head p{ font-size:0.85rem; opacity:0.55; font-weight:500; }
 
+  /* ---------- product grid ---------- */
   .grid{ max-width:1240px; margin:0 auto; padding:20px 24px 90px; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
   @media(max-width:980px){ .grid{ grid-template-columns:repeat(2,1fr); } }
   @media(max-width:600px){ .grid{ grid-template-columns:1fr; } }
@@ -167,6 +173,7 @@
   }
   .add-btn:hover{ background:var(--red); transform:scale(1.1) rotate(90deg); }
 
+  /* ---------- trust / features ---------- */
   .features{ background:var(--black); color:#fff; }
   .features-inner{ max-width:1240px; margin:0 auto; padding:56px 24px; display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
   @media(max-width:900px){ .features-inner{ grid-template-columns:repeat(2,1fr); } }
@@ -176,6 +183,7 @@
   .feature h4{ font-family:'Montserrat',sans-serif; font-size:0.98rem; margin-bottom:6px; }
   .feature p{ font-size:0.8rem; opacity:0.6; line-height:1.5; }
 
+  /* ---------- CTA banner ---------- */
   .cta-banner{
     max-width:1240px; margin:70px auto; padding:0 24px;
   }
@@ -191,6 +199,7 @@
   .cta-inner h2{ position:relative; font-size:clamp(1.6rem,3.4vw,2.4rem); margin-bottom:14px; }
   .cta-inner p{ position:relative; opacity:0.85; margin-bottom:26px; font-size:0.95rem; }
 
+  /* ---------- footer ---------- */
   footer{ background:var(--black); color:#fff; padding:50px 24px 24px; }
   .footer-inner{ max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:34px; }
   @media(max-width:800px){ .footer-inner{ grid-template-columns:1fr 1fr; } }
@@ -201,6 +210,7 @@
   .footer-logo span{ color:var(--red); }
   .footer-bottom{ max-width:1240px; margin:36px auto 0; padding-top:22px; border-top:1px solid var(--line); text-align:center; font-size:0.76rem; opacity:0.5; }
 
+  /* ---------- cart drawer (shared) ---------- */
   .overlay{ position:fixed; inset:0; background:rgba(20,18,14,0.5); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:90; }
   .overlay.open{ opacity:1; pointer-events:auto; }
   .drawer{
@@ -355,6 +365,7 @@
   <div class="footer-bottom">ETA MARKET © 2026 — Tous droits réservés</div>
 </footer>
 
+<!-- Cart drawer -->
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
 <div class="drawer" id="drawer">
 
@@ -418,6 +429,14 @@
 </div>
 
 <script>
+  // ============================================================
+  // SOURCE DES PRODUITS : vraie base de données (via l'API du site)
+  // ------------------------------------------------------------
+  // Les produits sont ajoutés depuis l'espace admin (admin.html),
+  // avec upload de photo. Ce site les récupère automatiquement.
+  // ============================================================
+
+  // Produits de secours, affichés uniquement si l'API est injoignable
   const fallbackProducts = [
     {id:1, cat:"Téléphones & Tech", catId:"tech", name:"iPhone 15 Pro 128GB", price:950000, old:null, desc:"Le plus puissant. Livraison 24h à Brazzaville.", img:"https://images.pexels.com/photos/3945672/pexels-photo-3945672.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"new"},
     {id:2, cat:"Téléphones & Tech", catId:"tech", name:"Samsung Galaxy A54 5G", price:320000, old:365000, desc:"Écran AMOLED 120Hz, batterie longue durée.", img:"https://images.pexels.com/photos/47261/pexels-photo-47261.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"promo"},
@@ -430,7 +449,7 @@
     {id:9, cat:"Maison & Électroménager", catId:"maison", name:"Fer à Repasser Vapeur Pro", price:22000, old:null, desc:"Vapeur puissante, semelle anti-adhésive.", img:"https://images.pexels.com/photos/4440650/pexels-photo-4440650.jpeg?auto=compress&cs=tinysrgb&w=800", badge:null},
   ];
 
-  let products = fallbackProducts;
+  let products = fallbackProducts; // remplacé par les vrais produits de la base dès que l'API répond
 
   const catMap = { tech: "Téléphones & Tech", mode: "Mode & Beauté", maison: "Maison & Électroménager" };
 
@@ -449,11 +468,15 @@
     };
   }
 
+  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
+
   async function loadProductsFromApi() {
     try {
-      const res = await fetch('/.netlify/functions/list-products');
-      const data = await res.json();
-      const list = data.products || [];
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?is_active=eq.true&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const list = await res.json();
       if (list.length > 0) {
         products = list.map(apiProductToLocal);
       }
