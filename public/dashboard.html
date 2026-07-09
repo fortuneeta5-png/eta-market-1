@@ -97,6 +97,16 @@
   .prod-card .pc-actions{ display:flex; gap:6px; }
   .prod-card .pc-actions button{ flex:1; font-size:0.7rem; padding:6px; }
   .empty{ text-align:center; padding:40px 20px; opacity:0.5; font-size:0.88rem; }
+
+  .stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+  @media(max-width:700px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+  .stat-card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; }
+  .stat-num{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.6rem; color:var(--primary); }
+  .stat-lbl{ font-size:0.76rem; opacity:0.55; margin-top:4px; font-weight:600; }
+  .status-tag{ padding:4px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; }
+  .status-tag.pending{ background:#FEF3C7; color:#92400E; }
+  .status-tag.confirmed{ background:#D1FAE5; color:#065F46; }
+  .status-tag.cancelled{ background:#FEE2E2; color:#991B1B; }
 </style>
 </head>
 <body>
@@ -172,6 +182,35 @@
       </div>
     </div>
 
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-num" id="statVisitors">—</div><div class="stat-lbl">Visiteurs</div></div>
+      <div class="stat-card"><div class="stat-num" id="statOrders">—</div><div class="stat-lbl">Commandes</div></div>
+      <div class="stat-card"><div class="stat-num" id="statConfirmed">—</div><div class="stat-lbl">Confirmées</div></div>
+      <div class="stat-card"><div class="stat-num" id="statRevenue">—</div><div class="stat-lbl">Revenu confirmé</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Commandes récentes</h3>
+        <button class="btn btn-ghost" onclick="loadOrders()">Actualiser</button>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+          <thead>
+            <tr style="background:#faf9f7; text-align:left;">
+              <th style="padding:10px 16px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Client</th>
+              <th style="padding:10px 16px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Produit</th>
+              <th style="padding:10px 16px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Montant</th>
+              <th style="padding:10px 16px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Statut</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="4" class="empty">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-head"><h3>Ajouter un produit</h3></div>
       <div class="panel-body">
@@ -217,6 +256,31 @@
     </div>
   </div>
 </div>
+
+<!-- Modale d'édition de produit -->
+<div id="editOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:400px; width:100%;">
+    <h3 style="font-size:1.15rem; margin-bottom:18px;">Modifier le produit</h3>
+    <div class="field">
+      <label>Nom du produit</label>
+      <input type="text" id="editName">
+    </div>
+    <div class="field">
+      <label>Prix (FCFA)</label>
+      <input type="number" id="editPrice">
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea id="editDesc" rows="2"></textarea>
+    </div>
+    <div class="form-msg" id="editMsg"></div>
+    <div style="display:flex; gap:10px; margin-top:8px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeEdit()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1;" id="saveEditBtn" onclick="saveEdit()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
   const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
@@ -364,6 +428,8 @@
     document.getElementById('bannerStoreDesc').textContent = currentStore.description || '';
     document.getElementById('storeLinkText').textContent = `store.html?s=${currentStore.slug}`;
     loadProducts();
+    loadStats();
+    loadOrders();
   }
 
   function copyStoreLink(){
@@ -448,6 +514,8 @@
     }
   }
 
+  let currentProducts = [];
+
   async function loadProducts(){
     const grid = document.getElementById('prodGrid');
     grid.innerHTML = '<div class="empty">Chargement…</div>';
@@ -456,6 +524,7 @@
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
       });
       const products = await res.json();
+      currentProducts = products;
       if(products.length === 0){
         grid.innerHTML = '<div class="empty">Aucun produit pour l\'instant. Ajoute le premier ci-dessus !</div>';
         return;
@@ -467,7 +536,8 @@
             <h4>${p.name}</h4>
             <div class="price">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</div>
             <div class="pc-actions">
-              <button class="btn btn-ghost" onclick="copyProductLink('${p.id}')">Copier le lien</button>
+              <button class="btn btn-ghost" onclick="openEdit('${p.id}')">Modifier</button>
+              <button class="btn btn-ghost" onclick="copyProductLink('${p.id}')">Lien</button>
               <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">✕</button>
             </div>
           </div>
@@ -499,6 +569,118 @@
       loadProducts();
     } catch(err){
       alert("Erreur lors de la suppression.");
+    }
+  }
+
+  // ---------- Modifier un produit ----------
+  let editingId = null;
+  function openEdit(id){
+    const p = currentProducts.find(x => x.id === id);
+    if(!p) return;
+    editingId = id;
+    document.getElementById('editName').value = p.name;
+    document.getElementById('editPrice').value = p.price_fcfa;
+    document.getElementById('editDesc').value = p.description || '';
+    document.getElementById('editMsg').style.display = 'none';
+    document.getElementById('editOverlay').style.display = 'flex';
+  }
+  function closeEdit(){
+    document.getElementById('editOverlay').style.display = 'none';
+    editingId = null;
+  }
+  async function saveEdit(){
+    const name = document.getElementById('editName').value.trim();
+    const price = document.getElementById('editPrice').value;
+    const description = document.getElementById('editDesc').value.trim();
+    const msg = document.getElementById('editMsg');
+    const btn = document.getElementById('saveEditBtn');
+    if(!name || !price){
+      msg.textContent = "Nom et prix obligatoires."; msg.style.display = "block"; msg.style.color = "#DC2626";
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Enregistrement…";
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?id=eq.${editingId}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ name, price_fcfa: parseInt(price,10), description }),
+      });
+      if(!res.ok) throw new Error();
+      closeEdit();
+      loadProducts();
+    } catch(err){
+      msg.textContent = "Erreur lors de l'enregistrement."; msg.style.display = "block"; msg.style.color = "#DC2626";
+    } finally {
+      btn.disabled = false; btn.textContent = "Enregistrer";
+    }
+  }
+
+  // ---------- Statistiques et commandes ----------
+  async function loadStats(){
+    try {
+      const pvRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${currentStore.id}&select=id`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Prefer': 'count=exact' },
+      });
+      const visitorsCount = pvRes.headers.get('content-range')?.split('/')[1] || (await pvRes.json()).length;
+      document.getElementById('statVisitors').textContent = visitorsCount;
+    } catch(err){ document.getElementById('statVisitors').textContent = '—'; }
+  }
+
+  async function loadOrders(){
+    const body = document.getElementById('ordersBody');
+    body.innerHTML = '<tr><td colspan="4" class="empty">Chargement…</td></tr>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${currentStore.id}&order=created_at.desc&limit=50`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const orders = await res.json();
+
+      const totalOrders = orders.length;
+      const confirmed = orders.filter(o => o.status === 'confirmed');
+      const revenue = confirmed.reduce((sum, o) => sum + Number(o.amount_fcfa), 0);
+      document.getElementById('statOrders').textContent = totalOrders;
+      document.getElementById('statConfirmed').textContent = confirmed.length;
+      document.getElementById('statRevenue').textContent = revenue.toLocaleString('fr-FR') + " F";
+
+      if(orders.length === 0){
+        body.innerHTML = '<tr><td colspan="4" class="empty">Aucune commande pour l\'instant.</td></tr>';
+        return;
+      }
+      body.innerHTML = orders.map(o => `
+        <tr style="border-top:1px solid var(--line);">
+          <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span></td>
+          <td style="padding:10px 16px;">${o.product_name_snapshot}</td>
+          <td style="padding:10px 16px; font-weight:700;">${Number(o.amount_fcfa).toLocaleString('fr-FR')} F</td>
+          <td style="padding:10px 16px;">
+            <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${o.status}" style="border:none; cursor:pointer;">
+              <option value="pending" ${o.status==='pending'?'selected':''}>En attente</option>
+              <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmée</option>
+              <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Annulée</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    } catch(err){
+      body.innerHTML = '<tr><td colspan="4" class="empty">Impossible de charger les commandes.</td></tr>';
+    }
+  }
+
+  async function updateOrderStatus(id, status){
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ status }),
+      });
+      loadOrders();
+    } catch(err){
+      alert("Erreur lors de la mise à jour.");
     }
   }
 
