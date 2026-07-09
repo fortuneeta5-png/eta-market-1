@@ -529,7 +529,7 @@
               ${p.old ? `<span class="old">${fmt(p.old)}</span>` : ''}
               <span class="price">${fmt(p.price)}</span>
             </div>
-            <button class="add-btn" onclick="addToCart(${p.id})">+</button>
+            <button class="add-btn" onclick="addToCart('${p.id}')">+</button>
           </div>
         </div>
       </div>
@@ -573,9 +573,9 @@
               <div class="p">${fmt(p.price)}</div>
             </div>
             <div class="qty">
-              <button onclick="changeQty(${id},-1)">−</button>
+              <button onclick="changeQty('${id}',-1)">−</button>
               <span>${qty}</span>
-              <button onclick="changeQty(${id},1)">+</button>
+              <button onclick="changeQty('${id}',1)">+</button>
             </div>
           </div>
         `;
