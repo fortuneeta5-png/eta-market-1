@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ETA MARKET — Crée ta boutique en ligne</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -114,7 +115,17 @@
 <!-- AUTH -->
 <div id="authScreen">
   <div class="auth-card">
-    <div class="auth-logo">ETA MARKET<span>.</span></div>
+    <div class="auth-logo" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+      <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8,14 L20,14 L26,28" fill="none" stroke="#E63946" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M20,28 L82,28 L72,64 L34,64 Z" fill="#E63946"/>
+        <path d="M38,64 L42,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
+        <path d="M68,64 L64,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="42" cy="80" r="9" fill="#E63946"/>
+        <circle cx="64" cy="80" r="9" fill="#E63946"/>
+      </svg>
+      ETA MARKET<span>.</span>
+    </div>
     <div class="auth-sub">Crée ta boutique en ligne en quelques minutes</div>
 
     <div class="tabs">
@@ -164,7 +175,17 @@
 <!-- DASHBOARD -->
 <div id="dashboard">
   <header>
-    <div class="logo">ETA MARKET<span>.</span></div>
+    <div class="logo" style="display:flex; align-items:center; gap:8px;">
+      <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8,14 L20,14 L26,28" fill="none" stroke="#E63946" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M20,28 L82,28 L72,64 L34,64 Z" fill="#E63946"/>
+        <path d="M38,64 L42,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
+        <path d="M68,64 L64,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="42" cy="80" r="9" fill="#E63946"/>
+        <circle cx="64" cy="80" r="9" fill="#E63946"/>
+      </svg>
+      ETA MARKET<span>.</span>
+    </div>
     <div class="header-right">
       <button class="logout-btn" onclick="logout()">Déconnexion</button>
     </div>
@@ -172,13 +193,50 @@
 
   <div class="wrap">
     <div class="store-banner" id="storeBanner">
-      <div>
-        <h2 id="bannerStoreName">—</h2>
-        <p id="bannerStoreDesc"></p>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <img id="bannerLogo" style="display:none; width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.5);">
+        <div>
+          <h2 id="bannerStoreName">—</h2>
+          <p id="bannerStoreDesc"></p>
+        </div>
       </div>
-      <div class="link-box">
-        <span id="storeLinkText">—</span>
-        <button onclick="copyStoreLink()">Copier</button>
+      <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+        <div class="link-box">
+          <span id="storeLinkText">—</span>
+          <button onclick="copyStoreLink()">Copier</button>
+        </div>
+        <button onclick="openStoreEdit()" style="background:rgba(255,255,255,0.2); color:#fff; border:none; padding:7px 14px; border-radius:100px; font-size:0.78rem; cursor:pointer; font-weight:600;">✏️ Modifier ma boutique</button>
+      </div>
+    </div>
+
+    <div id="storeEditOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:#fff; border-radius:18px; padding:26px; max-width:420px; width:100%;">
+        <h3 style="font-size:1.15rem; margin-bottom:18px;">Modifier ma boutique</h3>
+        <label class="upload-zone" id="logoUploadZone" style="padding:16px;">
+          <div id="logoPlaceholder">
+            <div style="font-size:1.6rem; margin-bottom:6px;">🖼️</div>
+            <div class="hint">Logo de la boutique (optionnel)</div>
+          </div>
+          <img id="logoPreview" style="display:none; max-height:100px; border-radius:50%; aspect-ratio:1; object-fit:cover;">
+          <input type="file" id="logoInput" accept="image/*" onchange="previewLogo(event)">
+        </label>
+        <div class="field">
+          <label>Nom de la boutique</label>
+          <input type="text" id="editStoreName">
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="editStoreDesc" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Couleur</label>
+          <div class="color-row" id="editColorRow"></div>
+        </div>
+        <div class="form-msg" id="storeEditMsg"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn btn-ghost" style="flex:1;" onclick="closeStoreEdit()">Annuler</button>
+          <button class="btn btn-primary" style="flex:1;" id="saveStoreEditBtn" onclick="saveStoreEdit()">Enregistrer</button>
+        </div>
       </div>
     </div>
 
@@ -433,6 +491,12 @@
     document.getElementById('storeBanner').style.background = `linear-gradient(120deg, ${currentStore.accent_color}, ${currentStore.accent_color}dd)`;
     document.getElementById('bannerStoreName').textContent = currentStore.name;
     document.getElementById('bannerStoreDesc').textContent = currentStore.description || '';
+    if(currentStore.logo_url){
+      document.getElementById('bannerLogo').src = currentStore.logo_url;
+      document.getElementById('bannerLogo').style.display = 'block';
+    } else {
+      document.getElementById('bannerLogo').style.display = 'none';
+    }
     document.getElementById('storeLinkText').textContent = `store.html?s=${currentStore.slug}`;
     renderRatingSummary();
     loadProducts();
@@ -465,6 +529,95 @@
       btn.textContent = "Copié !";
       setTimeout(()=>btn.textContent = old, 1500);
     });
+  }
+
+  // ---------- Modifier la boutique ----------
+  let editSelectedColor = null;
+  let selectedLogoFile = null;
+  function renderEditColorPicker(){
+    const row = document.getElementById('editColorRow');
+    row.innerHTML = COLORS.map(c => `<div class="color-dot ${c===editSelectedColor?'selected':''}" style="background:${c}" onclick="selectEditColor('${c}')"></div>`).join('');
+  }
+  function selectEditColor(c){ editSelectedColor = c; renderEditColorPicker(); }
+
+  function previewLogo(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    selectedLogoFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('logoPreview').src = e.target.result;
+      document.getElementById('logoPreview').style.display = 'block';
+      document.getElementById('logoPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function openStoreEdit(){
+    document.getElementById('editStoreName').value = currentStore.name;
+    document.getElementById('editStoreDesc').value = currentStore.description || '';
+    editSelectedColor = currentStore.accent_color;
+    renderEditColorPicker();
+    selectedLogoFile = null;
+    if(currentStore.logo_url){
+      document.getElementById('logoPreview').src = currentStore.logo_url;
+      document.getElementById('logoPreview').style.display = 'block';
+      document.getElementById('logoPlaceholder').style.display = 'none';
+    } else {
+      document.getElementById('logoPreview').style.display = 'none';
+      document.getElementById('logoPlaceholder').style.display = 'block';
+    }
+    document.getElementById('storeEditMsg').style.display = 'none';
+    document.getElementById('storeEditOverlay').style.display = 'flex';
+  }
+  function closeStoreEdit(){
+    document.getElementById('storeEditOverlay').style.display = 'none';
+  }
+  async function saveStoreEdit(){
+    const name = document.getElementById('editStoreName').value.trim();
+    const description = document.getElementById('editStoreDesc').value.trim();
+    const msg = document.getElementById('storeEditMsg');
+    const btn = document.getElementById('saveStoreEditBtn');
+    if(!name){
+      msg.textContent = "Le nom de la boutique est obligatoire."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Enregistrement…";
+    try {
+      let logoUrl = currentStore.logo_url || null;
+      if(selectedLogoFile){
+        const ext = (selectedLogoFile.name.split('.').pop() || 'jpg').toLowerCase();
+        const fileName = `logos/${currentStore.id}-${Date.now()}.${ext}`;
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': selectedLogoFile.type,
+          },
+          body: selectedLogoFile,
+        });
+        if(!uploadRes.ok) throw new Error("Échec de l'upload du logo");
+        logoUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
+      }
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?id=eq.${currentStore.id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=representation',
+        },
+        body: JSON.stringify({ name, description, accent_color: editSelectedColor, logo_url: logoUrl }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error();
+      currentStore = data[0];
+      closeStoreEdit();
+      showDashboard();
+    } catch(err){
+      msg.textContent = "Erreur : " + err.message; msg.className = "form-msg err"; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Enregistrer";
+    }
   }
 
   function previewImage(event){
