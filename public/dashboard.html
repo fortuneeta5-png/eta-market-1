@@ -398,7 +398,7 @@
         return;
       }
 
-      session = { access_token: data.access_token, user: data.user };
+      session = { access_token: data.access_token, refresh_token: data.refresh_token, user: data.user };
       localStorage.setItem('vendoSession', JSON.stringify(session));
       await afterLogin();
     } catch(err){
@@ -416,8 +416,27 @@
     document.getElementById('authScreen').style.display = 'flex';
   }
 
+  async function refreshSession(){
+    if(!session || !session.refresh_token) return false;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: session.refresh_token }),
+      });
+      const data = await res.json();
+      if(!res.ok) return false;
+      session = { access_token: data.access_token, refresh_token: data.refresh_token, user: data.user };
+      localStorage.setItem('vendoSession', JSON.stringify(session));
+      return true;
+    } catch(err){
+      return false;
+    }
+  }
+
   async function afterLogin(){
     document.getElementById('authScreen').style.display = 'none';
+    await refreshSession(); // toujours repartir avec un token frais
     const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${session.user.id}&select=*`, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
     });
