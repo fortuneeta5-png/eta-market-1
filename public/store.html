@@ -102,6 +102,43 @@
   </div>
 </div>
 
+<!-- Avis clients -->
+<div class="wrap" id="reviewsWrap" style="display:none;">
+  <div style="background:#fff; border-radius:16px; padding:22px; border:1px solid var(--line); margin-top:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h3 style="font-size:1.05rem;">Avis clients</h3>
+        <div id="ratingsSummary" style="font-size:0.85rem; opacity:0.65; margin-top:4px;"></div>
+      </div>
+      <button class="btn btn-ghost" onclick="openReviewForm()">Laisser un avis</button>
+    </div>
+    <div id="reviewsList"></div>
+  </div>
+</div>
+
+<!-- review modal -->
+<div id="reviewOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
+    <h3 style="font-size:1.1rem; margin-bottom:16px;">Laisser un avis</h3>
+    <div style="text-align:center; font-size:1.8rem; margin-bottom:16px; letter-spacing:6px;" id="starPicker">
+      <span data-v="1">☆</span><span data-v="2">☆</span><span data-v="3">☆</span><span data-v="4">☆</span><span data-v="5">☆</span>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton nom</label>
+      <input type="text" id="reviewName" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+    </div>
+    <div style="margin-bottom:18px;">
+      <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton commentaire (optionnel)</label>
+      <textarea id="reviewComment" rows="3" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;"></textarea>
+    </div>
+    <div id="reviewMsg" style="font-size:0.82rem; color:#DC2626; margin-bottom:10px; display:none;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeReviewForm()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="submitReview()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
 <script>
   const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
@@ -113,6 +150,71 @@
   let currentProduct = null;
 
   function fmt(n){ return Number(n).toLocaleString('fr-FR') + " FCFA"; }
+
+  let selectedRating = 0;
+  document.getElementById('starPicker').addEventListener('click', (e) => {
+    if(e.target.dataset.v){
+      selectedRating = parseInt(e.target.dataset.v, 10);
+      renderStarPicker();
+    }
+  });
+  function renderStarPicker(){
+    document.querySelectorAll('#starPicker span').forEach(s => {
+      s.textContent = parseInt(s.dataset.v,10) <= selectedRating ? '★' : '☆';
+    });
+  }
+  function openReviewForm(){
+    selectedRating = 0; renderStarPicker();
+    document.getElementById('reviewName').value = '';
+    document.getElementById('reviewComment').value = '';
+    document.getElementById('reviewMsg').style.display = 'none';
+    document.getElementById('reviewOverlay').style.display = 'flex';
+  }
+  function closeReviewForm(){
+    document.getElementById('reviewOverlay').style.display = 'none';
+  }
+  async function submitReview(){
+    const name = document.getElementById('reviewName').value.trim();
+    const comment = document.getElementById('reviewComment').value.trim();
+    const msg = document.getElementById('reviewMsg');
+    if(!name || selectedRating === 0){
+      msg.textContent = "Choisis une note et indique ton nom."; msg.style.display = "block";
+      return;
+    }
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_reviews`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ store_id: currentStore.id, customer_name: name, rating: selectedRating, comment }),
+      });
+      closeReviewForm();
+      loadReviews();
+    } catch(err){
+      msg.textContent = "Erreur, réessaie."; msg.style.display = "block";
+    }
+  }
+  async function loadReviews(){
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_reviews?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const reviews = await res.json();
+      document.getElementById('reviewsWrap').style.display = 'block';
+      if(reviews.length === 0){
+        document.getElementById('ratingsSummary').textContent = "Aucun avis pour l'instant — sois le premier !";
+        document.getElementById('reviewsList').innerHTML = '';
+        return;
+      }
+      const avg = (reviews.reduce((s,r)=>s+r.rating,0) / reviews.length).toFixed(1);
+      document.getElementById('ratingsSummary').textContent = `${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))} ${avg}/5 (${reviews.length} avis)`;
+      document.getElementById('reviewsList').innerHTML = reviews.map(r => `
+        <div style="padding:12px 0; border-top:1px solid var(--line);">
+          <div style="font-weight:700; font-size:0.88rem;">${r.customer_name} <span style="color:var(--accent); font-weight:400;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div>
+          ${r.comment ? `<div style="font-size:0.85rem; opacity:0.7; margin-top:4px;">${r.comment}</div>` : ''}
+        </div>
+      `).join('');
+    } catch(err){ /* silencieux */ }
+  }
 
   async function logPageview(storeId, prodId){
     try {
@@ -199,11 +301,13 @@
         currentProduct = p;
         logPageview(store.id, p.id);
         showProduct(p);
+        loadReviews();
         return;
       }
     }
     logPageview(store.id, null);
     showGrid(products);
+    loadReviews();
   }
 
   function showGrid(products){
