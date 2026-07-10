@@ -64,9 +64,11 @@
   <div id="productView">
     <div class="product-hero">
       <img id="pImg" src="" alt="">
+      <div id="thumbRow" style="display:flex; gap:8px; padding:12px 26px 0; flex-wrap:wrap;"></div>
       <div class="product-info">
         <h2 id="pName"></h2>
         <div class="price" id="pPrice"></div>
+        <div id="stockBadge" style="font-size:0.82rem; font-weight:700; margin-bottom:14px;"></div>
         <p id="pDesc"></p>
         <button class="btn btn-primary" id="buyBtn" onclick="openCheckout()">Acheter maintenant</button>
       </div>
@@ -250,20 +252,22 @@
     }
     btn.disabled = true; btn.textContent = "Envoi…";
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/place_order`, {
         method: 'POST',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          store_id: currentStore.id, product_id: currentProduct.id,
-          product_name_snapshot: currentProduct.name, amount_fcfa: currentProduct.price_fcfa,
-          customer_name: name, customer_phone: phone,
+          p_store_id: currentStore.id, p_product_id: currentProduct.id,
+          p_customer_name: name, p_customer_phone: phone,
         }),
       });
-      if(!res.ok) throw new Error();
+      if(!res.ok){
+        const errData = await res.json();
+        throw new Error(errData.message && errData.message.includes('rupture') ? "Ce produit vient d'être épuisé, désolé !" : "Erreur, réessaie.");
+      }
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
     } catch(err){
-      msg.textContent = "Erreur, réessaie."; msg.style.display = "block";
+      msg.textContent = err.message; msg.style.display = "block";
     } finally {
       btn.disabled = false; btn.textContent = "Confirmer";
     }
@@ -342,6 +346,40 @@
     document.getElementById('pName').textContent = p.name;
     document.getElementById('pPrice').textContent = fmt(p.price_fcfa);
     document.getElementById('pDesc').textContent = p.description || '';
+
+    // Galerie de miniatures (photo principale + photos supplémentaires)
+    const allImages = [p.image_url, ...(p.extra_image_urls || [])];
+    const thumbRow = document.getElementById('thumbRow');
+    if(allImages.length > 1){
+      thumbRow.innerHTML = allImages.map((url, i) => `
+        <img src="${url}" onclick="document.getElementById('pImg').src='${url}'"
+             style="width:52px; height:52px; border-radius:8px; object-fit:cover; cursor:pointer; border:2px solid ${i===0?'var(--accent)':'transparent'};">
+      `).join('');
+    } else {
+      thumbRow.innerHTML = '';
+    }
+
+    // Stock
+    const stockBadge = document.getElementById('stockBadge');
+    const buyBtn = document.getElementById('buyBtn');
+    if(p.stock_quantity <= 0){
+      stockBadge.textContent = "Rupture de stock";
+      stockBadge.style.color = "#DC2626";
+      buyBtn.disabled = true;
+      buyBtn.textContent = "Indisponible";
+      buyBtn.style.opacity = "0.5";
+    } else if(p.stock_quantity <= 5){
+      stockBadge.textContent = `Plus que ${p.stock_quantity} en stock !`;
+      stockBadge.style.color = "#EA580C";
+      buyBtn.disabled = false;
+      buyBtn.textContent = "Acheter maintenant";
+      buyBtn.style.opacity = "1";
+    } else {
+      stockBadge.textContent = "";
+      buyBtn.disabled = false;
+      buyBtn.textContent = "Acheter maintenant";
+      buyBtn.style.opacity = "1";
+    }
   }
 
   init();
