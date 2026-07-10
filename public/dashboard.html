@@ -182,6 +182,13 @@
       </div>
     </div>
 
+    <div class="panel" id="planPanel" style="padding:18px 22px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="font-weight:700; font-size:0.95rem;">Ta réputation</div>
+        <div style="font-size:0.8rem; opacity:0.6;" id="ratingSummary">Chargement des avis…</div>
+      </div>
+    </div>
+
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card"><div class="stat-num" id="statVisitors">—</div><div class="stat-lbl">Visiteurs</div></div>
       <div class="stat-card"><div class="stat-num" id="statOrders">—</div><div class="stat-lbl">Commandes</div></div>
@@ -427,9 +434,27 @@
     document.getElementById('bannerStoreName').textContent = currentStore.name;
     document.getElementById('bannerStoreDesc').textContent = currentStore.description || '';
     document.getElementById('storeLinkText').textContent = `store.html?s=${currentStore.slug}`;
+    renderRatingSummary();
     loadProducts();
     loadStats();
     loadOrders();
+  }
+
+  async function renderRatingSummary(){
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_reviews?store_id=eq.${currentStore.id}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const reviews = await res.json();
+      if(reviews.length === 0){
+        document.getElementById('ratingSummary').textContent = "Aucun avis pour l'instant.";
+        return;
+      }
+      const avg = (reviews.reduce((s,r)=>s+r.rating,0) / reviews.length).toFixed(1);
+      document.getElementById('ratingSummary').textContent = `${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))} ${avg}/5 sur ${reviews.length} avis`;
+    } catch(err){
+      document.getElementById('ratingSummary').textContent = "Impossible de charger les avis.";
+    }
   }
 
   function copyStoreLink(){
