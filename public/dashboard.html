@@ -107,6 +107,9 @@
   .status-tag{ padding:4px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; }
   .status-tag.pending{ background:#FEF3C7; color:#92400E; }
   .status-tag.confirmed{ background:#D1FAE5; color:#065F46; }
+  .status-tag.preparing{ background:#DBEAFE; color:#1E40AF; }
+  .status-tag.shipped{ background:#E0E7FF; color:#4338CA; }
+  .status-tag.delivered{ background:#DCFCE7; color:#166534; }
   .status-tag.cancelled{ background:#FEE2E2; color:#991B1B; }
 </style>
 </head>
@@ -282,10 +285,19 @@
         <label class="upload-zone" id="uploadZone">
           <div id="uploadPlaceholder">
             <div style="font-size:1.8rem; margin-bottom:8px;">📷</div>
-            <div class="hint">Touche pour choisir une photo</div>
+            <div class="hint">Photo principale (obligatoire)</div>
           </div>
           <img id="imagePreview" style="display:none;">
           <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+        </label>
+
+        <label class="upload-zone" id="extraUploadZone" style="padding:14px;">
+          <div id="extraUploadPlaceholder">
+            <div style="font-size:1.4rem; margin-bottom:4px;">🖼️</div>
+            <div class="hint">+ Ajouter d'autres photos (optionnel, plusieurs à la fois)</div>
+          </div>
+          <div id="extraPreviewRow" style="display:none; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
+          <input type="file" id="extraImageInput" accept="image/*" multiple onchange="previewExtraImages(event)">
         </label>
 
         <div class="field">
@@ -296,6 +308,10 @@
           <div class="field">
             <label>Prix (FCFA)</label>
             <input type="number" id="pPrice" placeholder="15000">
+          </div>
+          <div class="field">
+            <label>Quantité en stock</label>
+            <input type="number" id="pStock" placeholder="10" min="0">
           </div>
         </div>
         <div class="field">
@@ -333,6 +349,10 @@
     <div class="field">
       <label>Prix (FCFA)</label>
       <input type="number" id="editPrice">
+    </div>
+    <div class="field">
+      <label>Quantité en stock</label>
+      <input type="number" id="editStock" min="0">
     </div>
     <div class="field">
       <label>Description</label>
@@ -678,9 +698,29 @@
     reader.readAsDataURL(file);
   }
 
+  let selectedExtraFiles = [];
+  function previewExtraImages(event){
+    selectedExtraFiles = Array.from(event.target.files).slice(0, 6); // 6 photos supplémentaires max
+    const row = document.getElementById('extraPreviewRow');
+    row.innerHTML = '';
+    row.style.display = 'flex';
+    document.getElementById('extraUploadPlaceholder').style.display = 'none';
+    selectedExtraFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style = 'width:48px; height:48px; border-radius:8px; object-fit:cover;';
+        row.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function publishProduct(){
     const name = document.getElementById('pName').value.trim();
     const price = document.getElementById('pPrice').value;
+    const stock = document.getElementById('pStock').value;
     const description = document.getElementById('pDesc').value.trim();
     const msg = document.getElementById('formMsg');
     const btn = document.getElementById('publishBtn');
@@ -706,13 +746,30 @@
       if(!uploadRes.ok) throw new Error("Échec de l'upload de la photo");
       const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
 
+      // Upload des photos supplémentaires, une par une
+      const extraUrls = [];
+      for(const file of selectedExtraFiles){
+        const extraExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const extraFileName = `${currentStore.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extraExt}`;
+        const extraRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${extraFileName}`, {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': file.type },
+          body: file,
+        });
+        if(extraRes.ok) extraUrls.push(`${SUPABASE_URL}/storage/v1/object/public/dp-assets/${extraFileName}`);
+      }
+
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json', 'Prefer': 'return=representation',
         },
-        body: JSON.stringify({ store_id: currentStore.id, name, description, price_fcfa: parseInt(price,10), image_url: imageUrl }),
+        body: JSON.stringify({
+          store_id: currentStore.id, name, description, price_fcfa: parseInt(price,10),
+          stock_quantity: stock ? parseInt(stock,10) : 999,
+          image_url: imageUrl, extra_image_urls: extraUrls,
+        }),
       });
       const productData = await insertRes.json();
       if(!insertRes.ok) throw new Error(productData.message || "Échec de la publication");
@@ -723,11 +780,16 @@
 
       document.getElementById('pName').value = '';
       document.getElementById('pPrice').value = '';
+      document.getElementById('pStock').value = '';
       document.getElementById('pDesc').value = '';
       document.getElementById('imagePreview').style.display = 'none';
       document.getElementById('uploadPlaceholder').style.display = 'block';
       document.getElementById('imageInput').value = '';
+      document.getElementById('extraPreviewRow').style.display = 'none';
+      document.getElementById('extraUploadPlaceholder').style.display = 'block';
+      document.getElementById('extraImageInput').value = '';
       selectedImageFile = null;
+      selectedExtraFiles = [];
 
       loadProducts();
     } catch(err){
@@ -758,6 +820,9 @@
           <div class="pc-body">
             <h4>${p.name}</h4>
             <div class="price">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</div>
+            <div style="font-size:0.72rem; font-weight:700; margin-bottom:8px; color:${p.stock_quantity > 5 ? '#059669' : p.stock_quantity > 0 ? '#EA580C' : '#DC2626'};">
+              ${p.stock_quantity > 0 ? `${p.stock_quantity} en stock` : 'Rupture de stock'}
+            </div>
             <div class="pc-actions">
               <button class="btn btn-ghost" onclick="openEdit('${p.id}')">Modifier</button>
               <button class="btn btn-ghost" onclick="copyProductLink('${p.id}')">Lien</button>
@@ -803,6 +868,7 @@
     editingId = id;
     document.getElementById('editName').value = p.name;
     document.getElementById('editPrice').value = p.price_fcfa;
+    document.getElementById('editStock').value = p.stock_quantity;
     document.getElementById('editDesc').value = p.description || '';
     document.getElementById('editMsg').style.display = 'none';
     document.getElementById('editOverlay').style.display = 'flex';
@@ -814,6 +880,7 @@
   async function saveEdit(){
     const name = document.getElementById('editName').value.trim();
     const price = document.getElementById('editPrice').value;
+    const stock = document.getElementById('editStock').value;
     const description = document.getElementById('editDesc').value.trim();
     const msg = document.getElementById('editMsg');
     const btn = document.getElementById('saveEditBtn');
@@ -829,7 +896,7 @@
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json', 'Prefer': 'return=minimal',
         },
-        body: JSON.stringify({ name, price_fcfa: parseInt(price,10), description }),
+        body: JSON.stringify({ name, price_fcfa: parseInt(price,10), stock_quantity: parseInt(stock,10) || 0, description }),
       });
       if(!res.ok) throw new Error();
       closeEdit();
@@ -881,6 +948,9 @@
             <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${o.status}" style="border:none; cursor:pointer;">
               <option value="pending" ${o.status==='pending'?'selected':''}>En attente</option>
               <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmée</option>
+              <option value="preparing" ${o.status==='preparing'?'selected':''}>En préparation</option>
+              <option value="shipped" ${o.status==='shipped'?'selected':''}>Expédiée</option>
+              <option value="delivered" ${o.status==='delivered'?'selected':''}>Livrée</option>
               <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Annulée</option>
             </select>
           </td>
