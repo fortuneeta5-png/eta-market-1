@@ -476,6 +476,7 @@
     }
     btn.disabled = true; btn.textContent = "Création…";
     try {
+      await refreshSession(); // s'assure d'avoir un token valide juste avant d'agir
       let slug = slugify(name);
       const check = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?slug=eq.${slug}`, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
@@ -483,7 +484,7 @@
       const existing = await check.json();
       if(existing.length > 0) slug = slug + '-' + Math.floor(Math.random()*1000);
 
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores`, {
+      let res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
@@ -491,8 +492,33 @@
         },
         body: JSON.stringify({ vendor_id: session.user.id, name, slug, description, accent_color: selectedColor }),
       });
-      const data = await res.json();
-      if(!res.ok) throw new Error(data.message || "Échec de la création");
+      let data = await res.json();
+
+      // Si le token a quand même expiré pile à ce moment, on rafraîchit et on retente UNE fois
+      if(!res.ok && JSON.stringify(data).toLowerCase().includes('jwt')){
+        await refreshSession();
+        res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json', 'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({ vendor_id: session.user.id, name, slug, description, accent_color: selectedColor }),
+        });
+        data = await res.json();
+      }
+
+      if(!res.ok){
+        const errText = JSON.stringify(data).toLowerCase();
+        if(errText.includes('jwt') || errText.includes('token')){
+          logout();
+          const authMsg = document.getElementById('authMsg');
+          authMsg.textContent = "Ta session a expiré. Reconnecte-toi et réessaie — ça ne se reproduira plus après ça.";
+          authMsg.className = "auth-msg err"; authMsg.style.display = "block";
+          return;
+        }
+        throw new Error(data.message || "Échec de la création");
+      }
 
       currentStore = data[0];
       document.getElementById('createStoreScreen').style.display = 'none';
