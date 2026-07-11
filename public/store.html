@@ -70,6 +70,7 @@
         <div class="price" id="pPrice"></div>
         <div id="stockBadge" style="font-size:0.82rem; font-weight:700; margin-bottom:14px;"></div>
         <p id="pDesc"></p>
+        <div id="variantsWrap" style="display:none; margin-bottom:16px;"></div>
         <button class="btn btn-primary" id="buyBtn" onclick="openCheckout()">Acheter maintenant</button>
       </div>
     </div>
@@ -166,6 +167,60 @@
   let currentProduct = null;
 
   function fmt(n){ return Number(n).toLocaleString('fr-FR') + " FCFA"; }
+
+  // ---------- Pixels publicitaires (Facebook, TikTok, Google Ads) ----------
+  function loadMarketingPixels(store){
+    if(store.fb_pixel_id){
+      const s = document.createElement('script');
+      s.innerHTML = `
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+        document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '${store.fb_pixel_id}');
+        fbq('track', 'PageView');
+      `;
+      document.head.appendChild(s);
+    }
+    if(store.tiktok_pixel_id){
+      const s = document.createElement('script');
+      s.innerHTML = `
+        !function (w, d, t) {
+          w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+          ttq.load('${store.tiktok_pixel_id}');
+          ttq.page();
+        }(window, document, 'ttq');
+      `;
+      document.head.appendChild(s);
+    }
+    if(store.google_ads_id){
+      const s1 = document.createElement('script');
+      s1.async = true;
+      s1.src = `https://www.googletagmanager.com/gtag/js?id=${store.google_ads_id}`;
+      document.head.appendChild(s1);
+      const s2 = document.createElement('script');
+      s2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${store.google_ads_id}');
+      `;
+      document.head.appendChild(s2);
+    }
+  }
+
+  function trackPurchase(amount){
+    try {
+      if(typeof fbq !== 'undefined') fbq('track', 'Purchase', { value: amount, currency: 'XAF' });
+    } catch(e){}
+    try {
+      if(typeof ttq !== 'undefined') ttq.track('CompletePayment', { value: amount, currency: 'XAF' });
+    } catch(e){}
+    try {
+      if(typeof gtag !== 'undefined') gtag('event', 'conversion', { value: amount, currency: 'XAF' });
+    } catch(e){}
+  }
 
   let selectedRating = 0;
   document.getElementById('starPicker').addEventListener('click', (e) => {
@@ -323,6 +378,18 @@
       msg.textContent = "Merci de remplir ton nom et ton numéro."; msg.style.display = "block";
       return;
     }
+
+    // Vérifie que toutes les variantes obligatoires sont choisies
+    const variantGroups = document.querySelectorAll('#variantsWrap > div');
+    for(const group of variantGroups){
+      const groupName = group.querySelector('[data-group]')?.dataset.group;
+      if(groupName && !selectedVariants[groupName]){
+        msg.textContent = `Merci de choisir : ${groupName}`; msg.style.display = "block";
+        return;
+      }
+    }
+    const variantText = Object.entries(selectedVariants).map(([k,v]) => `${k}: ${v}`).join(', ') || null;
+
     btn.disabled = true; btn.textContent = "Envoi…";
     try {
       const zoneSelect = document.getElementById('zoneSelect');
@@ -336,6 +403,7 @@
           p_store_id: currentStore.id, p_product_id: currentProduct.id,
           p_customer_name: name, p_customer_phone: phone,
           p_promo_code: promoCode, p_delivery_zone_id: zoneId,
+          p_variant_selection: variantText,
         }),
       });
       if(!res.ok){
@@ -344,6 +412,7 @@
       }
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
+      trackPurchase(currentProduct.price_fcfa);
     } catch(err){
       msg.textContent = err.message; msg.style.display = "block";
     } finally {
@@ -377,6 +446,7 @@
     }
     document.title = store.name + " — ETA MARKET";
     document.getElementById('backLink').href = `?s=${slug}`;
+    loadMarketingPixels(store);
 
     const prodRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?store_id=eq.${store.id}&is_active=eq.true&order=created_at.desc`, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
@@ -458,6 +528,52 @@
       buyBtn.textContent = "Acheter maintenant";
       buyBtn.style.opacity = "1";
     }
+
+    loadVariants(p.id);
+  }
+
+  let selectedVariants = {};
+  async function loadVariants(productId){
+    selectedVariants = {};
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_product_options?product_id=eq.${productId}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const options = await res.json();
+      const wrap = document.getElementById('variantsWrap');
+      if(options.length === 0){
+        wrap.style.display = 'none';
+        wrap.innerHTML = '';
+        return;
+      }
+      wrap.style.display = 'block';
+      wrap.innerHTML = options.map(o => `
+        <div style="margin-bottom:12px;">
+          <div style="font-size:0.82rem; font-weight:700; margin-bottom:6px;">${o.option_name}</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            ${o.option_values.map(v => `
+              <button type="button" class="variant-btn" data-group="${o.option_name}" data-value="${v}"
+                onclick="selectVariant('${o.option_name}', '${v}', this)"
+                style="padding:8px 14px; border-radius:100px; border:1.5px solid var(--line); background:#fff; font-size:0.85rem; cursor:pointer;">${v}</button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    } catch(err){
+      document.getElementById('variantsWrap').style.display = 'none';
+    }
+  }
+
+  function selectVariant(groupName, value, btnEl){
+    selectedVariants[groupName] = value;
+    document.querySelectorAll(`.variant-btn[data-group="${groupName}"]`).forEach(b => {
+      b.style.borderColor = 'var(--line)';
+      b.style.background = '#fff';
+      b.style.color = 'inherit';
+    });
+    btnEl.style.borderColor = 'var(--accent)';
+    btnEl.style.background = 'var(--accent)';
+    btnEl.style.color = '#fff';
   }
 
   init();
