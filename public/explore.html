@@ -69,9 +69,19 @@
 <div class="hero">
   <h1>Découvre les boutiques ETA MARKET</h1>
   <p>Des vendeurs de tout le Congo, classés selon les avis de vrais clients.</p>
+  <div style="max-width:420px; margin:22px auto 0; display:flex; gap:8px;">
+    <input type="text" id="searchInput" placeholder="Rechercher un produit…" oninput="handleSearch()"
+      style="flex:1; padding:13px 16px; border-radius:100px; border:none; font-size:0.92rem; font-family:'Poppins',sans-serif;">
+  </div>
 </div>
 
 <div class="wrap">
+  <div id="searchResults" style="display:none;">
+    <div class="section-title">Résultats de recherche</div>
+    <div class="store-grid" id="searchGrid"></div>
+  </div>
+
+  <div id="browseSections">
   <div id="topSection" style="display:none;">
     <div class="section-title">⭐ Les mieux notées <span class="badge-top">Avis clients</span></div>
     <div class="store-grid" id="topGrid"></div>
@@ -80,6 +90,7 @@
   <div class="section-title">Toutes les boutiques</div>
   <div class="store-grid" id="allGrid">
     <div class="empty">Chargement…</div>
+  </div>
   </div>
 
   <div class="cta-vendor">
@@ -92,6 +103,52 @@
 <script>
   const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
+
+  let searchTimeout = null;
+  function handleSearch(){
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(runSearch, 350);
+  }
+
+  function productCard(p){
+    const store = p.dp_stores;
+    return `
+      <a class="store-card" href="store.html?s=${store.slug}&p=${p.id}">
+        <img src="${p.image_url}" style="width:100%; aspect-ratio:1; object-fit:cover;" alt="${p.name}">
+        <div class="store-body">
+          <h3>${p.name}</h3>
+          <p style="min-height:auto;">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</p>
+          <div class="store-meta">Chez ${store.name}</div>
+        </div>
+      </a>
+    `;
+  }
+
+  async function runSearch(){
+    const query = document.getElementById('searchInput').value.trim();
+    if(!query){
+      document.getElementById('searchResults').style.display = 'none';
+      document.getElementById('browseSections').style.display = 'block';
+      return;
+    }
+    document.getElementById('searchResults').style.display = 'block';
+    document.getElementById('browseSections').style.display = 'none';
+    const grid = document.getElementById('searchGrid');
+    grid.innerHTML = '<div class="empty">Recherche…</div>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?is_active=eq.true&name=ilike.*${encodeURIComponent(query)}*&select=*,dp_stores(name,slug,accent_color)&limit=24`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const products = await res.json();
+      if(products.length === 0){
+        grid.innerHTML = `<div class="empty">Aucun produit trouvé pour "${query}".</div>`;
+        return;
+      }
+      grid.innerHTML = products.map(productCard).join('');
+    } catch(err){
+      grid.innerHTML = '<div class="empty">Erreur lors de la recherche.</div>';
+    }
+  }
 
   function storeCard(s, isTop){
     const ratingHtml = s.reviewCount > 0
