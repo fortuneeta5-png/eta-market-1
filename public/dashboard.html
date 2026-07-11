@@ -13,7 +13,7 @@
     --primary:#E63946; --primary-dark:#B4222D; --lavender:#FDEDEE;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{ background:var(--paper); color:var(--ink); font-family:'Poppins',sans-serif; min-height:100vh; }
+  body{ background:var(--paper); color:var(--ink); font-family:'Poppins',sans-serif; min-height:100vh; overflow-wrap:break-word; word-break:normal; overflow-x:hidden; }
   h1,h2,h3{ font-family:'Montserrat',sans-serif; font-weight:800; letter-spacing:-0.01em; }
   .btn{ border:none; cursor:pointer; border-radius:12px; font-weight:600; transition:transform .15s ease, box-shadow .15s ease; font-family:'Poppins',sans-serif; }
   .btn-primary{ background:var(--primary); color:#fff; padding:14px 26px; font-size:0.95rem; box-shadow:0 8px 20px rgba(230,57,70,0.3); }
@@ -68,8 +68,9 @@
   }
   .store-banner h2{ font-size:1.3rem; margin-bottom:4px; }
   .store-banner p{ font-size:0.85rem; opacity:0.9; }
-  .link-box{ background:rgba(255,255,255,0.15); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:0.82rem; font-family:monospace; }
-  .link-box button{ background:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:0.76rem; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .link-box{ background:rgba(255,255,255,0.15); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:0.82rem; font-family:monospace; max-width:100%; }
+  .link-box span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1; }
+  .link-box button{ background:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:0.76rem; font-weight:700; cursor:pointer; white-space:nowrap; flex:none; }
 
   .panel{ background:#fff; border-radius:16px; border:1px solid var(--line); overflow:hidden; margin-bottom:20px; }
   .panel-head{ padding:18px 22px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
@@ -203,7 +204,7 @@
           <p id="bannerStoreDesc"></p>
         </div>
       </div>
-      <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+      <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end; max-width:100%; min-width:0;">
         <div class="link-box">
           <span id="storeLinkText">—</span>
           <button onclick="copyStoreLink()">Copier</button>
