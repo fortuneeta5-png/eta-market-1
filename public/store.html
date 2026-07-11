@@ -91,6 +91,18 @@
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton numéro de téléphone</label>
         <input type="tel" id="custPhone" placeholder="06 XXX XX XX" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
       </div>
+      <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
+        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Zone de livraison</label>
+        <select id="zoneSelect" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;" onchange="updateOrderTotal()"></select>
+      </div>
+      <div style="margin-bottom:10px; display:flex; gap:8px;">
+        <input type="text" id="promoInput" placeholder="Code promo (optionnel)" style="flex:1; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.9rem; text-transform:uppercase;">
+        <button class="btn btn-ghost" onclick="applyPromoCode()" style="white-space:nowrap;">Appliquer</button>
+      </div>
+      <div id="promoFeedback" style="font-size:0.8rem; margin-bottom:14px; display:none;"></div>
+      <div id="orderTotalWrap" style="display:flex; justify-content:space-between; font-weight:700; margin-bottom:16px; padding-top:10px; border-top:1px solid var(--line);">
+        <span>Total</span><span id="orderTotalAmt"></span>
+      </div>
       <div id="checkoutMsg" style="font-size:0.82rem; color:#DC2626; margin-bottom:10px; display:none;"></div>
       <div style="display:flex; gap:10px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="closeCheckout()">Annuler</button>
@@ -230,11 +242,72 @@
     } catch(err){ /* silencieux, le suivi n'est pas critique */ }
   }
 
-  function openCheckout(){
+  let deliveryZones = [];
+  let selectedZoneFee = 0;
+  let appliedDiscount = 0;
+
+  async function openCheckout(){
     document.getElementById('checkoutOverlay').style.display = 'flex';
     document.getElementById('checkoutForm').style.display = 'block';
     document.getElementById('checkoutSuccess').style.display = 'none';
+    document.getElementById('promoFeedback').style.display = 'none';
+    document.getElementById('promoInput').value = '';
+    appliedDiscount = 0;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones?store_id=eq.${currentStore.id}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      deliveryZones = await res.json();
+      const zoneWrap = document.getElementById('zoneFieldWrap');
+      const zoneSelect = document.getElementById('zoneSelect');
+      if(deliveryZones.length > 0){
+        zoneWrap.style.display = 'block';
+        zoneSelect.innerHTML = deliveryZones.map((z,i) => `<option value="${i}">${z.zone_name} — ${fmt(z.fee_fcfa)}</option>`).join('');
+        selectedZoneFee = deliveryZones[0].fee_fcfa;
+      } else {
+        zoneWrap.style.display = 'none';
+        selectedZoneFee = 0;
+      }
+    } catch(err){ selectedZoneFee = 0; }
+
+    updateOrderTotal();
   }
+
+  function updateOrderTotal(){
+    const zoneSelect = document.getElementById('zoneSelect');
+    if(deliveryZones.length > 0 && zoneSelect.value !== ''){
+      selectedZoneFee = deliveryZones[parseInt(zoneSelect.value,10)].fee_fcfa;
+    }
+    const total = currentProduct.price_fcfa - appliedDiscount + selectedZoneFee;
+    document.getElementById('orderTotalAmt').textContent = fmt(Math.max(0,total));
+  }
+
+  async function applyPromoCode(){
+    const code = document.getElementById('promoInput').value.trim().toUpperCase();
+    const feedback = document.getElementById('promoFeedback');
+    if(!code){ appliedDiscount = 0; feedback.style.display = 'none'; updateOrderTotal(); return; }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_promo_codes?store_id=eq.${currentStore.id}&code=eq.${code}&is_active=eq.true`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const codes = await res.json();
+      if(codes.length === 0){
+        appliedDiscount = 0;
+        feedback.textContent = "Code invalide."; feedback.style.color = "#DC2626"; feedback.style.display = 'block';
+      } else {
+        const promo = codes[0];
+        appliedDiscount = promo.discount_type === 'percentage'
+          ? Math.round(currentProduct.price_fcfa * promo.discount_value / 100)
+          : Math.min(promo.discount_value, currentProduct.price_fcfa);
+        feedback.textContent = `✅ Code appliqué : -${fmt(appliedDiscount)}`; feedback.style.color = "#059669"; feedback.style.display = 'block';
+      }
+      updateOrderTotal();
+    } catch(err){
+      feedback.textContent = "Erreur de vérification."; feedback.style.color = "#DC2626"; feedback.style.display = 'block';
+    }
+  }
+
   function closeCheckout(){
     document.getElementById('checkoutOverlay').style.display = 'none';
     document.getElementById('custName').value = '';
@@ -252,12 +325,17 @@
     }
     btn.disabled = true; btn.textContent = "Envoi…";
     try {
+      const zoneSelect = document.getElementById('zoneSelect');
+      const zoneId = (deliveryZones.length > 0 && zoneSelect.value !== '') ? deliveryZones[parseInt(zoneSelect.value,10)].id : null;
+      const promoCode = document.getElementById('promoInput').value.trim().toUpperCase() || null;
+
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/place_order`, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           p_store_id: currentStore.id, p_product_id: currentProduct.id,
           p_customer_name: name, p_customer_phone: phone,
+          p_promo_code: promoCode, p_delivery_zone_id: zoneId,
         }),
       });
       if(!res.ok){
