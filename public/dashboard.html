@@ -466,6 +466,27 @@
       </div>
     </div>
 
+    <div class="panel">
+      <div class="panel-head"><h3>Pixels publicitaires</h3></div>
+      <div class="panel-body">
+        <p style="font-size:0.8rem; opacity:0.6; margin-bottom:14px;">Suis tes visiteurs et tes ventes depuis tes campagnes Facebook, TikTok ou Google Ads. Laisse vide si tu n'utilises pas une de ces plateformes.</p>
+        <div class="field">
+          <label>Facebook Pixel ID</label>
+          <input type="text" id="fbPixelInput" placeholder="Ex: 123456789012345">
+        </div>
+        <div class="field">
+          <label>TikTok Pixel ID</label>
+          <input type="text" id="tiktokPixelInput" placeholder="Ex: C4A1B2C3D4E5F6G7">
+        </div>
+        <div class="field">
+          <label>Google Ads ID</label>
+          <input type="text" id="googleAdsInput" placeholder="Ex: AW-123456789">
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="savePixels()">Enregistrer les pixels</button>
+        <div class="form-msg" id="pixelsMsg"></div>
+      </div>
+    </div>
+
     <button class="logout-btn" style="width:100%; margin-top:6px;" onclick="logout()">Déconnexion</button>
     </div>
     <!-- /ONGLET MENU -->
@@ -739,6 +760,9 @@
       document.getElementById('bannerLogo').style.display = 'none';
     }
     document.getElementById('storeLinkText').textContent = `store.html?s=${currentStore.slug}`;
+    document.getElementById('fbPixelInput').value = currentStore.fb_pixel_id || '';
+    document.getElementById('tiktokPixelInput').value = currentStore.tiktok_pixel_id || '';
+    document.getElementById('googleAdsInput').value = currentStore.google_ads_id || '';
     renderRatingSummary();
     renderGreeting();
     loadProducts().then(() => loadHomeStats());
@@ -900,6 +924,34 @@
   function closeStoreEdit(){
     document.getElementById('storeEditOverlay').style.display = 'none';
   }
+  async function savePixels(){
+    const fbPixel = document.getElementById('fbPixelInput').value.trim();
+    const tiktokPixel = document.getElementById('tiktokPixelInput').value.trim();
+    const googleAds = document.getElementById('googleAdsInput').value.trim();
+    const msg = document.getElementById('pixelsMsg');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?id=eq.${currentStore.id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=representation',
+        },
+        body: JSON.stringify({
+          fb_pixel_id: fbPixel || null,
+          tiktok_pixel_id: tiktokPixel || null,
+          google_ads_id: googleAds || null,
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error();
+      currentStore = data[0];
+      msg.textContent = "✅ Pixels enregistrés !"; msg.className = "form-msg ok"; msg.style.display = "block";
+      setTimeout(() => msg.style.display = 'none', 3000);
+    } catch(err){
+      msg.textContent = "Erreur lors de l'enregistrement."; msg.className = "form-msg err"; msg.style.display = "block";
+    }
+  }
+
   async function saveStoreEdit(){
     const name = document.getElementById('editStoreName').value.trim();
     const description = document.getElementById('editStoreDesc').value.trim();
