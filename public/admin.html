@@ -40,10 +40,10 @@
 
   /* ---------- dashboard ---------- */
   #dashboard{ display:none; }
-  header{ background:var(--black); color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header{ background:var(--black); color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
   .logo{ font-size:1.3rem; font-weight:900; }
   .logo span{ color:var(--red); }
-  .header-right{ display:flex; gap:14px; align-items:center; }
+  .header-right{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
   .header-right a{ color:#fff; font-size:0.82rem; opacity:0.85; text-decoration:none; }
   .logout-btn{ background:none; border:1px solid rgba(255,255,255,0.3); color:#fff; padding:9px 16px; border-radius:100px; font-size:0.82rem; cursor:pointer; }
   .logout-btn:hover{ background:rgba(255,255,255,0.1); }
@@ -92,6 +92,17 @@
   .tag.none{ opacity:0.3; }
   .price-cell{ font-family:'Montserrat',sans-serif; font-weight:700; }
   .loading, .empty{ text-align:center; padding:50px 20px; opacity:0.5; font-size:0.9rem; }
+
+  .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .table-scroll table{ min-width:420px; }
+
+  @media (max-width: 480px){
+    .row2{ grid-template-columns:1fr; }
+    header{ padding:12px 16px; }
+    .wrap{ padding:20px 14px 50px; }
+    .panel-body{ padding:16px; }
+    .stats{ gap:10px; }
+  }
 </style>
 </head>
 <body>
@@ -206,12 +217,14 @@
           <h3>Mes produits</h3>
           <button class="btn btn-dark" onclick="loadProducts()">Actualiser</button>
         </div>
+        <div class="table-scroll">
         <table>
           <thead><tr><th>Produit</th><th>Prix</th><th></th></tr></thead>
           <tbody id="productsTableBody">
             <tr><td colspan="3" class="loading">Chargement…</td></tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   </div>
