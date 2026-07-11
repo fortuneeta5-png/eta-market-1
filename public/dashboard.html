@@ -140,6 +140,35 @@
     header{ padding:12px 16px; }
     .store-banner{ padding:20px; }
   }
+
+  /* ---------- Accueil vendeur : salutation, stats, top produits ---------- */
+  .greeting-block{ margin-bottom:22px; }
+  .greeting-block h2{ font-size:1.5rem; margin-bottom:6px; }
+  .greeting-block p{ font-size:0.9rem; opacity:0.6; }
+  .quick-actions{ display:flex; gap:10px; margin-bottom:22px; }
+  .quick-actions button{ flex:1; padding:14px 10px; font-size:0.85rem; }
+  .top-product-row{ display:flex; align-items:center; gap:12px; padding:12px 16px; border-top:1px solid var(--line); }
+  .top-product-row:first-child{ border-top:none; }
+  .top-product-row img{ width:44px; height:44px; border-radius:10px; object-fit:cover; flex:none; }
+  .top-product-row .tp-name{ font-weight:700; font-size:0.88rem; }
+  .top-product-row .tp-qty{ font-size:0.76rem; opacity:0.55; }
+  .top-product-row .tp-revenue{ font-weight:700; font-size:0.85rem; color:var(--primary); text-align:right; white-space:nowrap; }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  /* Menu du bas façon app mobile */
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line);
+    display:flex; justify-content:space-around; padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+    z-index:80;
+  }
+  .nav-item{
+    background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px;
+    font-size:0.66rem; color:#999; cursor:pointer; padding:6px 4px; flex:1; font-family:'Poppins',sans-serif;
+  }
+  .nav-item .nav-icon{ font-size:1.25rem; line-height:1; }
+  .nav-item.active{ color:var(--primary); font-weight:700; }
+  body{ padding-bottom:70px; }
 </style>
 </head>
 <body>
@@ -165,6 +194,10 @@
       <div class="tab" id="tabSignup" onclick="switchTab('signup')">Créer un compte</div>
     </div>
 
+    <div class="field" id="firstNameField" style="display:none;">
+      <label>Prénom</label>
+      <input type="text" id="authFirstName" placeholder="Ex: Fortune">
+    </div>
     <div class="field">
       <label>Email</label>
       <input type="email" id="authEmail" placeholder="toi@exemple.com">
@@ -224,6 +257,32 @@
   </header>
 
   <div class="wrap">
+
+    <!-- ONGLET ACCUEIL -->
+    <div class="tab-panel active" data-tab="home">
+      <div class="greeting-block">
+        <h2 id="greetingTitle">Bonjour !</h2>
+        <p id="greetingSub"></p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="statTotalRevenue">—</div><div class="stat-lbl">Revenu total</div></div>
+        <div class="stat-card"><div class="stat-num" id="statRevenue7d">—</div><div class="stat-lbl">7 derniers jours</div></div>
+        <div class="stat-card"><div class="stat-num" id="statUniqueCustomers">—</div><div class="stat-lbl">Clients</div></div>
+      </div>
+      <div class="quick-actions">
+        <button class="btn btn-primary" onclick="goToTab('products')">+ Ajouter un produit</button>
+        <button class="btn btn-ghost" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('promoCodeInput')?.scrollIntoView({behavior:'smooth'}), 100);">🏷️ Créer une promo</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Produits les plus vendus</h3></div>
+        <div id="topProductsBody">
+          <div class="empty">Chargement…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ONGLET MENU (boutique, réputation, promo, livraison) -->
+    <div class="tab-panel" data-tab="menu">
     <div class="store-banner" id="storeBanner">
       <div style="display:flex; align-items:center; gap:14px;">
         <img id="bannerLogo" style="display:none; width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.5);">
@@ -278,7 +337,11 @@
         <div style="font-size:0.8rem; opacity:0.6;" id="ratingSummary">Chargement des avis…</div>
       </div>
     </div>
+    </div>
+    <!-- /ONGLET MENU (suite plus bas : promo, livraison) -->
 
+    <!-- ONGLET VENTES -->
+    <div class="tab-panel" data-tab="sales">
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card"><div class="stat-num" id="statVisitors">—</div><div class="stat-lbl">Visiteurs</div></div>
       <div class="stat-card"><div class="stat-num" id="statOrders">—</div><div class="stat-lbl">Commandes</div></div>
@@ -307,7 +370,11 @@
         </table>
       </div>
     </div>
+    </div>
+    <!-- /ONGLET VENTES -->
 
+    <!-- ONGLET PRODUITS -->
+    <div class="tab-panel" data-tab="products">
     <div class="panel">
       <div class="panel-head"><h3>Ajouter un produit</h3></div>
       <div class="panel-body">
@@ -364,7 +431,11 @@
         </div>
       </div>
     </div>
+    </div>
+    <!-- /ONGLET PRODUITS -->
 
+    <!-- ONGLET MENU (suite) -->
+    <div class="tab-panel" data-tab="menu">
     <div class="panel">
       <div class="panel-head"><h3>Codes promo</h3></div>
       <div class="panel-body">
@@ -394,12 +465,37 @@
         <div id="zoneList"></div>
       </div>
     </div>
+
+    <button class="logout-btn" style="width:100%; margin-top:6px;" onclick="logout()">Déconnexion</button>
+    </div>
+    <!-- /ONGLET MENU -->
+
+    <!-- ONGLET SOLDE (bientôt disponible) -->
+    <div class="tab-panel" data-tab="balance">
+      <div class="panel">
+        <div class="panel-body" style="text-align:center; padding:50px 20px;">
+          <div style="font-size:2.2rem; margin-bottom:12px;">💰</div>
+          <h3 style="font-size:1.1rem; margin-bottom:8px;">Bientôt disponible</h3>
+          <p style="opacity:0.6; font-size:0.88rem;">Le suivi de ton solde et les retraits arrivent très prochainement.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Menu du bas -->
+  <div class="bottom-nav">
+    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">🏠</span>Accueil</button>
+    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">📦</span>Produits</button>
+    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">🧾</span>Ventes</button>
+    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">💰</span>Solde</button>
+    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☰</span>Menu</button>
   </div>
 </div>
 
 <!-- Modale d'édition de produit -->
 <div id="editOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
-  <div style="background:#fff; border-radius:18px; padding:26px; max-width:400px; width:100%;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:420px; width:100%; max-height:90vh; overflow-y:auto;">
     <h3 style="font-size:1.15rem; margin-bottom:18px;">Modifier le produit</h3>
     <div class="field">
       <label>Nom du produit</label>
@@ -417,6 +513,18 @@
       <label>Description</label>
       <textarea id="editDesc" rows="2"></textarea>
     </div>
+
+    <div style="border-top:1px solid var(--line); margin:18px 0 14px; padding-top:14px;">
+      <div style="font-weight:700; font-size:0.9rem; margin-bottom:4px;">Variantes (taille, couleur...)</div>
+      <div style="font-size:0.78rem; opacity:0.55; margin-bottom:10px;">Ex: nom "Taille", valeurs "S, M, L"</div>
+      <div id="variantList" style="margin-bottom:10px;"></div>
+      <div class="row2">
+        <input type="text" id="variantNameInput" placeholder="Ex: Taille" style="padding:11px 14px; border-radius:10px; border:1.5px solid var(--line);">
+        <input type="text" id="variantValuesInput" placeholder="S, M, L" style="padding:11px 14px; border-radius:10px; border:1.5px solid var(--line);">
+      </div>
+      <button class="btn btn-ghost" style="width:100%; margin-top:10px;" onclick="addVariantOption()">+ Ajouter cette variante</button>
+    </div>
+
     <div class="form-msg" id="editMsg"></div>
     <div style="display:flex; gap:10px; margin-top:8px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="closeEdit()">Annuler</button>
@@ -445,9 +553,11 @@
     document.getElementById('tabLogin').classList.toggle('active', mode==='login');
     document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
     document.getElementById('authBtn').textContent = mode==='login' ? 'Se connecter' : 'Créer mon compte';
+    document.getElementById('firstNameField').style.display = mode==='signup' ? 'block' : 'none';
   }
 
   async function handleAuth(){
+    const firstName = document.getElementById('authFirstName').value.trim();
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const msg = document.getElementById('authMsg');
@@ -458,15 +568,22 @@
       msg.textContent = "Remplis email et mot de passe."; msg.className = "auth-msg err"; msg.style.display = "block";
       return;
     }
+    if(authMode === 'signup' && !firstName){
+      msg.textContent = "Indique ton prénom."; msg.className = "auth-msg err"; msg.style.display = "block";
+      return;
+    }
 
     btn.disabled = true; btn.textContent = "Patiente…";
 
     try {
       const endpoint = authMode === 'login' ? 'token?grant_type=password' : 'signup';
+      const bodyData = authMode === 'signup'
+        ? { email, password, data: { first_name: firstName } }
+        : { email, password };
       const res = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(bodyData),
       });
       const data = await res.json();
       if(!res.ok) throw new Error(data.error_description || data.msg || data.error || "Échec");
@@ -623,11 +740,95 @@
     }
     document.getElementById('storeLinkText').textContent = `store.html?s=${currentStore.slug}`;
     renderRatingSummary();
-    loadProducts();
+    renderGreeting();
+    loadProducts().then(() => loadHomeStats());
     loadStats();
     loadOrders();
     loadPromoCodes();
     loadDeliveryZones();
+  }
+
+  // ---------- Navigation par onglets (menu du bas) ----------
+  function goToTab(tabName){
+    document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll(`.tab-panel[data-tab="${tabName}"]`).forEach(el => el.classList.add('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tabName));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ---------- Salutation personnalisée selon l'heure ----------
+  function renderGreeting(){
+    const hour = new Date().getHours();
+    const firstName = (session.user.user_metadata && session.user.user_metadata.first_name) || session.user.email.split('@')[0];
+    let title, sub;
+    if(hour >= 5 && hour < 12){
+      title = `Bonjour ${firstName} ! ☀️`;
+      sub = "Votre inspiration matinale est précieuse - vendez quelque chose de spécial !";
+    } else if(hour >= 12 && hour < 18){
+      title = `Bon après-midi ${firstName} !`;
+      sub = "Continuez sur votre lancée et boostez vos ventes aujourd'hui !";
+    } else {
+      title = `Bonsoir ${firstName} ! 🌙`;
+      sub = "Jetez un œil à vos ventes du jour avant de vous reposer.";
+    }
+    document.getElementById('greetingTitle').textContent = title;
+    document.getElementById('greetingSub').textContent = sub;
+  }
+
+  // ---------- Statistiques de la page d'accueil ----------
+  const PAID_STATUSES = ['confirmed','preparing','shipped','delivered'];
+
+  async function loadHomeStats(){
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${currentStore.id}&select=amount_fcfa,status,customer_phone,product_id,product_name_snapshot,created_at`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const orders = await res.json();
+
+      const paidOrders = orders.filter(o => PAID_STATUSES.includes(o.status));
+      const totalRevenue = paidOrders.reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
+
+      const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const revenue7d = paidOrders.filter(o => new Date(o.created_at) >= sevenDaysAgo).reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
+
+      const uniqueCustomers = new Set(orders.map(o => o.customer_phone)).size;
+
+      document.getElementById('statTotalRevenue').textContent = totalRevenue.toLocaleString('fr-FR') + ' F';
+      document.getElementById('statRevenue7d').textContent = revenue7d.toLocaleString('fr-FR') + ' F';
+      document.getElementById('statUniqueCustomers').textContent = uniqueCustomers;
+
+      // Top 5 produits les plus vendus (sur les commandes payées)
+      const byProduct = {};
+      paidOrders.forEach(o => {
+        if(!o.product_id) return;
+        if(!byProduct[o.product_id]) byProduct[o.product_id] = { name: o.product_name_snapshot, qty: 0, revenue: 0 };
+        byProduct[o.product_id].qty += 1;
+        byProduct[o.product_id].revenue += Number(o.amount_fcfa);
+      });
+      const top5 = Object.entries(byProduct).map(([id,v]) => ({ id, ...v })).sort((a,b) => b.qty - a.qty).slice(0,5);
+
+      const body = document.getElementById('topProductsBody');
+      if(top5.length === 0){
+        body.innerHTML = '<div class="empty">Aucune vente confirmée pour l\'instant.</div>';
+        return;
+      }
+      body.innerHTML = top5.map(p => {
+        const prod = currentProducts.find(x => x.id === p.id);
+        const img = prod ? prod.image_url : '';
+        return `
+          <div class="top-product-row">
+            ${img ? `<img src="${img}" alt="">` : '<div style="width:44px;height:44px;border-radius:10px;background:var(--lavender);flex:none;"></div>'}
+            <div style="flex:1;">
+              <div class="tp-name">${p.name}</div>
+              <div class="tp-qty">${p.qty} vendu${p.qty>1?'s':''}</div>
+            </div>
+            <div class="tp-revenue">${p.revenue.toLocaleString('fr-FR')} F</div>
+          </div>
+        `;
+      }).join('');
+    } catch(err){
+      document.getElementById('topProductsBody').innerHTML = '<div class="empty">Impossible de charger les statistiques.</div>';
+    }
   }
 
   async function renderRatingSummary(){
@@ -933,7 +1134,60 @@
     document.getElementById('editDesc').value = p.description || '';
     document.getElementById('editMsg').style.display = 'none';
     document.getElementById('editOverlay').style.display = 'flex';
+    loadVariantOptions(id);
   }
+
+  async function loadVariantOptions(productId){
+    const list = document.getElementById('variantList');
+    list.innerHTML = '<div style="font-size:0.8rem; opacity:0.5;">Chargement…</div>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_product_options?product_id=eq.${productId}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const options = await res.json();
+      if(options.length === 0){
+        list.innerHTML = '<div style="font-size:0.8rem; opacity:0.5;">Aucune variante pour l\'instant.</div>';
+        return;
+      }
+      list.innerHTML = options.map(o => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line);">
+          <div style="font-size:0.85rem;"><strong>${o.option_name}</strong> : ${o.option_values.join(', ')}</div>
+          <button class="btn btn-danger" onclick="deleteVariantOption('${o.id}')">✕</button>
+        </div>
+      `).join('');
+    } catch(err){
+      list.innerHTML = '<div style="font-size:0.8rem; opacity:0.5;">Erreur de chargement.</div>';
+    }
+  }
+
+  async function addVariantOption(){
+    const name = document.getElementById('variantNameInput').value.trim();
+    const valuesRaw = document.getElementById('variantValuesInput').value.trim();
+    if(!name || !valuesRaw){ alert("Remplis le nom et les valeurs de la variante."); return; }
+    const values = valuesRaw.split(',').map(v => v.trim()).filter(Boolean);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_product_options`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ product_id: editingId, option_name: name, option_values: values }),
+      });
+      if(!res.ok) throw new Error();
+      document.getElementById('variantNameInput').value = '';
+      document.getElementById('variantValuesInput').value = '';
+      loadVariantOptions(editingId);
+    } catch(err){
+      alert("Erreur lors de l'ajout de la variante.");
+    }
+  }
+
+  async function deleteVariantOption(id){
+    await fetch(`${SUPABASE_URL}/rest/v1/dp_product_options?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+    });
+    loadVariantOptions(editingId);
+  }
+
   function closeEdit(){
     document.getElementById('editOverlay').style.display = 'none';
     editingId = null;
@@ -1105,7 +1359,7 @@
       body.innerHTML = orders.map(o => `
         <tr style="border-top:1px solid var(--line);">
           <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span></td>
-          <td style="padding:10px 16px;">${o.product_name_snapshot}</td>
+          <td style="padding:10px 16px;">${o.product_name_snapshot}${o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${o.variant_selection}</span>` : ''}</td>
           <td style="padding:10px 16px; font-weight:700;">${Number(o.amount_fcfa).toLocaleString('fr-FR')} F</td>
           <td style="padding:10px 16px;">
             <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${o.status}" style="border:none; cursor:pointer;">
