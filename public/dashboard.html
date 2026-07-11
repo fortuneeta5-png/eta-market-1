@@ -335,6 +335,36 @@
         </div>
       </div>
     </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>Codes promo</h3></div>
+      <div class="panel-body">
+        <div class="row2" style="margin-bottom:12px;">
+          <input type="text" id="promoCodeInput" placeholder="Ex: BIENVENUE10" style="text-transform:uppercase; padding:11px 14px; border-radius:10px; border:1.5px solid var(--line);">
+          <input type="number" id="promoValueInput" placeholder="Réduction (ex: 10)" style="padding:11px 14px; border-radius:10px; border:1.5px solid var(--line);">
+        </div>
+        <div class="row2" style="margin-bottom:12px; align-items:center;">
+          <select id="promoTypeInput" style="padding:11px 14px; border-radius:10px; border:1.5px solid var(--line);">
+            <option value="percentage">Pourcentage (%)</option>
+            <option value="fixed">Montant fixe (FCFA)</option>
+          </select>
+          <button class="btn btn-primary" onclick="addPromoCode()">Créer le code</button>
+        </div>
+        <div id="promoList"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>Zones de livraison</h3></div>
+      <div class="panel-body">
+        <div class="row2" style="margin-bottom:12px;">
+          <input type="text" id="zoneNameInput" placeholder="Ex: Brazzaville centre" style="padding:11px 14px; border-radius:10px; border:1.5px solid var(--line);">
+          <input type="number" id="zoneFeeInput" placeholder="Frais (FCFA)" style="padding:11px 14px; border-radius:10px; border:1.5px solid var(--line);">
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-bottom:12px;" onclick="addDeliveryZone()">Ajouter la zone</button>
+        <div id="zoneList"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -567,6 +597,8 @@
     loadProducts();
     loadStats();
     loadOrders();
+    loadPromoCodes();
+    loadDeliveryZones();
   }
 
   async function renderRatingSummary(){
@@ -917,6 +949,108 @@
       const visitorsCount = pvRes.headers.get('content-range')?.split('/')[1] || (await pvRes.json()).length;
       document.getElementById('statVisitors').textContent = visitorsCount;
     } catch(err){ document.getElementById('statVisitors').textContent = '—'; }
+  }
+
+  // ---------- Codes promo ----------
+  async function loadPromoCodes(){
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_promo_codes?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const codes = await res.json();
+      const list = document.getElementById('promoList');
+      if(codes.length === 0){
+        list.innerHTML = '<div class="empty">Aucun code promo pour l\'instant.</div>';
+        return;
+      }
+      list.innerHTML = codes.map(c => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--line);">
+          <div>
+            <strong>${c.code}</strong>
+            <span style="opacity:0.6; font-size:0.85rem;"> — ${c.discount_type === 'percentage' ? c.discount_value + '%' : c.discount_value.toLocaleString('fr-FR') + ' FCFA'}</span>
+          </div>
+          <button class="btn btn-danger" onclick="deletePromoCode('${c.id}')">✕</button>
+        </div>
+      `).join('');
+    } catch(err){ /* silencieux */ }
+  }
+
+  async function addPromoCode(){
+    const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+    const value = document.getElementById('promoValueInput').value;
+    const type = document.getElementById('promoTypeInput').value;
+    if(!code || !value){ alert("Remplis le code et la réduction."); return; }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_promo_codes`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ store_id: currentStore.id, code, discount_type: type, discount_value: parseInt(value,10) }),
+      });
+      if(!res.ok) throw new Error();
+      document.getElementById('promoCodeInput').value = '';
+      document.getElementById('promoValueInput').value = '';
+      loadPromoCodes();
+    } catch(err){
+      alert("Erreur : ce code existe peut-être déjà.");
+    }
+  }
+
+  async function deletePromoCode(id){
+    if(!confirm("Supprimer ce code promo ?")) return;
+    await fetch(`${SUPABASE_URL}/rest/v1/dp_promo_codes?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+    });
+    loadPromoCodes();
+  }
+
+  // ---------- Zones de livraison ----------
+  async function loadDeliveryZones(){
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const zones = await res.json();
+      const list = document.getElementById('zoneList');
+      if(zones.length === 0){
+        list.innerHTML = '<div class="empty">Aucune zone pour l\'instant. Sans zone, la livraison n\'aura pas de frais ajoutés.</div>';
+        return;
+      }
+      list.innerHTML = zones.map(z => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--line);">
+          <div><strong>${z.zone_name}</strong> <span style="opacity:0.6; font-size:0.85rem;"> — ${Number(z.fee_fcfa).toLocaleString('fr-FR')} FCFA</span></div>
+          <button class="btn btn-danger" onclick="deleteDeliveryZone('${z.id}')">✕</button>
+        </div>
+      `).join('');
+    } catch(err){ /* silencieux */ }
+  }
+
+  async function addDeliveryZone(){
+    const zoneName = document.getElementById('zoneNameInput').value.trim();
+    const fee = document.getElementById('zoneFeeInput').value;
+    if(!zoneName || fee === ''){ alert("Remplis le nom de la zone et les frais."); return; }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ store_id: currentStore.id, zone_name: zoneName, fee_fcfa: parseInt(fee,10) }),
+      });
+      if(!res.ok) throw new Error();
+      document.getElementById('zoneNameInput').value = '';
+      document.getElementById('zoneFeeInput').value = '';
+      loadDeliveryZones();
+    } catch(err){
+      alert("Erreur lors de l'ajout de la zone.");
+    }
+  }
+
+  async function deleteDeliveryZone(id){
+    if(!confirm("Supprimer cette zone ?")) return;
+    await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+    });
+    loadDeliveryZones();
   }
 
   async function loadOrders(){
