@@ -131,7 +131,13 @@
     <div id="checkoutSuccess" style="display:none; text-align:center;">
       <div style="font-size:2.4rem; margin-bottom:10px;">✅</div>
       <h3 style="font-size:1.1rem; margin-bottom:8px;">Commande envoyée !</h3>
-      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Le vendeur va te contacter très vite pour finaliser ta commande.</p>
+      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:14px;">Le vendeur va te contacter très vite pour finaliser ta commande.</p>
+      <div style="background:var(--paper); border:1.5px dashed var(--accent); border-radius:12px; padding:14px; margin-bottom:18px;">
+        <div style="font-size:0.76rem; opacity:0.6; margin-bottom:4px;">Ton code de suivi</div>
+        <div id="trackingCodeDisplay" style="font-family:monospace; font-size:1.2rem; font-weight:800; letter-spacing:1px;">—</div>
+        <div style="font-size:0.72rem; opacity:0.5; margin-top:4px;">Garde-le pour suivre ta commande</div>
+      </div>
+      <a id="trackOrderLink" href="suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande →</a>
       <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
     </div>
   </div>
@@ -175,7 +181,7 @@
 </div>
 
 <div style="text-align:center; padding:24px 20px 40px; font-size:0.78rem; opacity:0.45;">
-  <a href="conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="conditions.html" style="color:inherit;">Livraison & Retours</a>
+  <a href="suivi.html" style="color:inherit;">Suivre ma commande</a> · <a href="conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="conditions.html" style="color:inherit;">Livraison & Retours</a>
 </div>
 
 <script>
@@ -432,6 +438,10 @@
         const errData = await res.json();
         throw new Error(errData.message && errData.message.includes('rupture') ? "Ce produit vient d'être épuisé, désolé !" : "Erreur, réessaie.");
       }
+      const resultData = await res.json();
+      const trackingCode = resultData?.[0]?.tracking_code || '—';
+      document.getElementById('trackingCodeDisplay').textContent = trackingCode;
+      document.getElementById('trackOrderLink').href = `suivi.html?code=${trackingCode}`;
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
       trackPurchase(currentProduct.price_fcfa);
