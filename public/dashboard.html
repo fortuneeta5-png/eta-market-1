@@ -1554,7 +1554,7 @@
       }
       body.innerHTML = orders.map(o => `
         <tr style="border-top:1px solid var(--line);">
-          <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span></td>
+          <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span><br><span style="opacity:0.4; font-size:0.7rem; font-family:monospace;">${o.tracking_code || ''}</span></td>
           <td style="padding:10px 16px;">${o.product_name_snapshot}${o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${o.variant_selection}</span>` : ''}</td>
           <td style="padding:10px 16px; font-weight:700;">${Number(o.amount_fcfa).toLocaleString('fr-FR')} F</td>
           <td style="padding:10px 16px;">
