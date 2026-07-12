@@ -6,7 +6,7 @@
 <title>Boutique — ETA MARKET</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{ --accent:#4F46E5; --ink:#1D1D1D; --paper:#FAFAFA; --line:rgba(20,18,31,0.1); }
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -43,16 +43,34 @@
   .product-info .price{ font-size:1.5rem; font-weight:800; color:var(--accent); margin-bottom:16px; }
   .product-info p{ opacity:0.7; line-height:1.6; margin-bottom:24px; }
   .back-link{ display:inline-block; margin-top:20px; font-size:0.85rem; opacity:0.6; }
+
+  /* Thèmes de boutique */
+  body.theme-moderne, body.theme-moderne h1, body.theme-moderne h2, body.theme-moderne h3{ font-family:'Space Grotesk', sans-serif; }
+  body.theme-doux .card, body.theme-doux .product-hero, body.theme-doux .btn, body.theme-doux .store-top{ border-radius:26px !important; }
+  body.theme-doux h1, body.theme-doux h2{ font-weight:700 !important; }
+
+  /* Bannière de couverture */
+  .banner-img{ width:100%; height:140px; object-fit:cover; display:block; }
+
+  /* Bouton WhatsApp flottant */
+  .whatsapp-btn{
+    position:fixed; bottom:20px; right:20px; background:#25D366; color:#fff; width:56px; height:56px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,0.25);
+    text-decoration:none; font-size:1.6rem; z-index:70;
+  }
 </style>
 </head>
 <body>
 
+<img id="bannerImg" class="banner-img" style="display:none;">
 <header>
   <img id="storeLogo" style="display:none; width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid rgba(255,255,255,0.6); margin:0 auto 14px;">
   <h1 id="storeName">Chargement…</h1>
   <p id="storeDesc"></p>
   <div class="powered">Propulsé par ETA MARKET · Crée ta boutique sur etamarket.cg</div>
 </header>
+
+<a id="whatsappBtn" href="#" target="_blank" class="whatsapp-btn" style="display:none;">💬</a>
 
 <div class="wrap">
   <!-- grid view -->
@@ -154,6 +172,10 @@
       <button class="btn btn-primary" style="flex:1;" onclick="submitReview()">Envoyer</button>
     </div>
   </div>
+</div>
+
+<div style="text-align:center; padding:24px 20px 40px; font-size:0.78rem; opacity:0.45;">
+  <a href="conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="conditions.html" style="color:inherit;">Livraison & Retours</a>
 </div>
 
 <script>
@@ -443,6 +465,18 @@
     if(store.logo_url){
       document.getElementById('storeLogo').src = store.logo_url;
       document.getElementById('storeLogo').style.display = 'block';
+    }
+    if(store.banner_url){
+      document.getElementById('bannerImg').src = store.banner_url;
+      document.getElementById('bannerImg').style.display = 'block';
+    }
+    if(store.font_theme && store.font_theme !== 'classique'){
+      document.body.classList.add('theme-' + store.font_theme);
+    }
+    if(store.whatsapp_number){
+      const cleanNumber = store.whatsapp_number.replace(/\D/g,'');
+      document.getElementById('whatsappBtn').href = `https://wa.me/${cleanNumber}?text=${encodeURIComponent('Bonjour, je viens de votre boutique ' + store.name + ' sur ETA MARKET')}`;
+      document.getElementById('whatsappBtn').style.display = 'flex';
     }
     document.title = store.name + " — ETA MARKET";
     document.getElementById('backLink').href = `?s=${slug}`;
