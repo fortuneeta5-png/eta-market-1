@@ -301,7 +301,7 @@
     </div>
 
     <div id="storeEditOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
-      <div style="background:#fff; border-radius:18px; padding:26px; max-width:420px; width:100%;">
+      <div style="background:#fff; border-radius:18px; padding:26px; max-width:420px; width:100%; max-height:90vh; overflow-y:auto;">
         <h3 style="font-size:1.15rem; margin-bottom:18px;">Modifier ma boutique</h3>
         <label class="upload-zone" id="logoUploadZone" style="padding:16px;">
           <div id="logoPlaceholder">
@@ -311,6 +311,16 @@
           <img id="logoPreview" style="display:none; max-height:100px; border-radius:50%; aspect-ratio:1; object-fit:cover;">
           <input type="file" id="logoInput" accept="image/*" onchange="previewLogo(event)">
         </label>
+
+        <label class="upload-zone" id="bannerUploadZone" style="padding:16px;">
+          <div id="bannerPlaceholder">
+            <div style="font-size:1.6rem; margin-bottom:6px;">🏞️</div>
+            <div class="hint">Bannière de couverture (optionnel, format large)</div>
+          </div>
+          <img id="bannerPreview" style="display:none; max-height:100px; max-width:100%; border-radius:8px; object-fit:cover;">
+          <input type="file" id="bannerInput" accept="image/*" onchange="previewBanner(event)">
+        </label>
+
         <div class="field">
           <label>Nom de la boutique</label>
           <input type="text" id="editStoreName">
@@ -322,6 +332,19 @@
         <div class="field">
           <label>Couleur</label>
           <div class="color-row" id="editColorRow"></div>
+        </div>
+        <div class="field">
+          <label>Style de la boutique</label>
+          <div class="row2" style="grid-template-columns:1fr 1fr 1fr; gap:8px;" id="fontThemeRow">
+            <button type="button" class="theme-btn" data-theme="classique" onclick="selectFontTheme('classique')" style="padding:10px 6px; border-radius:10px; border:1.5px solid var(--line); background:#fff; font-size:0.78rem; cursor:pointer; font-family:'Montserrat',sans-serif; font-weight:800;">Classique</button>
+            <button type="button" class="theme-btn" data-theme="moderne" onclick="selectFontTheme('moderne')" style="padding:10px 6px; border-radius:10px; border:1.5px solid var(--line); background:#fff; font-size:0.78rem; cursor:pointer; font-family:'Poppins',sans-serif; font-weight:300; letter-spacing:1px;">MODERNE</button>
+            <button type="button" class="theme-btn" data-theme="doux" onclick="selectFontTheme('doux')" style="padding:10px 6px; border-radius:10px; border:1.5px solid var(--line); background:#fff; font-size:0.78rem; cursor:pointer; font-family:'Poppins',sans-serif; font-weight:600; border-radius:20px;">Doux ﹒</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Numéro WhatsApp (optionnel)</label>
+          <input type="tel" id="editWhatsapp" placeholder="Ex: 24206XXXXXXX">
+          <div style="font-size:0.76rem; opacity:0.5; margin-top:4px;">Un bouton "Contacter sur WhatsApp" apparaîtra sur ta boutique.</div>
         </div>
         <div class="form-msg" id="storeEditMsg"></div>
         <div style="display:flex; gap:10px; margin-top:10px;">
@@ -919,12 +942,38 @@
     reader.readAsDataURL(file);
   }
 
+  let selectedBannerFile = null;
+  function previewBanner(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    selectedBannerFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('bannerPreview').src = e.target.result;
+      document.getElementById('bannerPreview').style.display = 'block';
+      document.getElementById('bannerPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  let selectedFontTheme = 'classique';
+  function selectFontTheme(theme){
+    selectedFontTheme = theme;
+    document.querySelectorAll('.theme-btn').forEach(b => {
+      b.style.borderColor = b.dataset.theme === theme ? 'var(--primary)' : 'var(--line)';
+      b.style.background = b.dataset.theme === theme ? 'var(--lavender)' : '#fff';
+    });
+  }
+
   function openStoreEdit(){
     document.getElementById('editStoreName').value = currentStore.name;
     document.getElementById('editStoreDesc').value = currentStore.description || '';
+    document.getElementById('editWhatsapp').value = currentStore.whatsapp_number || '';
     editSelectedColor = currentStore.accent_color;
     renderEditColorPicker();
+    selectFontTheme(currentStore.font_theme || 'classique');
     selectedLogoFile = null;
+    selectedBannerFile = null;
     if(currentStore.logo_url){
       document.getElementById('logoPreview').src = currentStore.logo_url;
       document.getElementById('logoPreview').style.display = 'block';
@@ -932,6 +981,14 @@
     } else {
       document.getElementById('logoPreview').style.display = 'none';
       document.getElementById('logoPlaceholder').style.display = 'block';
+    }
+    if(currentStore.banner_url){
+      document.getElementById('bannerPreview').src = currentStore.banner_url;
+      document.getElementById('bannerPreview').style.display = 'block';
+      document.getElementById('bannerPlaceholder').style.display = 'none';
+    } else {
+      document.getElementById('bannerPreview').style.display = 'none';
+      document.getElementById('bannerPlaceholder').style.display = 'block';
     }
     document.getElementById('storeEditMsg').style.display = 'none';
     document.getElementById('storeEditOverlay').style.display = 'flex';
@@ -1022,6 +1079,7 @@
   async function saveStoreEdit(){
     const name = document.getElementById('editStoreName').value.trim();
     const description = document.getElementById('editStoreDesc').value.trim();
+    const whatsapp = document.getElementById('editWhatsapp').value.trim();
     const msg = document.getElementById('storeEditMsg');
     const btn = document.getElementById('saveStoreEditBtn');
     if(!name){
@@ -1046,13 +1104,32 @@
         logoUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
       }
 
+      let bannerUrl = currentStore.banner_url || null;
+      if(selectedBannerFile){
+        const ext = (selectedBannerFile.name.split('.').pop() || 'jpg').toLowerCase();
+        const fileName = `banners/${currentStore.id}-${Date.now()}.${ext}`;
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': selectedBannerFile.type,
+          },
+          body: selectedBannerFile,
+        });
+        if(!uploadRes.ok) throw new Error("Échec de l'upload de la bannière");
+        bannerUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
+      }
+
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?id=eq.${currentStore.id}`, {
         method: 'PATCH',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json', 'Prefer': 'return=representation',
         },
-        body: JSON.stringify({ name, description, accent_color: editSelectedColor, logo_url: logoUrl }),
+        body: JSON.stringify({
+          name, description, accent_color: editSelectedColor, logo_url: logoUrl,
+          banner_url: bannerUrl, font_theme: selectedFontTheme, whatsapp_number: whatsapp || null,
+        }),
       });
       const data = await res.json();
       if(!res.ok) throw new Error();
