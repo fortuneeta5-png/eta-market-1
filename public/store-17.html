@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boutique — ETA MARKET</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --accent:#4F46E5; --ink:#1D1D1D; --paper:#FAFAFA; --line:rgba(20,18,31,0.1); }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--paper); color:var(--ink); font-family:'Poppins',sans-serif; min-height:100vh; overflow-wrap:break-word; word-break:normal; overflow-x:hidden; }
+  h1,h2,h3{ font-family:'Montserrat',sans-serif; font-weight:800; letter-spacing:-0.01em; }
+  a{ color:inherit; text-decoration:none; }
+  img{ display:block; max-width:100%; }
+  .btn{ border:none; cursor:pointer; border-radius:12px; font-weight:600; font-family:'Poppins',sans-serif; transition:transform .15s ease; }
+  .btn-primary{ background:var(--accent); color:#fff; padding:13px 24px; font-size:0.92rem; }
+  .btn-primary:hover{ transform:translateY(-2px); }
+  .btn-ghost{ background:#fff; color:var(--ink); border:1.5px solid var(--line); padding:11px 20px; font-size:0.85rem; }
+
+  header{ display:none; }
+  .cover-wrap{ position:relative; width:100%; height:190px; background:var(--accent); overflow:hidden; }
+  .cover-wrap .banner-img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .profile-pic-wrap{ position:absolute; bottom:-42px; left:50%; transform:translateX(-50%); }
+  .profile-pic{ width:96px; height:96px; border-radius:50%; object-fit:contain; border:4px solid #fff; background:#fff; display:block; }
+  .store-info{ text-align:center; padding:54px 24px 22px; background:#fff; }
+  .store-info h1{ font-size:1.5rem; margin-bottom:8px; color:var(--ink); }
+  .store-info p{ font-size:0.9rem; opacity:0.65; max-width:44ch; margin:0 auto; color:var(--ink); }
+  .powered{ font-size:0.7rem; opacity:0.45; margin-top:14px; color:var(--ink); }
+
+  .wrap{ max-width:1000px; margin:0 auto; padding:0 20px 60px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:18px; margin-top:24px; }
+  .card{ background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.06); transition:transform .2s ease; cursor:pointer; }
+  .card:hover{ transform:translateY(-4px); }
+  .card .img-wrap{ width:100%; aspect-ratio:1; background:#F3F3F3; display:flex; align-items:center; justify-content:center; }
+  .card img{ width:100%; height:100%; object-fit:contain; }
+  .card-body{ padding:14px; }
+  .card-body h3{ font-size:0.92rem; font-weight:700; margin-bottom:6px; }
+  .card-body .price{ font-weight:700; color:var(--accent); font-size:0.95rem; }
+  .empty{ text-align:center; padding:60px 20px; opacity:0.5; }
+
+  /* single product view */
+  #productView{ display:none; }
+  .product-hero{ background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.08); margin-top:24px; }
+  .product-hero .img-wrap{ width:100%; aspect-ratio:1.1; background:#F3F3F3; display:flex; align-items:center; justify-content:center; }
+  .product-hero img{ width:100%; height:100%; object-fit:contain; }
+  .product-info{ padding:26px; }
+  .product-info h2{ font-size:1.4rem; margin-bottom:10px; }
+  .product-info .price{ font-size:1.5rem; font-weight:800; color:var(--accent); margin-bottom:16px; }
+  .product-info p{ opacity:0.7; line-height:1.6; margin-bottom:24px; }
+  .back-link{ display:inline-block; margin-top:20px; font-size:0.85rem; opacity:0.6; }
+
+  /* Thèmes de boutique */
+  body.theme-moderne, body.theme-moderne h1, body.theme-moderne h2, body.theme-moderne h3{ font-family:'Space Grotesk', sans-serif; }
+  body.theme-doux .card, body.theme-doux .product-hero, body.theme-doux .btn, body.theme-doux .store-top{ border-radius:26px !important; }
+  body.theme-doux h1, body.theme-doux h2{ font-weight:700 !important; }
+
+  /* Bouton WhatsApp flottant */
+  .whatsapp-btn{
+    position:fixed; bottom:20px; right:20px; background:#25D366; color:#fff; width:56px; height:56px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,0.25);
+    text-decoration:none; font-size:1.6rem; z-index:70;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover-wrap" id="coverWrap">
+  <img id="bannerImg" class="banner-img" style="display:none;">
+  <div class="profile-pic-wrap">
+    <img id="storeLogo" class="profile-pic" style="display:none;">
+  </div>
+</div>
+<div class="store-info">
+  <h1 id="storeName">Chargement…</h1>
+  <p id="storeDesc"></p>
+  <div class="powered">Propulsé par ETA MARKET · Crée ta boutique sur etamarket.cg</div>
+</div>
+
+<a id="whatsappBtn" href="#" target="_blank" class="whatsapp-btn" style="display:none;">💬</a>
+
+<div class="wrap">
+  <!-- grid view -->
+  <div id="gridView">
+    <div class="grid" id="productGrid"></div>
+  </div>
+
+  <!-- single product view -->
+  <div id="productView">
+    <div class="product-hero">
+      <div class="img-wrap"><img id="pImg" src="" alt=""></div>
+      <div id="thumbRow" style="display:flex; gap:8px; padding:12px 26px 0; flex-wrap:wrap;"></div>
+      <div class="product-info">
+        <h2 id="pName"></h2>
+        <div class="price" id="pPrice"></div>
+        <div id="stockBadge" style="font-size:0.82rem; font-weight:700; margin-bottom:14px;"></div>
+        <p id="pDesc"></p>
+        <div id="variantsWrap" style="display:none; margin-bottom:16px;"></div>
+        <button class="btn btn-primary" id="buyBtn" onclick="openCheckout()">Acheter maintenant</button>
+      </div>
+    </div>
+    <a class="back-link" href="#" id="backLink">← Voir tous les produits de la boutique</a>
+  </div>
+</div>
+
+<!-- checkout modal -->
+<div id="checkoutOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
+    <div id="checkoutForm">
+      <h3 style="font-size:1.15rem; margin-bottom:6px;">Finaliser la commande</h3>
+      <p style="font-size:0.85rem; opacity:0.6; margin-bottom:18px;">Le vendeur te contactera pour confirmer le paiement et la livraison.</p>
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton nom</label>
+        <input type="text" id="custName" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton numéro de téléphone</label>
+        <input type="tel" id="custPhone" placeholder="06 XXX XX XX" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+      </div>
+      <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
+        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Zone de livraison</label>
+        <select id="zoneSelect" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;" onchange="updateOrderTotal()"></select>
+      </div>
+      <div style="margin-bottom:10px; display:flex; gap:8px;">
+        <input type="text" id="promoInput" placeholder="Code promo (optionnel)" style="flex:1; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.9rem; text-transform:uppercase;">
+        <button class="btn btn-ghost" onclick="applyPromoCode()" style="white-space:nowrap;">Appliquer</button>
+      </div>
+      <div id="promoFeedback" style="font-size:0.8rem; margin-bottom:14px; display:none;"></div>
+      <div id="orderTotalWrap" style="display:flex; justify-content:space-between; font-weight:700; margin-bottom:16px; padding-top:10px; border-top:1px solid var(--line);">
+        <span>Total</span><span id="orderTotalAmt"></span>
+      </div>
+      <div id="checkoutMsg" style="font-size:0.82rem; color:#DC2626; margin-bottom:10px; display:none;"></div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeCheckout()">Annuler</button>
+        <button class="btn btn-primary" style="flex:1;" id="confirmOrderBtn" onclick="submitOrder()">Confirmer</button>
+      </div>
+    </div>
+    <div id="checkoutSuccess" style="display:none; text-align:center;">
+      <div style="font-size:2.4rem; margin-bottom:10px;">✅</div>
+      <h3 style="font-size:1.1rem; margin-bottom:8px;">Commande envoyée !</h3>
+      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Le vendeur va te contacter très vite pour finaliser ta commande.</p>
+      <a href="suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
+      <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Avis clients -->
+<div class="wrap" id="reviewsWrap" style="display:none;">
+  <div style="background:#fff; border-radius:16px; padding:22px; border:1px solid var(--line); margin-top:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h3 style="font-size:1.05rem;">Avis clients</h3>
+        <div id="ratingsSummary" style="font-size:0.85rem; opacity:0.65; margin-top:4px;"></div>
+      </div>
+      <button class="btn btn-ghost" onclick="openReviewForm()">Laisser un avis</button>
+    </div>
+    <div id="reviewsList"></div>
+  </div>
+</div>
+
+<!-- review modal -->
+<div id="reviewOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
+    <h3 style="font-size:1.1rem; margin-bottom:16px;">Laisser un avis</h3>
+    <div style="text-align:center; font-size:1.8rem; margin-bottom:16px; letter-spacing:6px;" id="starPicker">
+      <span data-v="1">☆</span><span data-v="2">☆</span><span data-v="3">☆</span><span data-v="4">☆</span><span data-v="5">☆</span>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton nom</label>
+      <input type="text" id="reviewName" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+    </div>
+    <div style="margin-bottom:18px;">
+      <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton commentaire (optionnel)</label>
+      <textarea id="reviewComment" rows="3" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;"></textarea>
+    </div>
+    <div id="reviewMsg" style="font-size:0.82rem; color:#DC2626; margin-bottom:10px; display:none;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeReviewForm()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="submitReview()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; padding:24px 20px 40px; font-size:0.78rem; opacity:0.45;">
+  <a href="suivi.html" style="color:inherit;">Suivre ma commande</a> · <a href="conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="conditions.html" style="color:inherit;">Livraison & Retours</a>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
+
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('s');
+  const productId = params.get('p');
+  let currentStore = null;
+  let currentProduct = null;
+
+  function fmt(n){ return Number(n).toLocaleString('fr-FR') + " FCFA"; }
+
+  // ---------- Pixels publicitaires (Facebook, TikTok, Google Ads) ----------
+  function loadMarketingPixels(store){
+    if(store.fb_pixel_id){
+      const s = document.createElement('script');
+      s.innerHTML = `
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+        document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '${store.fb_pixel_id}');
+        fbq('track', 'PageView');
+      `;
+      document.head.appendChild(s);
+    }
+    if(store.tiktok_pixel_id){
+      const s = document.createElement('script');
+      s.innerHTML = `
+        !function (w, d, t) {
+          w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+          ttq.load('${store.tiktok_pixel_id}');
+          ttq.page();
+        }(window, document, 'ttq');
+      `;
+      document.head.appendChild(s);
+    }
+    if(store.google_ads_id){
+      const s1 = document.createElement('script');
+      s1.async = true;
+      s1.src = `https://www.googletagmanager.com/gtag/js?id=${store.google_ads_id}`;
+      document.head.appendChild(s1);
+      const s2 = document.createElement('script');
+      s2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${store.google_ads_id}');
+      `;
+      document.head.appendChild(s2);
+    }
+  }
+
+  function trackPurchase(amount){
+    try {
+      if(typeof fbq !== 'undefined') fbq('track', 'Purchase', { value: amount, currency: 'XAF' });
+    } catch(e){}
+    try {
+      if(typeof ttq !== 'undefined') ttq.track('CompletePayment', { value: amount, currency: 'XAF' });
+    } catch(e){}
+    try {
+      if(typeof gtag !== 'undefined') gtag('event', 'conversion', { value: amount, currency: 'XAF' });
+    } catch(e){}
+  }
+
+  let selectedRating = 0;
+  document.getElementById('starPicker').addEventListener('click', (e) => {
+    if(e.target.dataset.v){
+      selectedRating = parseInt(e.target.dataset.v, 10);
+      renderStarPicker();
+    }
+  });
+  function renderStarPicker(){
+    document.querySelectorAll('#starPicker span').forEach(s => {
+      s.textContent = parseInt(s.dataset.v,10) <= selectedRating ? '★' : '☆';
+    });
+  }
+  function openReviewForm(){
+    selectedRating = 0; renderStarPicker();
+    document.getElementById('reviewName').value = '';
+    document.getElementById('reviewComment').value = '';
+    document.getElementById('reviewMsg').style.display = 'none';
+    document.getElementById('reviewOverlay').style.display = 'flex';
+  }
+  function closeReviewForm(){
+    document.getElementById('reviewOverlay').style.display = 'none';
+  }
+  async function submitReview(){
+    const name = document.getElementById('reviewName').value.trim();
+    const comment = document.getElementById('reviewComment').value.trim();
+    const msg = document.getElementById('reviewMsg');
+    if(!name || selectedRating === 0){
+      msg.textContent = "Choisis une note et indique ton nom."; msg.style.display = "block";
+      return;
+    }
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_reviews`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ store_id: currentStore.id, customer_name: name, rating: selectedRating, comment }),
+      });
+      closeReviewForm();
+      loadReviews();
+    } catch(err){
+      msg.textContent = "Erreur, réessaie."; msg.style.display = "block";
+    }
+  }
+  async function loadReviews(){
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_reviews?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const reviews = await res.json();
+      document.getElementById('reviewsWrap').style.display = 'block';
+      if(reviews.length === 0){
+        document.getElementById('ratingsSummary').textContent = "Aucun avis pour l'instant — sois le premier !";
+        document.getElementById('reviewsList').innerHTML = '';
+        return;
+      }
+      const avg = (reviews.reduce((s,r)=>s+r.rating,0) / reviews.length).toFixed(1);
+      document.getElementById('ratingsSummary').textContent = `${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))} ${avg}/5 (${reviews.length} avis)`;
+      document.getElementById('reviewsList').innerHTML = reviews.map(r => `
+        <div style="padding:12px 0; border-top:1px solid var(--line);">
+          <div style="font-weight:700; font-size:0.88rem;">${r.customer_name} <span style="color:var(--accent); font-weight:400;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div>
+          ${r.comment ? `<div style="font-size:0.85rem; opacity:0.7; margin-top:4px;">${r.comment}</div>` : ''}
+        </div>
+      `).join('');
+    } catch(err){ /* silencieux */ }
+  }
+
+  async function logPageview(storeId, prodId){
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_pageviews`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ store_id: storeId, product_id: prodId || null }),
+      });
+    } catch(err){ /* silencieux, le suivi n'est pas critique */ }
+  }
+
+  let deliveryZones = [];
+  let selectedZoneFee = 0;
+  let appliedDiscount = 0;
+
+  async function openCheckout(){
+    document.getElementById('checkoutOverlay').style.display = 'flex';
+    document.getElementById('checkoutForm').style.display = 'block';
+    document.getElementById('checkoutSuccess').style.display = 'none';
+    document.getElementById('promoFeedback').style.display = 'none';
+    document.getElementById('promoInput').value = '';
+    appliedDiscount = 0;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones?store_id=eq.${currentStore.id}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      deliveryZones = await res.json();
+      const zoneWrap = document.getElementById('zoneFieldWrap');
+      const zoneSelect = document.getElementById('zoneSelect');
+      if(deliveryZones.length > 0){
+        zoneWrap.style.display = 'block';
+        zoneSelect.innerHTML = deliveryZones.map((z,i) => `<option value="${i}">${z.zone_name} — ${fmt(z.fee_fcfa)}</option>`).join('');
+        selectedZoneFee = deliveryZones[0].fee_fcfa;
+      } else {
+        zoneWrap.style.display = 'none';
+        selectedZoneFee = 0;
+      }
+    } catch(err){ selectedZoneFee = 0; }
+
+    updateOrderTotal();
+  }
+
+  function updateOrderTotal(){
+    const zoneSelect = document.getElementById('zoneSelect');
+    if(deliveryZones.length > 0 && zoneSelect.value !== ''){
+      selectedZoneFee = deliveryZones[parseInt(zoneSelect.value,10)].fee_fcfa;
+    }
+    const total = currentProduct.price_fcfa - appliedDiscount + selectedZoneFee;
+    document.getElementById('orderTotalAmt').textContent = fmt(Math.max(0,total));
+  }
+
+  async function applyPromoCode(){
+    const code = document.getElementById('promoInput').value.trim().toUpperCase();
+    const feedback = document.getElementById('promoFeedback');
+    if(!code){ appliedDiscount = 0; feedback.style.display = 'none'; updateOrderTotal(); return; }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_promo_codes?store_id=eq.${currentStore.id}&code=eq.${code}&is_active=eq.true`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const codes = await res.json();
+      if(codes.length === 0){
+        appliedDiscount = 0;
+        feedback.textContent = "Code invalide."; feedback.style.color = "#DC2626"; feedback.style.display = 'block';
+      } else {
+        const promo = codes[0];
+        appliedDiscount = promo.discount_type === 'percentage'
+          ? Math.round(currentProduct.price_fcfa * promo.discount_value / 100)
+          : Math.min(promo.discount_value, currentProduct.price_fcfa);
+        feedback.textContent = `✅ Code appliqué : -${fmt(appliedDiscount)}`; feedback.style.color = "#059669"; feedback.style.display = 'block';
+      }
+      updateOrderTotal();
+    } catch(err){
+      feedback.textContent = "Erreur de vérification."; feedback.style.color = "#DC2626"; feedback.style.display = 'block';
+    }
+  }
+
+  function closeCheckout(){
+    document.getElementById('checkoutOverlay').style.display = 'none';
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+  }
+
+  async function submitOrder(){
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const msg = document.getElementById('checkoutMsg');
+    const btn = document.getElementById('confirmOrderBtn');
+    if(!name || !phone){
+      msg.textContent = "Merci de remplir ton nom et ton numéro."; msg.style.display = "block";
+      return;
+    }
+
+    // Vérifie que toutes les variantes obligatoires sont choisies
+    const variantGroups = document.querySelectorAll('#variantsWrap > div');
+    for(const group of variantGroups){
+      const groupName = group.querySelector('[data-group]')?.dataset.group;
+      if(groupName && !selectedVariants[groupName]){
+        msg.textContent = `Merci de choisir : ${groupName}`; msg.style.display = "block";
+        return;
+      }
+    }
+    const variantText = Object.entries(selectedVariants).map(([k,v]) => `${k}: ${v}`).join(', ') || null;
+
+    btn.disabled = true; btn.textContent = "Envoi…";
+    try {
+      const zoneSelect = document.getElementById('zoneSelect');
+      const zoneId = (deliveryZones.length > 0 && zoneSelect.value !== '') ? deliveryZones[parseInt(zoneSelect.value,10)].id : null;
+      const promoCode = document.getElementById('promoInput').value.trim().toUpperCase() || null;
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/place_order`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          p_store_id: currentStore.id, p_product_id: currentProduct.id,
+          p_customer_name: name, p_customer_phone: phone,
+          p_promo_code: promoCode, p_delivery_zone_id: zoneId,
+          p_variant_selection: variantText,
+        }),
+      });
+      if(!res.ok){
+        const errData = await res.json();
+        throw new Error(errData.message && errData.message.includes('rupture') ? "Ce produit vient d'être épuisé, désolé !" : "Erreur, réessaie.");
+      }
+      document.getElementById('checkoutForm').style.display = 'none';
+      document.getElementById('checkoutSuccess').style.display = 'block';
+      trackPurchase(currentProduct.price_fcfa);
+    } catch(err){
+      msg.textContent = err.message; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Confirmer";
+    }
+  }
+
+  async function init(){
+    if(!slug){
+      document.getElementById('storeName').textContent = "Boutique introuvable";
+      return;
+    }
+
+    const storeRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?slug=eq.${slug}&select=*`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+    const stores = await storeRes.json();
+    if(!stores || stores.length === 0){
+      document.getElementById('storeName').textContent = "Boutique introuvable";
+      return;
+    }
+    const store = stores[0];
+    currentStore = store;
+
+    document.documentElement.style.setProperty('--accent', store.accent_color || '#4F46E5');
+    document.getElementById('storeName').textContent = store.name;
+    document.getElementById('storeDesc').textContent = store.description || '';
+    if(store.logo_url){
+      document.getElementById('storeLogo').src = store.logo_url;
+      document.getElementById('storeLogo').style.display = 'block';
+    }
+    if(store.banner_url){
+      document.getElementById('bannerImg').src = store.banner_url;
+      document.getElementById('bannerImg').style.display = 'block';
+    }
+    if(store.font_theme && store.font_theme !== 'classique'){
+      document.body.classList.add('theme-' + store.font_theme);
+    }
+    if(store.whatsapp_number){
+      const cleanNumber = store.whatsapp_number.replace(/\D/g,'');
+      document.getElementById('whatsappBtn').href = `https://wa.me/${cleanNumber}?text=${encodeURIComponent('Bonjour, je viens de votre boutique ' + store.name + ' sur ETA MARKET')}`;
+      document.getElementById('whatsappBtn').style.display = 'flex';
+    }
+    document.title = store.name + " — ETA MARKET";
+    document.getElementById('backLink').href = `?s=${slug}`;
+    loadMarketingPixels(store);
+
+    const prodRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?store_id=eq.${store.id}&is_active=eq.true&order=created_at.desc`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+    const products = await prodRes.json();
+
+    if(productId){
+      const p = products.find(x => x.id === productId);
+      if(p){
+        currentProduct = p;
+        logPageview(store.id, p.id);
+        showProduct(p);
+        loadReviews();
+        return;
+      }
+    }
+    logPageview(store.id, null);
+    showGrid(products);
+    loadReviews();
+  }
+
+  function showGrid(products){
+    document.getElementById('gridView').style.display = 'block';
+    document.getElementById('productView').style.display = 'none';
+    const grid = document.getElementById('productGrid');
+    if(products.length === 0){
+      grid.innerHTML = '<div class="empty">Cette boutique n\'a pas encore de produits.</div>';
+      return;
+    }
+    grid.innerHTML = products.map(p => `
+      <a class="card" href="?s=${slug}&p=${p.id}">
+        <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}"></div>
+        <div class="card-body">
+          <h3>${p.name}</h3>
+          <div class="price">${fmt(p.price_fcfa)}</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function showProduct(p){
+    document.getElementById('gridView').style.display = 'none';
+    document.getElementById('productView').style.display = 'block';
+    document.getElementById('pImg').src = p.image_url;
+    document.getElementById('pName').textContent = p.name;
+    document.getElementById('pPrice').textContent = fmt(p.price_fcfa);
+    document.getElementById('pDesc').textContent = p.description || '';
+
+    // Galerie de miniatures (photo principale + photos supplémentaires)
+    const allImages = [p.image_url, ...(p.extra_image_urls || [])];
+    const thumbRow = document.getElementById('thumbRow');
+    if(allImages.length > 1){
+      thumbRow.innerHTML = allImages.map((url, i) => `
+        <img src="${url}" onclick="document.getElementById('pImg').src='${url}'"
+             style="width:52px; height:52px; border-radius:8px; object-fit:cover; cursor:pointer; border:2px solid ${i===0?'var(--accent)':'transparent'};">
+      `).join('');
+    } else {
+      thumbRow.innerHTML = '';
+    }
+
+    // Stock
+    const stockBadge = document.getElementById('stockBadge');
+    const buyBtn = document.getElementById('buyBtn');
+    if(p.stock_quantity <= 0){
+      stockBadge.textContent = "Rupture de stock";
+      stockBadge.style.color = "#DC2626";
+      buyBtn.disabled = true;
+      buyBtn.textContent = "Indisponible";
+      buyBtn.style.opacity = "0.5";
+    } else if(p.stock_quantity <= 5){
+      stockBadge.textContent = `Plus que ${p.stock_quantity} en stock !`;
+      stockBadge.style.color = "#EA580C";
+      buyBtn.disabled = false;
+      buyBtn.textContent = "Acheter maintenant";
+      buyBtn.style.opacity = "1";
+    } else {
+      stockBadge.textContent = "";
+      buyBtn.disabled = false;
+      buyBtn.textContent = "Acheter maintenant";
+      buyBtn.style.opacity = "1";
+    }
+
+    loadVariants(p.id);
+  }
+
+  let selectedVariants = {};
+  async function loadVariants(productId){
+    selectedVariants = {};
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_product_options?product_id=eq.${productId}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const options = await res.json();
+      const wrap = document.getElementById('variantsWrap');
+      if(options.length === 0){
+        wrap.style.display = 'none';
+        wrap.innerHTML = '';
+        return;
+      }
+      wrap.style.display = 'block';
+      wrap.innerHTML = options.map(o => `
+        <div style="margin-bottom:12px;">
+          <div style="font-size:0.82rem; font-weight:700; margin-bottom:6px;">${o.option_name}</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            ${o.option_values.map(v => `
+              <button type="button" class="variant-btn" data-group="${o.option_name}" data-value="${v}"
+                onclick="selectVariant('${o.option_name}', '${v}', this)"
+                style="padding:8px 14px; border-radius:100px; border:1.5px solid var(--line); background:#fff; font-size:0.85rem; cursor:pointer;">${v}</button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    } catch(err){
+      document.getElementById('variantsWrap').style.display = 'none';
+    }
+  }
+
+  function selectVariant(groupName, value, btnEl){
+    selectedVariants[groupName] = value;
+    document.querySelectorAll(`.variant-btn[data-group="${groupName}"]`).forEach(b => {
+      b.style.borderColor = 'var(--line)';
+      b.style.background = '#fff';
+      b.style.color = 'inherit';
+    });
+    btnEl.style.borderColor = 'var(--accent)';
+    btnEl.style.background = 'var(--accent)';
+    btnEl.style.color = '#fff';
+  }
+
+  init();
+</script>
+
+</body>
+</html>
