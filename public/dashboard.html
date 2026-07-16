@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ETA MARKET — Crée ta boutique en ligne</title>
+<title>EtaChop — Crée ta boutique en ligne</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -177,15 +177,7 @@
 <div id="authScreen">
   <div class="auth-card">
     <div class="auth-logo" style="display:flex; align-items:center; justify-content:center; gap:8px;">
-      <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8,14 L20,14 L26,28" fill="none" stroke="#E63946" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M20,28 L82,28 L72,64 L34,64 Z" fill="#E63946"/>
-        <path d="M38,64 L42,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
-        <path d="M68,64 L64,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
-        <circle cx="42" cy="80" r="9" fill="#E63946"/>
-        <circle cx="64" cy="80" r="9" fill="#E63946"/>
-      </svg>
-      ETA MARKET<span>.</span>
+      <img src="etachop-logo-black-bg.png" alt="EtaChop" style="height:34px;">
     </div>
     <div class="auth-sub">Crée ta boutique en ligne en quelques minutes</div>
 
@@ -241,15 +233,7 @@
 <div id="dashboard">
   <header>
     <div class="logo" style="display:flex; align-items:center; gap:8px;">
-      <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8,14 L20,14 L26,28" fill="none" stroke="#E63946" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M20,28 L82,28 L72,64 L34,64 Z" fill="#E63946"/>
-        <path d="M38,64 L42,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
-        <path d="M68,64 L64,74" stroke="#E63946" stroke-width="7" stroke-linecap="round"/>
-        <circle cx="42" cy="80" r="9" fill="#E63946"/>
-        <circle cx="64" cy="80" r="9" fill="#E63946"/>
-      </svg>
-      ETA MARKET<span>.</span>
+      <img src="etachop-logo-black-bg.png" alt="EtaChop" style="height:28px;">
     </div>
     <div class="header-right">
       <button class="logout-btn" onclick="logout()">Déconnexion</button>
@@ -1017,7 +1001,7 @@
       el.textContent = `🎁 Essai gratuit — encore ${daysLeftTrial} jour${daysLeftTrial>1?'s':''} avant de devoir t'abonner`;
     } else {
       el.style.background = '#FEE2E2'; el.style.color = '#991B1B';
-      el.textContent = `⚠️ Ton essai gratuit est terminé — abonne-toi pour continuer à vendre sur ETA MARKET`;
+      el.textContent = `⚠️ Ton essai gratuit est terminé — abonne-toi pour continuer à vendre sur EtaChop`;
     }
     document.getElementById('paySubscriptionBtn').style.display = 'block';
   }
@@ -1596,5 +1580,7 @@
   }
 </script>
 
+<script src="assistant.js"></script>
+<script>initEtaAssistant('both');</script>
 </body>
 </html>
