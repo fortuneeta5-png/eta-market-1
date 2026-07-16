@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EtaChop — Le e-commerce n°1 à Brazzaville</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
+<meta name="description" content="EtaChop — Téléphones, mode et maison livrés à Brazzaville. Paiement MTN MoMo et Airtel Money.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#E63946;
+    --red-dark:#B4222D;
+    --black:#1D1D1D;
+    --white:#FFFFFF;
+    --yellow:#FCA311;
+    --line:rgba(255,255,255,0.1);
+    --line-dark:rgba(29,29,29,0.1);
+    --radius:16px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--white);
+    color:var(--black);
+    font-family:'Poppins', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    overflow-wrap:break-word;
+    word-break:normal;
+  }
+  h1,h2,h3,.mont{ font-family:'Montserrat', sans-serif; font-weight:800; letter-spacing:-0.01em; }
+  a{ color:inherit; text-decoration:none; }
+  img{ display:block; max-width:100%; }
+  ::selection{ background:var(--red); color:#fff; }
+
+  /* ---------- shiny button ---------- */
+  .btn{
+    position:relative; overflow:hidden; border:none; cursor:pointer;
+    border-radius:100px; font-family:'Poppins',sans-serif; font-weight:600;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .btn::after{
+    content:''; position:absolute; top:0; left:-120%; width:60%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform:skewX(-20deg); transition:left .5s ease;
+  }
+  .btn:hover::after{ left:130%; }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--red), var(--red-dark));
+    color:#fff; padding:15px 30px; font-size:0.95rem;
+    box-shadow:0 8px 20px rgba(230,57,70,0.35);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 14px 28px rgba(230,57,70,0.45); }
+  .btn-dark{
+    background:var(--black); color:#fff; padding:12px 22px; font-size:0.88rem;
+  }
+  .btn-dark:hover{ background:var(--red); transform:translateY(-2px); }
+
+  /* ---------- top bar ---------- */
+  .topbar{ background:var(--black); color:#fff; text-align:center; font-size:0.76rem; padding:8px 12px; letter-spacing:0.03em; }
+  .topbar b{ color:var(--yellow); }
+
+  /* ---------- header ---------- */
+  header{ position:sticky; top:0; z-index:60; background:#fff; border-bottom:1px solid var(--line-dark); }
+  .header-inner{ max-width:1240px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+  .logo{ font-size:1.5rem; font-weight:900; font-family:'Montserrat',sans-serif; white-space:nowrap; }
+  .logo span{ color:var(--red); }
+  nav.catnav{ display:flex; gap:26px; font-weight:600; font-size:0.9rem; }
+  nav.catnav a{ opacity:0.75; transition:opacity .15s ease, color .15s ease; }
+  nav.catnav a:hover{ opacity:1; color:var(--red); }
+  @media(max-width:900px){ nav.catnav{ display:none; } }
+  .header-actions{ display:flex; align-items:center; gap:14px; }
+  .cart-btn{
+    background:var(--black); color:#fff; border:none; padding:10px 18px; border-radius:100px;
+    font-weight:600; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:8px;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .cart-btn:hover{ background:var(--red); transform:translateY(-1px); }
+  .cart-count{ background:var(--yellow); color:var(--black); border-radius:100px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; padding:0 5px;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative; background:linear-gradient(125deg, var(--red) 0%, var(--red-dark) 45%, var(--black) 100%);
+    color:#fff; overflow:hidden;
+  }
+  .hero::before{
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 85% 20%, rgba(252,163,17,0.35), transparent 40%),
+      radial-gradient(circle at 10% 90%, rgba(255,255,255,0.12), transparent 45%);
+  }
+  .hero-inner{
+    position:relative; max-width:1240px; margin:0 auto; padding:80px 24px 90px;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center;
+  }
+  @media(max-width:900px){ .hero-inner{ grid-template-columns:1fr; padding:56px 24px 64px; text-align:center;} }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.14);
+    padding:8px 16px; border-radius:100px; font-size:0.78rem; font-weight:600; margin-bottom:22px;
+    border:1px solid rgba(255,255,255,0.25);
+  }
+  .hero-badge b{ color:var(--yellow); }
+  .hero h1{ font-size:clamp(2.3rem,5vw,3.6rem); line-height:1.05; margin-bottom:20px; }
+  .hero h1 span{ color:var(--yellow); }
+  .hero p{ font-size:1.05rem; opacity:0.9; max-width:48ch; margin-bottom:32px; line-height:1.55; }
+  @media(max-width:900px){ .hero p{ margin-left:auto; margin-right:auto;} }
+  .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
+  @media(max-width:900px){ .hero-ctas{ justify-content:center; } }
+  .btn-ghost{ background:rgba(255,255,255,0.12); color:#fff; padding:15px 26px; font-size:0.92rem; border:1px solid rgba(255,255,255,0.3); }
+  .btn-ghost:hover{ background:rgba(255,255,255,0.22); transform:translateY(-2px); }
+  .pay-row{ display:flex; gap:10px; margin-top:28px; flex-wrap:wrap; }
+  @media(max-width:900px){ .pay-row{ justify-content:center; } }
+  .pay-pill{ background:rgba(255,255,255,0.1); padding:7px 14px; border-radius:100px; font-size:0.74rem; font-weight:600; border:1px solid rgba(255,255,255,0.2); }
+
+  .hero-visual{ position:relative; display:flex; justify-content:center; }
+  .hero-card{
+    background:#fff; color:var(--black); border-radius:20px; padding:20px; width:100%; max-width:320px;
+    box-shadow:0 30px 60px rgba(0,0,0,0.35); transform:rotate(-3deg);
+  }
+  .hero-card img{ border-radius:12px; width:100%; aspect-ratio:1/1; object-fit:cover; margin-bottom:14px; }
+  .hero-card .hc-row{ display:flex; justify-content:space-between; align-items:center; }
+  .hero-card .hc-name{ font-weight:700; font-size:0.92rem; }
+  .hero-card .hc-price{ font-family:'Montserrat',sans-serif; font-weight:800; color:var(--red); }
+  .hero-float{
+    position:absolute; top:-18px; right:10px; background:var(--yellow); color:var(--black);
+    font-weight:800; font-size:0.76rem; padding:8px 14px; border-radius:100px; transform:rotate(6deg);
+    box-shadow:0 10px 20px rgba(0,0,0,0.25);
+  }
+
+  /* ---------- category strip ---------- */
+  .cat-strip{ max-width:1240px; margin:0 auto; padding:36px 24px 8px; display:flex; gap:12px; overflow-x:auto; }
+  .cat-chip{
+    flex:none; padding:11px 20px; border-radius:100px; border:1.5px solid var(--line-dark);
+    font-weight:600; font-size:0.88rem; cursor:pointer; background:#fff; transition:all .15s ease; white-space:nowrap;
+  }
+  .cat-chip.active{ background:var(--black); color:#fff; border-color:var(--black); }
+  .cat-chip:hover:not(.active){ border-color:var(--red); color:var(--red); }
+
+  .section-head{ max-width:1240px; margin:0 auto; padding:26px 24px 4px; display:flex; justify-content:space-between; align-items:baseline; }
+  .section-head h2{ font-size:1.8rem; }
+  .section-head h2 span{ color:var(--red); }
+  .section-head p{ font-size:0.85rem; opacity:0.55; font-weight:500; }
+
+  /* ---------- product grid ---------- */
+  .grid{ max-width:1240px; margin:0 auto; padding:20px 24px 90px; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  @media(max-width:980px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:600px){ .grid{ grid-template-columns:1fr; } }
+
+  .card{
+    background:#fff; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line-dark);
+    display:flex; flex-direction:column; transition:transform .22s ease, box-shadow .22s ease;
+  }
+  .card:hover{ transform:translateY(-6px); box-shadow:0 20px 40px rgba(29,29,29,0.14); }
+  .card-img{ position:relative; aspect-ratio:1/0.85; overflow:hidden; background:#f2f2f2; }
+  .card-img img{ width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
+  .card:hover .card-img img{ transform:scale(1.07); }
+  .badge{
+    position:absolute; top:12px; left:12px; padding:6px 12px; border-radius:100px;
+    font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .badge.promo{ background:var(--yellow); color:var(--black); }
+  .badge.new{ background:var(--red); color:#fff; }
+  .card-body{ padding:18px 20px 20px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .card-cat{ font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--red); letter-spacing:0.04em; }
+  .card-body h3{ font-family:'Montserrat',sans-serif; font-size:1.02rem; font-weight:700; line-height:1.25; }
+  .card-body p{ font-size:0.82rem; opacity:0.6; line-height:1.45; flex:1; }
+  .card-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
+  .price-block .old{ font-size:0.74rem; opacity:0.45; text-decoration:line-through; margin-right:6px; }
+  .price{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.05rem; }
+  .add-btn{
+    background:var(--black); color:#fff; border:none; width:40px; height:40px; border-radius:50%;
+    font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .add-btn:hover{ background:var(--red); transform:scale(1.1) rotate(90deg); }
+
+  /* ---------- trust / features ---------- */
+  .features{ background:var(--black); color:#fff; }
+  .features-inner{ max-width:1240px; margin:0 auto; padding:56px 24px; display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+  @media(max-width:900px){ .features-inner{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:520px){ .features-inner{ grid-template-columns:1fr; } }
+  .feature{ text-align:left; }
+  .feature .ic{ width:46px; height:46px; border-radius:12px; background:var(--red); display:flex; align-items:center; justify-content:center; font-size:1.3rem; margin-bottom:14px; }
+  .feature h4{ font-family:'Montserrat',sans-serif; font-size:0.98rem; margin-bottom:6px; }
+  .feature p{ font-size:0.8rem; opacity:0.6; line-height:1.5; }
+
+  /* ---------- CTA banner ---------- */
+  .cta-banner{
+    max-width:1240px; margin:70px auto; padding:0 24px;
+  }
+  .cta-inner{
+    background:linear-gradient(120deg, var(--black), var(--red-dark) 120%);
+    border-radius:24px; padding:56px 40px; color:#fff; text-align:center;
+    position:relative; overflow:hidden;
+  }
+  .cta-inner::before{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(circle at 20% 30%, rgba(252,163,17,0.25), transparent 40%);
+  }
+  .cta-inner h2{ position:relative; font-size:clamp(1.6rem,3.4vw,2.4rem); margin-bottom:14px; }
+  .cta-inner p{ position:relative; opacity:0.85; margin-bottom:26px; font-size:0.95rem; }
+
+  /* ---------- footer ---------- */
+  footer{ background:var(--black); color:#fff; padding:50px 24px 24px; }
+  .footer-inner{ max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:34px; }
+  @media(max-width:800px){ .footer-inner{ grid-template-columns:1fr 1fr; } }
+  .footer-inner h5{ font-family:'Montserrat',sans-serif; font-size:0.85rem; margin-bottom:14px; }
+  .footer-inner p, .footer-inner a{ font-size:0.82rem; opacity:0.6; line-height:2; display:block; }
+  .footer-inner a:hover{ opacity:1; color:var(--yellow); }
+  .footer-logo{ font-family:'Montserrat',sans-serif; font-weight:900; font-size:1.4rem; margin-bottom:12px; }
+  .footer-logo span{ color:var(--red); }
+  .footer-bottom{ max-width:1240px; margin:36px auto 0; padding-top:22px; border-top:1px solid var(--line); text-align:center; font-size:0.76rem; opacity:0.5; }
+
+  /* ---------- cart drawer (shared) ---------- */
+  .overlay{ position:fixed; inset:0; background:rgba(20,18,14,0.5); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:90; }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+  .drawer{
+    position:fixed; top:0; right:0; height:100%; width:min(430px,100%); background:#fff; z-index:95;
+    box-shadow:-20px 0 40px rgba(0,0,0,0.25); transform:translateX(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    display:flex; flex-direction:column;
+  }
+  .drawer.open{ transform:translateX(0); }
+  .drawer-head{ padding:22px 22px 16px; border-bottom:1px solid var(--line-dark); display:flex; justify-content:space-between; align-items:center;}
+  .drawer-head h3{ font-size:1.25rem; font-family:'Montserrat',sans-serif; }
+  .close-btn{ background:none; border:none; font-size:1.4rem; cursor:pointer; opacity:0.55; }
+  .drawer-body{ flex:1; overflow-y:auto; padding:16px 22px; display:flex; flex-direction:column; gap:16px;}
+  .empty-cart{ text-align:center; opacity:0.5; padding:60px 0; font-size:0.9rem; }
+  .cart-line{ display:flex; gap:12px; align-items:center; }
+  .cart-line img{ width:56px; height:56px; border-radius:10px; object-fit:cover; flex:none; }
+  .cart-line .info{ flex:1; }
+  .cart-line .info h4{ font-size:0.88rem; font-weight:600; }
+  .cart-line .info .p{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:0.82rem; color:var(--red); margin-top:2px;}
+  .qty{ display:flex; align-items:center; gap:8px; }
+  .qty button{ width:24px; height:24px; border-radius:50%; border:1px solid var(--line-dark); background:#fff; cursor:pointer; font-size:0.85rem; }
+  .drawer-foot{ padding:18px 22px 26px; border-top:1px solid var(--line-dark); }
+  .subtotal{ display:flex; justify-content:space-between; font-size:0.95rem; margin-bottom:14px; }
+  .subtotal .amt{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.2rem; color:var(--red); }
+  .checkout-btn{ width:100%; padding:15px; font-size:0.95rem; }
+  .checkout-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .pay-methods{ display:flex; flex-direction:column; gap:12px; margin:18px 0; }
+  .pay-opt{ display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; border:1.5px solid var(--line-dark); cursor:pointer; transition:all .15s ease; }
+  .pay-opt.selected{ border-color:var(--black); background:#faf5f5; }
+  .pay-logo{ width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.72rem; color:#111; }
+  .pay-logo.mtn{ background:#FFCC02; }
+  .pay-logo.airtel{ background:#E2001A; color:#fff; }
+  .pay-opt .txt h4{ font-size:0.9rem; font-weight:700; }
+  .pay-opt .txt p{ font-size:0.74rem; opacity:0.55; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:0.76rem; opacity:0.6; margin-bottom:6px; font-weight:600; }
+  .field input{ width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line-dark); font-family:'Poppins',sans-serif; font-size:0.95rem; }
+  .field input:focus{ outline:2px solid var(--red); outline-offset:1px; border-color:var(--red);}
+  .step{ display:none; }
+  .step.active{ display:block; }
+  .confirm-pulse{ width:80px; height:80px; border-radius:50%; background:var(--yellow); margin:20px auto; display:flex; align-items:center; justify-content:center; font-size:2rem; animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ transform:scale(1); opacity:1;} 50%{ transform:scale(1.08); opacity:0.75;} }
+  .success-check{ width:80px; height:80px; border-radius:50%; background:var(--red); margin:20px auto; display:flex; align-items:center; justify-content:center; font-size:2.2rem; color:#fff; }
+  .center-txt{ text-align:center; }
+  .center-txt h3{ font-family:'Montserrat',sans-serif; font-size:1.25rem; margin:14px 0 8px; }
+  .center-txt p{ font-size:0.88rem; opacity:0.65; line-height:1.5; }
+  .back-link{ background:none; border:none; font-size:0.78rem; opacity:0.6; cursor:pointer; margin-bottom:10px; font-weight:600;}
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">🚚 Livraison offerte à Brazzaville dès <b>50 000 FCFA</b> d'achat &nbsp;|&nbsp; Paiement <b>MTN MoMo</b> &amp; <b>Airtel Money</b></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo" style="display:flex; align-items:center; gap:8px;">
+      <img src="etachop-logo-black-bg.png" alt="EtaChop" style="height:34px;">
+    </div>
+    <nav class="catnav">
+      <a href="#tech">Téléphones &amp; Tech</a>
+      <a href="#mode">Mode &amp; Beauté</a>
+      <a href="#maison">Maison</a>
+    </nav>
+    <div class="header-actions">
+      <button class="cart-btn" onclick="openCart()">🛒 Panier <span class="cart-count" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">🔥 <b>Promo du moment</b> — jusqu'à -20% cette semaine</div>
+      <h1>Tout Brazzaville<br>achète sur <span>EtaChop</span></h1>
+      <p>Téléphones, mode et électroménager livrés chez toi. Paie en toute simplicité avec MTN MoMo ou Airtel Money, directement depuis ton téléphone.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">Découvrir la boutique</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('tech').scrollIntoView({behavior:'smooth'})">Voir les tendances</button>
+      </div>
+      <div class="pay-row">
+        <span class="pay-pill">📲 MTN MoMo</span>
+        <span class="pay-pill">📲 Airtel Money</span>
+        <span class="pay-pill">🛵 Livraison 24-48h</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <span class="hero-float">Nouveau</span>
+        <img src="https://images.pexels.com/photos/3945672/pexels-photo-3945672.jpeg?auto=compress&cs=tinysrgb&w=800" alt="iPhone 15 Pro">
+        <div class="hc-row">
+          <span class="hc-name">iPhone 15 Pro 128GB</span>
+        </div>
+        <div class="hc-row" style="margin-top:6px;">
+          <span class="hc-price">950 000 FCFA</span>
+          <span style="font-size:0.72rem; opacity:0.5;">★★★★★ (128)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cat-strip" id="catStrip"></div>
+
+<div class="section-head">
+  <h2 id="sectionTitle">Nos <span>meilleures ventes</span></h2>
+  <p id="prodCount">9 produits</p>
+</div>
+<div class="grid" id="grid"></div>
+
+<section class="features">
+  <div class="features-inner">
+    <div class="feature"><div class="ic">📲</div><h4>Mobile Money</h4><p>Paiement instantané via MTN MoMo et Airtel Money, sans carte bancaire.</p></div>
+    <div class="feature"><div class="ic">🛵</div><h4>Livraison rapide</h4><p>Sous 24 à 48h à Brazzaville, Pointe-Noire et environs.</p></div>
+    <div class="feature"><div class="ic">🛡️</div><h4>Achat garanti</h4><p>Produits vérifiés, retour possible sous 7 jours.</p></div>
+    <div class="feature"><div class="ic">💬</div><h4>Support client</h4><p>Une équipe disponible 7j/7 pour répondre à tes questions.</p></div>
+  </div>
+</section>
+
+<div class="cta-banner">
+  <div class="cta-inner">
+    <h2>Ta prochaine commande, payée en 30 secondes</h2>
+    <p>MTN MoMo ou Airtel Money — choisis, valide, c'est livré.</p>
+    <button class="btn btn-primary" onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">Commencer mes achats</button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">Eta<span>Chop</span></div>
+      <p style="max-width:32ch;">Le marché en ligne pensé pour Brazzaville. Simple, rapide, payé avec ton Mobile Money.</p>
+    </div>
+    <div>
+      <h5>Boutique</h5>
+      <a href="#tech">Téléphones &amp; Tech</a>
+      <a href="#mode">Mode &amp; Beauté</a>
+      <a href="#maison">Maison</a>
+    </div>
+    <div>
+      <h5>Aide</h5>
+      <a href="#">Livraison</a>
+      <a href="#">Paiement Mobile Money</a>
+      <a href="#">Retours</a>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <a href="#">Brazzaville, Congo</a>
+      <a href="#">+242 06 000 00 00</a>
+      <a href="#">contact@etamarket.cg</a>
+    </div>
+  </div>
+  <div class="footer-bottom">EtaChop © 2026 — Tous droits réservés · <a href="conditions.html" style="color:inherit; text-decoration:underline;">Conditions & Livraison</a></div>
+</footer>
+
+<!-- Cart drawer -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+
+  <div class="step active" id="stepCart" style="display:flex; flex-direction:column; height:100%;">
+    <div class="drawer-head"><h3>Ton panier</h3><button class="close-btn" onclick="closeCart()">✕</button></div>
+    <div class="drawer-body" id="cartBody"></div>
+    <div class="drawer-foot">
+      <div class="subtotal"><span>Sous-total</span><span class="amt" id="subtotal">0 FCFA</span></div>
+      <button class="btn btn-primary checkout-btn" id="checkoutBtn" onclick="goToStep('stepPay')">Passer au paiement</button>
+    </div>
+  </div>
+
+  <div class="step" id="stepPay">
+    <div class="drawer-head"><h3>Paiement</h3><button class="close-btn" onclick="closeCart()">✕</button></div>
+    <div class="drawer-body">
+      <button class="back-link" onclick="goToStep('stepCart')">← Retour au panier</button>
+      <div class="subtotal"><span>Total à payer</span><span class="amt" id="payTotal">0 FCFA</span></div>
+      <div class="pay-methods">
+        <div class="pay-opt" data-op="mtn" onclick="selectOp('mtn')">
+          <div class="pay-logo mtn">MTN</div>
+          <div class="txt"><h4>MTN MoMo</h4><p>Paiement via ton compte MTN Mobile Money</p></div>
+        </div>
+        <div class="pay-opt" data-op="airtel" onclick="selectOp('airtel')">
+          <div class="pay-logo airtel">A</div>
+          <div class="txt"><h4>Airtel Money</h4><p>Paiement via ton compte Airtel Money</p></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Ton nom</label>
+        <input type="text" id="custNameInput" placeholder="Nom et prénom">
+      </div>
+      <div class="field">
+        <label>Numéro de téléphone</label>
+        <input type="tel" id="phoneInput" placeholder="06 XXX XX XX">
+      </div>
+      <button class="btn btn-primary checkout-btn" id="payBtn" onclick="startPayment()" disabled>Payer maintenant</button>
+    </div>
+  </div>
+
+  <div class="step" id="stepConfirm">
+    <div class="drawer-head"><h3>Confirmation</h3><span></span></div>
+    <div class="drawer-body">
+      <div class="center-txt">
+        <div class="confirm-pulse">📲</div>
+        <h3>Vérifie ton téléphone</h3>
+        <p id="confirmText">Une demande de paiement a été envoyée. Valide-la avec ton code Mobile Money pour finaliser la commande.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" id="stepSuccess">
+    <div class="drawer-head"><h3>Commande confirmée</h3><button class="close-btn" onclick="closeCart()">✕</button></div>
+    <div class="drawer-body">
+      <div class="center-txt">
+        <div class="success-check">✓</div>
+        <h3>Paiement reçu</h3>
+        <p>Ta commande de <span id="successAmt"></span> a été confirmée. Tu recevras un SMS avec le suivi de livraison.</p>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn btn-primary checkout-btn" onclick="resetAll()">Nouvelle commande</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // SOURCE DES PRODUITS : vraie base de données (via l'API du site)
+  // ------------------------------------------------------------
+  // Les produits sont ajoutés depuis l'espace admin (admin.html),
+  // avec upload de photo. Ce site les récupère automatiquement.
+  // ============================================================
+
+  // Produits de secours, affichés uniquement si l'API est injoignable
+  const fallbackProducts = [
+    {id:1, cat:"Téléphones & Tech", catId:"tech", name:"iPhone 15 Pro 128GB", price:950000, old:null, desc:"Le plus puissant. Livraison 24h à Brazzaville.", img:"https://images.pexels.com/photos/3945672/pexels-photo-3945672.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"new"},
+    {id:2, cat:"Téléphones & Tech", catId:"tech", name:"Samsung Galaxy A54 5G", price:320000, old:365000, desc:"Écran AMOLED 120Hz, batterie longue durée.", img:"https://images.pexels.com/photos/47261/pexels-photo-47261.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"promo"},
+    {id:3, cat:"Téléphones & Tech", catId:"tech", name:"Écouteurs Bluetooth Pro", price:45000, old:null, desc:"Son immersif, réduction de bruit active.", img:"https://images.pexels.com/photos/3945697/pexels-photo-3945697.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"new"},
+    {id:4, cat:"Mode & Beauté", catId:"mode", name:"Robe Wax Élégance", price:25000, old:32000, desc:"Tissu wax authentique, coupe moderne.", img:"https://images.pexels.com/photos/1391499/pexels-photo-1391499.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"promo"},
+    {id:5, cat:"Mode & Beauté", catId:"mode", name:"Sneakers Urban Style", price:38000, old:null, desc:"Confort et style pour toute la journée.", img:"https://images.pexels.com/photos/18212364/pexels-photo-18212364.jpeg?auto=compress&cs=tinysrgb&w=800", badge:null},
+    {id:6, cat:"Mode & Beauté", catId:"mode", name:"Sac à Main Cuir Premium", price:42000, old:null, desc:"Cuir véritable, finition soignée.", img:"https://images.pexels.com/photos/2433862/pexels-photo-2433862.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"new"},
+    {id:7, cat:"Maison & Électroménager", catId:"maison", name:"Mixeur Multifonction 5L", price:28000, old:34000, desc:"Puissant et polyvalent pour ta cuisine.", img:"https://images.pexels.com/photos/6803737/pexels-photo-6803737.jpeg?auto=compress&cs=tinysrgb&w=800", badge:"promo"},
+    {id:8, cat:"Maison & Électroménager", catId:"maison", name:"Téléviseur LED 43 pouces Smart", price:185000, old:null, desc:"Image nette, apps intégrées, Wi-Fi.", img:"https://images.pexels.com/photos/1571459/pexels-photo-1571459.jpeg?auto=compress&cs=tinysrgb&w=800", badge:null},
+    {id:9, cat:"Maison & Électroménager", catId:"maison", name:"Fer à Repasser Vapeur Pro", price:22000, old:null, desc:"Vapeur puissante, semelle anti-adhésive.", img:"https://images.pexels.com/photos/4440650/pexels-photo-4440650.jpeg?auto=compress&cs=tinysrgb&w=800", badge:null},
+  ];
+
+  let products = fallbackProducts; // remplacé par les vrais produits de la base dès que l'API répond
+
+  const catMap = { tech: "Téléphones & Tech", mode: "Mode & Beauté", maison: "Maison & Électroménager" };
+
+  function apiProductToLocal(p, index) {
+    const catId = (p.category || "tech").toLowerCase();
+    return {
+      id: p.id || index + 1,
+      cat: catMap[catId] || "Téléphones & Tech",
+      catId: catId,
+      name: p.name,
+      price: Number(p.price_fcfa) || 0,
+      old: p.compare_at_price_fcfa ? Number(p.compare_at_price_fcfa) : null,
+      desc: p.description || "",
+      img: p.image_url,
+      badge: p.badge || null,
+    };
+  }
+
+  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
+
+  async function loadProductsFromApi() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?is_active=eq.true&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      const list = await res.json();
+      if (list.length > 0) {
+        products = list.map(apiProductToLocal);
+      }
+    } catch (err) {
+      console.warn("Impossible de charger les produits depuis la base, utilisation des produits de secours.", err);
+    }
+  }
+
+  const cats = [
+    {id:"all", label:"Tout"},
+    {id:"tech", label:"Téléphones & Tech"},
+    {id:"mode", label:"Mode & Beauté"},
+    {id:"maison", label:"Maison & Électroménager"},
+  ];
+  let activeCat = "all";
+  let cart = {};
+  let selectedOp = null;
+
+  function fmt(n){ return n.toLocaleString('fr-FR') + " FCFA"; }
+
+  function renderCats(){
+    document.getElementById('catStrip').innerHTML = cats.map(c =>
+      `<button class="cat-chip ${c.id===activeCat?'active':''}" onclick="setCat('${c.id}')">${c.label}</button>`
+    ).join('');
+  }
+  function setCat(id){
+    activeCat = id;
+    renderCats();
+    renderGrid();
+    const label = cats.find(c=>c.id===id).label;
+    document.getElementById('sectionTitle').innerHTML = id==='all'
+      ? 'Nos <span>meilleures ventes</span>' : `<span>${label}</span>`;
+  }
+
+  function renderGrid(){
+    const list = activeCat==="all" ? products : products.filter(p=>p.catId===activeCat);
+    document.getElementById('prodCount').textContent = `${list.length} produits`;
+    document.getElementById('grid').innerHTML = list.map(p => `
+      <div class="card" id="tech">
+        <div class="card-img">
+          ${p.badge ? `<span class="badge ${p.badge}">${p.badge==='promo'?'Promo':'Nouveau'}</span>` : ''}
+          <img src="${p.img}" alt="${p.name}" loading="lazy">
+        </div>
+        <div class="card-body">
+          <span class="card-cat">${p.cat}</span>
+          <h3>${p.name}</h3>
+          <p>${p.desc}</p>
+          <div class="card-foot">
+            <div class="price-block">
+              ${p.old ? `<span class="old">${fmt(p.old)}</span>` : ''}
+              <span class="price">${fmt(p.price)}</span>
+            </div>
+            <button class="add-btn" onclick="addToCart('${p.id}')">+</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function addToCart(id){
+    cart[id] = (cart[id]||0)+1;
+    updateCartCount();
+    renderCartBody();
+    pulseCart();
+  }
+  function pulseCart(){
+    const b = document.getElementById('cartCount');
+    b.style.transform="scale(1.35)";
+    setTimeout(()=>b.style.transform="scale(1)",150);
+  }
+  function updateCartCount(){
+    document.getElementById('cartCount').textContent = Object.values(cart).reduce((a,b)=>a+b,0);
+  }
+  function cartTotal(){
+    return Object.entries(cart).reduce((sum,[id,qty])=>{
+      const p = products.find(x=>x.id==id);
+      return sum + p.price*qty;
+    },0);
+  }
+  function renderCartBody(){
+    const entries = Object.entries(cart);
+    const body = document.getElementById('cartBody');
+    if(entries.length===0){
+      body.innerHTML = `<div class="empty-cart">Ton panier est vide.<br>Ajoute des produits pour commencer.</div>`;
+      document.getElementById('checkoutBtn').disabled = true;
+    } else {
+      body.innerHTML = entries.map(([id,qty])=>{
+        const p = products.find(x=>x.id==id);
+        return `
+          <div class="cart-line">
+            <img src="${p.img}" alt="${p.name}">
+            <div class="info">
+              <h4>${p.name}</h4>
+              <div class="p">${fmt(p.price)}</div>
+            </div>
+            <div class="qty">
+              <button onclick="changeQty('${id}',-1)">−</button>
+              <span>${qty}</span>
+              <button onclick="changeQty('${id}',1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('checkoutBtn').disabled = false;
+    }
+    document.getElementById('subtotal').textContent = fmt(cartTotal());
+    document.getElementById('payTotal').textContent = fmt(cartTotal());
+  }
+  function changeQty(id,delta){
+    cart[id] += delta;
+    if(cart[id]<=0) delete cart[id];
+    updateCartCount();
+    renderCartBody();
+  }
+
+  function openCart(){
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+    goToStep('stepCart');
+  }
+  function closeCart(){
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+  }
+  function goToStep(stepId){
+    document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+    document.getElementById(stepId).classList.add('active');
+  }
+
+  function selectOp(op){
+    selectedOp = op;
+    document.querySelectorAll('.pay-opt').forEach(el=>el.classList.remove('selected'));
+    document.querySelector(`.pay-opt[data-op="${op}"]`).classList.add('selected');
+    checkPayReady();
+  }
+  document.getElementById('phoneInput').addEventListener('input', checkPayReady);
+  function checkPayReady(){
+    const phone = document.getElementById('phoneInput').value.trim();
+    const name = document.getElementById('custNameInput').value.trim();
+    document.getElementById('payBtn').disabled = !(selectedOp && phone.length>=6 && name.length>=2);
+  }
+  document.getElementById('custNameInput').addEventListener('input', checkPayReady);
+
+  async function startPayment(){
+    const amount = cartTotal();
+    const phone = document.getElementById('phoneInput').value.trim();
+    const customerName = document.getElementById('custNameInput').value.trim();
+    const opName = selectedOp === 'mtn' ? 'MTN MoMo' : 'Airtel Money';
+
+    document.getElementById('confirmText').textContent =
+      `Redirection vers la page de paiement sécurisée pour finaliser via ${opName}...`;
+    goToStep('stepConfirm');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/moneroo-initialize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount, phone, customerName,
+          orderId: 'ETA-' + Date.now(),
+          returnUrl: window.location.href.split('?')[0],
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok || !data.checkoutUrl) throw new Error(data.error || "Échec de l'initialisation du paiement");
+
+      window.location.href = data.checkoutUrl;
+    } catch(err){
+      document.getElementById('confirmText').textContent = "Erreur : " + err.message;
+      setTimeout(() => goToStep('stepPay'), 2500);
+    }
+  }
+
+  function resetAll(){
+    cart = {};
+    selectedOp = null;
+    document.getElementById('phoneInput').value = '';
+    updateCartCount();
+    renderCartBody();
+    closeCart();
+  }
+
+  function checkPaymentReturn(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status') || urlParams.get('paymentStatus');
+    if(status){
+      openCart();
+      if(status === 'success' || status === 'successful'){
+        goToStep('stepSuccess');
+        document.getElementById('successAmt').textContent = "ta commande";
+      } else {
+        goToStep('stepPay');
+        document.getElementById('checkoutMsg') && (document.getElementById('checkoutMsg').textContent = "Le paiement n'a pas abouti. Réessaie.");
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+
+  (async function init() {
+    await loadProductsFromApi();
+    renderCats();
+    renderGrid();
+    renderCartBody();
+    checkPaymentReturn();
+  })();
+</script>
+
+</body>
+</html>
