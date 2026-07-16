@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivre ma commande — EtaChop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
+<style>
+  :root{ --red:#E63946; --black:#1D1D1D; --line:rgba(29,29,29,0.12); }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:#FAFAFA; color:var(--black); font-family:'Poppins',sans-serif; min-height:100vh; overflow-wrap:break-word; }
+  h1,h2{ font-family:'Montserrat',sans-serif; font-weight:800; }
+
+  header{ background:var(--black); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:8px; }
+  .logo{ font-weight:900; font-size:1.1rem; }
+  .logo span{ color:var(--red); }
+
+  .wrap{ max-width:520px; margin:0 auto; padding:36px 20px 70px; }
+  h1{ font-size:1.4rem; margin-bottom:6px; text-align:center; }
+  .sub{ text-align:center; font-size:0.88rem; opacity:0.6; margin-bottom:26px; }
+
+  .search-box{ display:flex; gap:8px; margin-bottom:30px; }
+  .search-box input{ flex:1; padding:14px 16px; border-radius:12px; border:1.5px solid var(--line); font-size:1rem; }
+  .search-box button{ background:var(--red); color:#fff; border:none; padding:0 20px; border-radius:12px; font-weight:700; cursor:pointer; }
+
+  .order-card{ background:#fff; border-radius:16px; padding:20px; box-shadow:0 4px 16px rgba(0,0,0,0.06); margin-bottom:16px; }
+  .order-card h3{ font-size:1rem; margin-bottom:2px; }
+  .order-card .store-name{ font-size:0.8rem; opacity:0.55; margin-bottom:14px; }
+
+  .timeline{ margin:16px 0; }
+  .step{ display:flex; align-items:center; gap:10px; padding:6px 0; opacity:0.35; }
+  .step.done{ opacity:1; }
+  .step .dot{ width:10px; height:10px; border-radius:50%; background:var(--line); flex:none; }
+  .step.done .dot{ background:var(--red); }
+  .step .label{ font-size:0.82rem; font-weight:600; }
+
+  .detail-row{ display:flex; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); font-size:0.82rem; }
+  .detail-row span:first-child{ opacity:0.55; }
+  .detail-row span:last-child{ font-weight:600; text-align:right; }
+
+  .empty-msg{ text-align:center; padding:30px 20px; opacity:0.5; font-size:0.88rem; display:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="etachop-logo-black-bg.png" alt="EtaChop" style="height:28px;">
+</header>
+
+<div class="wrap">
+  <h1>Suivre mes commandes</h1>
+  <div class="sub">Entre le numéro de téléphone utilisé lors de ta commande</div>
+
+  <div class="search-box">
+    <input type="tel" id="phoneInput" placeholder="Ex: 06 XXX XX XX">
+    <button onclick="trackOrders()">Suivre</button>
+  </div>
+
+  <div class="empty-msg" id="emptyMsg">Aucune commande trouvée avec ce numéro.</div>
+
+  <div id="ordersContainer"></div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
+
+  const STEPS = [
+    { key: 'pending', label: 'Commande reçue' },
+    { key: 'confirmed', label: 'Confirmée' },
+    { key: 'preparing', label: 'En préparation' },
+    { key: 'shipped', label: 'Expédiée' },
+    { key: 'delivered', label: 'Livrée' },
+  ];
+
+  async function trackOrders(){
+    const phone = document.getElementById('phoneInput').value.trim();
+    document.getElementById('ordersContainer').innerHTML = '';
+    document.getElementById('emptyMsg').style.display = 'none';
+    if(!phone) return;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/track_orders_by_phone`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_phone: phone }),
+      });
+      const data = await res.json();
+      if(!res.ok || !data || data.length === 0){
+        document.getElementById('emptyMsg').style.display = 'block';
+        return;
+      }
+      document.getElementById('ordersContainer').innerHTML = data.map(renderOrder).join('');
+    } catch(err){
+      document.getElementById('emptyMsg').style.display = 'block';
+    }
+  }
+
+  function renderOrder(order){
+    const date = new Date(order.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+    const amount = Number(order.amount_fcfa).toLocaleString('fr-FR') + ' FCFA';
+
+    let timelineHtml;
+    if(order.status === 'cancelled'){
+      timelineHtml = '<div class="step done" style="color:#DC2626;"><div class="dot" style="background:#DC2626;"></div><div class="label">Commande annulée</div></div>';
+    } else {
+      const currentIndex = STEPS.findIndex(s => s.key === order.status);
+      timelineHtml = STEPS.map((s, i) => `
+        <div class="step ${i <= currentIndex ? 'done' : ''}">
+          <div class="dot"></div>
+          <div class="label">${s.label}</div>
+        </div>
+      `).join('');
+    }
+
+    return `
+      <div class="order-card">
+        <h3>${order.product_name}</h3>
+        <div class="store-name">Chez ${order.store_name}</div>
+        <div class="timeline">${timelineHtml}</div>
+        <div class="detail-row"><span>Montant</span><span>${amount}</span></div>
+        ${order.delivery_zone ? `<div class="detail-row"><span>Livraison</span><span>${order.delivery_zone}</span></div>` : ''}
+        ${order.variant_selection ? `<div class="detail-row"><span>Choix</span><span>${order.variant_selection}</span></div>` : ''}
+        <div class="detail-row"><span>Commandé le</span><span>${date}</span></div>
+      </div>
+    `;
+  }
+
+  document.getElementById('phoneInput').addEventListener('keypress', e => {
+    if(e.key === 'Enter') trackOrders();
+  });
+</script>
+
+</body>
+</html>
