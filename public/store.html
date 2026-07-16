@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boutique — ETA MARKET</title>
+<title>Boutique — EtaChop</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -75,7 +75,7 @@
 <div class="store-info">
   <h1 id="storeName">Chargement…</h1>
   <p id="storeDesc"></p>
-  <div class="powered">Propulsé par ETA MARKET · Crée ta boutique sur etamarket.cg</div>
+  <div class="powered">Propulsé par EtaChop · Crée ta boutique sur etachop.com</div>
 </div>
 
 <a id="whatsappBtn" href="#" target="_blank" class="whatsapp-btn" style="display:none;">💬</a>
@@ -139,13 +139,8 @@
     <div id="checkoutSuccess" style="display:none; text-align:center;">
       <div style="font-size:2.4rem; margin-bottom:10px;">✅</div>
       <h3 style="font-size:1.1rem; margin-bottom:8px;">Commande envoyée !</h3>
-      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:14px;">Le vendeur va te contacter très vite pour finaliser ta commande.</p>
-      <div style="background:var(--paper); border:1.5px dashed var(--accent); border-radius:12px; padding:14px; margin-bottom:18px;">
-        <div style="font-size:0.76rem; opacity:0.6; margin-bottom:4px;">Ton code de suivi</div>
-        <div id="trackingCodeDisplay" style="font-family:monospace; font-size:1.2rem; font-weight:800; letter-spacing:1px;">—</div>
-        <div style="font-size:0.72rem; opacity:0.5; margin-top:4px;">Garde-le pour suivre ta commande</div>
-      </div>
-      <a id="trackOrderLink" href="suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande →</a>
+      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Le vendeur va te contacter très vite pour finaliser ta commande.</p>
+      <a href="suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
       <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
     </div>
   </div>
@@ -446,10 +441,6 @@
         const errData = await res.json();
         throw new Error(errData.message && errData.message.includes('rupture') ? "Ce produit vient d'être épuisé, désolé !" : "Erreur, réessaie.");
       }
-      const resultData = await res.json();
-      const trackingCode = resultData?.[0]?.tracking_code || '—';
-      document.getElementById('trackingCodeDisplay').textContent = trackingCode;
-      document.getElementById('trackOrderLink').href = `suivi.html?code=${trackingCode}`;
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
       trackPurchase(currentProduct.price_fcfa);
@@ -493,10 +484,10 @@
     }
     if(store.whatsapp_number){
       const cleanNumber = store.whatsapp_number.replace(/\D/g,'');
-      document.getElementById('whatsappBtn').href = `https://wa.me/${cleanNumber}?text=${encodeURIComponent('Bonjour, je viens de votre boutique ' + store.name + ' sur ETA MARKET')}`;
+      document.getElementById('whatsappBtn').href = `https://wa.me/${cleanNumber}?text=${encodeURIComponent('Bonjour, je viens de votre boutique ' + store.name + ' sur EtaChop')}`;
       document.getElementById('whatsappBtn').style.display = 'flex';
     }
-    document.title = store.name + " — ETA MARKET";
+    document.title = store.name + " — EtaChop";
     document.getElementById('backLink').href = `?s=${slug}`;
     loadMarketingPixels(store);
 
@@ -631,5 +622,7 @@
   init();
 </script>
 
+<script src="assistant.js"></script>
+<script>initEtaAssistant('both');</script>
 </body>
 </html>
