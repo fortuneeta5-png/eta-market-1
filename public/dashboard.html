@@ -169,6 +169,8 @@
   .nav-item .nav-icon{ font-size:1.25rem; line-height:1; }
   .nav-item.active{ color:var(--primary); font-weight:700; }
   body{ padding-bottom:70px; }
+  .site-logo{ height:45px; padding:8px 12px; display:block; border-radius:10px; background:#1D1D1D; }
+  @media(min-width:768px){ .site-logo{ height:55px; } }
 </style>
 </head>
 <body>
@@ -177,7 +179,7 @@
 <div id="authScreen">
   <div class="auth-card">
     <div class="auth-logo" style="display:flex; align-items:center; justify-content:center; gap:8px;">
-      <img src="etachop-logo-black-bg.png" alt="EtaChop" style="height:34px;">
+      <img src="etachop-logo-black-bg.png" alt="EtaChop" class="site-logo">
     </div>
     <div class="auth-sub">Crée ta boutique en ligne en quelques minutes</div>
 
@@ -233,7 +235,7 @@
 <div id="dashboard">
   <header>
     <div class="logo" style="display:flex; align-items:center; gap:8px;">
-      <img src="etachop-logo-black-bg.png" alt="EtaChop" style="height:28px;">
+      <img src="etachop-logo-black-bg.png" alt="EtaChop" class="site-logo">
     </div>
     <div class="header-right">
       <button class="logout-btn" onclick="logout()">Déconnexion</button>
