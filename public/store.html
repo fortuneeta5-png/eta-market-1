@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boutique — EtaChop</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8,14 L20,14 L26,28' fill='none' stroke='%23E63946' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20,28 L82,28 L72,64 L34,64 Z' fill='%23E63946'/%3E%3Cpath d='M38,64 L42,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M68,64 L64,74' stroke='%23E63946' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='80' r='9' fill='%23E63946'/%3E%3Ccircle cx='64' cy='80' r='9' fill='%23E63946'/%3E%3C/svg%3E">
+<meta property="og:title" content="Boutique sur EtaChop">
+<meta property="og:description" content="Découvre cette boutique et ses produits sur EtaChop.">
+<meta property="og:image" content="https://etachop.com/public/etachop-logo-black-bg.png">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="etachop-logo-black-bg.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -20,14 +24,14 @@
   .btn-ghost{ background:#fff; color:var(--ink); border:1.5px solid var(--line); padding:11px 20px; font-size:0.85rem; }
 
   header{ display:none; }
-  .cover-wrap{ position:relative; width:100%; height:190px; background:var(--accent); overflow:hidden; }
+  .cover-wrap{ position:relative; width:100%; height:220px; background:var(--accent); overflow:hidden; }
   .cover-wrap .banner-img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .profile-pic-wrap{ position:absolute; bottom:-42px; left:50%; transform:translateX(-50%); }
-  .profile-pic{ width:96px; height:96px; border-radius:50%; object-fit:contain; border:4px solid #fff; background:#fff; display:block; }
-  .store-info{ text-align:center; padding:54px 24px 22px; background:#fff; }
-  .store-info h1{ font-size:1.5rem; margin-bottom:8px; color:var(--ink); }
-  .store-info p{ font-size:0.9rem; opacity:0.65; max-width:44ch; margin:0 auto; color:var(--ink); }
-  .powered{ font-size:0.7rem; opacity:0.45; margin-top:14px; color:var(--ink); }
+  .profile-pic-wrap{ position:absolute; bottom:-50px; left:50%; transform:translateX(-50%); }
+  .profile-pic{ width:100px; height:100px; border-radius:50%; object-fit:contain; border:4px solid #fff; background:#fff; display:block; }
+  .store-info{ text-align:center; padding:70px 16px 22px; background:#fff; }
+  .store-info h1{ font-size:1.375rem; font-weight:700; margin-bottom:8px; color:var(--ink); }
+  .store-info p{ font-size:14px; color:#555; line-height:1.5; max-width:500px; margin:0 auto; }
+  .powered{ font-size:0.72rem; color:#fff; background:var(--accent); font-weight:600; }
 
   .wrap{ max-width:1000px; margin:0 auto; padding:0 20px 60px; }
   .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:18px; margin-top:24px; }
@@ -75,7 +79,10 @@
 <div class="store-info">
   <h1 id="storeName">Chargement…</h1>
   <p id="storeDesc"></p>
-  <div class="powered">Propulsé par EtaChop · Crée ta boutique sur etachop.com</div>
+  <div class="powered" id="poweredBadge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:100px; margin-top:14px;">
+    <img src="etachop-logo-black-bg.png" alt="EtaChop" style="height:16px; border-radius:4px;">
+    <span>Propulsé par EtaChop</span>
+  </div>
 </div>
 
 <a id="whatsappBtn" href="#" target="_blank" class="whatsapp-btn" style="display:none;">💬</a>
