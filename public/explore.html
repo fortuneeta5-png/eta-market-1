@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Découvrir les boutiques — EtaChop</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#E63946">
+<link rel="apple-touch-icon" href="20260720_075600.png">
 <meta property="og:title" content="EtaChop — Marketplace de Brazzaville">
 <meta property="og:description" content="Découvre des boutiques locales et achète en toute confiance sur EtaChop.">
 <meta property="og:image" content="https://etachop.com/public/20260720_075600.png">
@@ -214,5 +217,8 @@
 
 <script src="assistant.js"></script>
 <script>initEtaAssistant('both');</script>
+<script>
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+</script>
 </body>
 </html>
