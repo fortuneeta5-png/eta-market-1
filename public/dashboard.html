@@ -797,6 +797,9 @@
     loadOrders();
     loadPromoCodes();
     loadDeliveryZones();
+    if(typeof subscribeToEtaNotifications === 'function'){
+      subscribeToEtaNotifications('vendor', { storeId: currentStore.id });
+    }
   }
 
   // ---------- Navigation par onglets (menu du bas) ----------
@@ -1563,8 +1566,23 @@
     }
   }
 
+  const STATUS_NOTIFICATIONS = {
+    confirmed: { title: 'Paiement confirmé ✅', body: (p) => `Ta commande "${p}" est en cours de traitement.` },
+    preparing: { title: 'Commande validée 📦', body: (p, s) => `Ta commande "${p}" a été validée par ${s}.` },
+    shipped:   { title: 'Commande expédiée 🚚', body: (p) => `Ta commande "${p}" est en route ! Suis-la sur EtaChop.` },
+    delivered: { title: 'Commande livrée 🎉', body: (p) => `"${p}" livrée ! Merci pour ton achat sur EtaChop.` },
+    cancelled: { title: 'Commande annulée', body: (p) => `Ta commande "${p}" a été annulée par le vendeur.` },
+  };
+
   async function updateOrderStatus(id, status){
     try {
+      // Récupère les infos de la commande pour personnaliser la notification
+      const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?id=eq.${id}&select=customer_phone,product_name_snapshot`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const orderData = await orderRes.json();
+      const order = orderData[0];
+
       await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?id=eq.${id}`, {
         method: 'PATCH',
         headers: {
@@ -1573,6 +1591,23 @@
         },
         body: JSON.stringify({ status }),
       });
+
+      // Notifie le client du changement de statut
+      const notif = STATUS_NOTIFICATIONS[status];
+      if(notif && order){
+        fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscriberType: 'customer',
+            customerPhone: order.customer_phone,
+            title: notif.title,
+            body: notif.body(order.product_name_snapshot, currentStore.name),
+            url: '/public/suivi.html',
+          }),
+        }).catch(() => {});
+      }
+
       loadOrders();
     } catch(err){
       alert("Erreur lors de la mise à jour.");
@@ -1588,6 +1623,7 @@
 <script src="assistant.js"></script>
 <script>initEtaAssistant('both');</script>
 <script src="install-banner.js"></script>
+<script src="push-subscribe.js"></script>
 <script>
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>

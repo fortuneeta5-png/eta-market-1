@@ -134,7 +134,7 @@
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Paiement par</label>
         <div style="display:flex; gap:10px;">
           <button type="button" class="pay-provider-btn" data-provider="MTN" onclick="selectProvider('MTN', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">MTN MoMo</button>
-          <button type="button" class="pay-provider-btn" data-provider="AIRTEL" onclick="selectProvider('AIRTEL', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">Airtel Money</button>
+          <button type="button" class="pay-provider-btn" data-provider="AIRTEL" disabled title="Bientôt disponible" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#f5f5f5; cursor:not-allowed; font-weight:700; font-family:'Poppins',sans-serif; opacity:0.5;">Airtel Money<br><span style="font-size:0.65rem; font-weight:400;">Bientôt disponible</span></button>
         </div>
       </div>
       <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
@@ -491,6 +491,24 @@
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
       trackPurchase(currentProduct.price_fcfa);
+
+      // Abonne le client aux notifications de suivi de CETTE commande
+      if(typeof subscribeToEtaNotifications === 'function'){
+        subscribeToEtaNotifications('customer', { customerPhone: phone });
+      }
+
+      // Prévient immédiatement le vendeur qu'une nouvelle commande est arrivée
+      fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscriberType: 'vendor',
+          storeId: currentStore.id,
+          title: 'Nouvelle commande 🎉',
+          body: `${name} — ${fmt(total)}`,
+          url: '/public/dashboard.html',
+        }),
+      }).catch(() => {});
     } catch(err){
       msg.textContent = err.message; msg.style.display = "block";
     } finally {
@@ -672,6 +690,7 @@
 <script src="assistant.js"></script>
 <script>initEtaAssistant('both');</script>
 <script src="install-banner.js"></script>
+<script src="push-subscribe.js"></script>
 <script>
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
