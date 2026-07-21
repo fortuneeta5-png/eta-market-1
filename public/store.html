@@ -156,9 +156,9 @@
       </div>
     </div>
     <div id="checkoutSuccess" style="display:none; text-align:center;">
-      <div style="font-size:2.4rem; margin-bottom:10px;">✅</div>
-      <h3 style="font-size:1.1rem; margin-bottom:8px;">Commande envoyée !</h3>
-      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Le vendeur va te contacter très vite pour finaliser ta commande.</p>
+      <div style="font-size:2.4rem; margin-bottom:10px;">📲</div>
+      <h3 style="font-size:1.1rem; margin-bottom:8px;">Demande de paiement envoyée !</h3>
+      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Valide le paiement sur ton téléphone avec ton code secret Mobile Money pour finaliser ta commande. Sans validation de ta part, la commande ne sera pas traitée.</p>
       <a href="suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
       <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
     </div>
@@ -504,8 +504,8 @@
         body: JSON.stringify({
           subscriberType: 'vendor',
           storeId: currentStore.id,
-          title: 'Nouvelle commande 🎉',
-          body: `${name} — ${fmt(total)}`,
+          title: 'Nouvelle demande de commande 🔔',
+          body: `${name} — ${fmt(total)} — Vérifie le paiement avant de préparer`,
           url: '/public/dashboard.html',
         }),
       }).catch(() => {});
