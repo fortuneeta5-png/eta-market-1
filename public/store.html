@@ -121,7 +121,7 @@
   <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
     <div id="checkoutForm">
       <h3 style="font-size:1.15rem; margin-bottom:6px;">Finaliser la commande</h3>
-      <p style="font-size:0.85rem; opacity:0.6; margin-bottom:18px;">Le vendeur te contactera pour confirmer le paiement et la livraison.</p>
+      <p style="font-size:0.85rem; opacity:0.6; margin-bottom:18px;">Tu recevras une demande de paiement sur ton téléphone à valider avec ton code secret.</p>
       <div style="margin-bottom:14px;">
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton nom</label>
         <input type="text" id="custName" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
@@ -129,6 +129,13 @@
       <div style="margin-bottom:18px;">
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton numéro de téléphone</label>
         <input type="tel" id="custPhone" placeholder="06 XXX XX XX" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Paiement par</label>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="pay-provider-btn" data-provider="MTN" onclick="selectProvider('MTN', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">MTN MoMo</button>
+          <button type="button" class="pay-provider-btn" data-provider="AIRTEL" onclick="selectProvider('AIRTEL', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">Airtel Money</button>
+        </div>
       </div>
       <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Zone de livraison</label>
@@ -412,6 +419,15 @@
     document.getElementById('custPhone').value = '';
   }
 
+  let selectedProvider = null;
+  function selectProvider(provider, btnEl){
+    selectedProvider = provider;
+    document.querySelectorAll('.pay-provider-btn').forEach(b => {
+      b.style.borderColor = 'var(--line)'; b.style.background = '#fff'; b.style.color = 'inherit';
+    });
+    btnEl.style.borderColor = 'var(--accent)'; btnEl.style.background = 'var(--accent)'; btnEl.style.color = '#fff';
+  }
+
   async function submitOrder(){
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
@@ -419,6 +435,10 @@
     const btn = document.getElementById('confirmOrderBtn');
     if(!name || !phone){
       msg.textContent = "Merci de remplir ton nom et ton numéro."; msg.style.display = "block";
+      return;
+    }
+    if(!selectedProvider){
+      msg.textContent = "Choisis MTN MoMo ou Airtel Money."; msg.style.display = "block";
       return;
     }
 
@@ -433,12 +453,27 @@
     }
     const variantText = Object.entries(selectedVariants).map(([k,v]) => `${k}: ${v}`).join(', ') || null;
 
-    btn.disabled = true; btn.textContent = "Envoi…";
+    btn.disabled = true; btn.textContent = "Envoi de la demande de paiement…";
     try {
       const zoneSelect = document.getElementById('zoneSelect');
       const zoneId = (deliveryZones.length > 0 && zoneSelect.value !== '') ? deliveryZones[parseInt(zoneSelect.value,10)].id : null;
       const promoCode = document.getElementById('promoInput').value.trim().toUpperCase() || null;
+      const total = currentProduct.price_fcfa - appliedDiscount + selectedZoneFee;
 
+      // 1. Déclenche la vraie demande de paiement OpenPay sur le téléphone du client
+      const payRes = await fetch(`${SUPABASE_URL}/functions/v1/openpay-initiate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: total, phone, customerName: name, provider: selectedProvider, orderId: 'ETA-' + Date.now() }),
+      });
+      if(!payRes.ok){
+        const payErr = await payRes.json();
+        throw new Error("Échec de l'envoi du paiement. Vérifie ton numéro et réessaie.");
+      }
+
+      btn.textContent = "Enregistrement de la commande…";
+
+      // 2. Enregistre la commande (le vendeur confirmera une fois le paiement reçu)
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/place_order`, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
