@@ -6,10 +6,10 @@
 <title>EtaChop — Crée ta boutique en ligne</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E63946">
-<link rel="apple-touch-icon" href="20260720_075600.png">
-<link rel="icon" type="image/png" href="20260720_075600.png">
+<link rel="apple-touch-icon" href="etachop-favicon.png">
+<link rel="icon" type="image/png" href="etachop-favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#1D1D1D; --paper:#FAFAFA; --line:rgba(20,18,31,0.1);
@@ -172,8 +172,9 @@
   .nav-item .nav-icon{ font-size:1.25rem; line-height:1; }
   .nav-item.active{ color:var(--primary); font-weight:700; }
   body{ padding-bottom:70px; }
-  .site-logo{ height:60px; padding:8px 12px; display:block; border-radius:10px; background:#1D1D1D; }
-  @media(min-width:768px){ .site-logo{ height:80px; } }
+  .site-logo-text{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.25rem; letter-spacing:-0.01em; display:inline-block; color:#fff; background:#1D1D1D; padding:6px 14px; border-radius:10px; }
+  .site-logo-text .accent{ color:#E63946; }
+  @media(min-width:768px){ .site-logo-text{ font-size:1.55rem; padding:8px 18px; } }
 </style>
 </head>
 <body>
@@ -182,7 +183,7 @@
 <div id="authScreen">
   <div class="auth-card">
     <div class="auth-logo" style="display:flex; align-items:center; justify-content:center; gap:8px;">
-      <img src="20260720_075600.png" alt="EtaChop" class="site-logo">
+      <span class="site-logo-text">Eta<span class="accent">Chop</span></span>
     </div>
     <div class="auth-sub">Crée ta boutique en ligne en quelques minutes</div>
 
@@ -238,7 +239,7 @@
 <div id="dashboard">
   <header>
     <div class="logo" style="display:flex; align-items:center; gap:8px;">
-      <img src="20260720_075600.png" alt="EtaChop" class="site-logo">
+      <span class="site-logo-text">Eta<span class="accent">Chop</span></span>
     </div>
     <div class="header-right">
       <button class="logout-btn" onclick="logout()">Déconnexion</button>
@@ -517,13 +518,23 @@
     </div>
     <!-- /ONGLET MENU -->
 
-    <!-- ONGLET SOLDE (bientôt disponible) -->
+    <!-- ONGLET SOLDE -->
     <div class="tab-panel" data-tab="balance">
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-num" id="statTotalSales">—</div><div class="stat-lbl">Ventes totales</div></div>
+        <div class="stat-card"><div class="stat-num" id="statPaidOut">—</div><div class="stat-lbl">Déjà reversé</div></div>
+      </div>
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-body" style="text-align:center; padding:26px 20px;">
+          <div style="font-size:0.8rem; opacity:0.6; margin-bottom:6px;">Solde disponible</div>
+          <div id="statBalanceOwed" style="font-size:2.2rem; font-weight:800; color:var(--primary); font-family:'Montserrat',sans-serif;">—</div>
+          <p style="font-size:0.78rem; opacity:0.5; margin-top:10px;">Contacte l'équipe EtaChop pour organiser ton retrait.</p>
+        </div>
+      </div>
       <div class="panel">
-        <div class="panel-body" style="text-align:center; padding:50px 20px;">
-          <div style="font-size:2.2rem; margin-bottom:12px;">💰</div>
-          <h3 style="font-size:1.1rem; margin-bottom:8px;">Bientôt disponible</h3>
-          <p style="opacity:0.6; font-size:0.88rem;">Le suivi de ton solde et les retraits arrivent très prochainement.</p>
+        <div class="panel-head"><h3>Historique des reversements</h3></div>
+        <div class="panel-body">
+          <div id="payoutsHistory"><div class="empty">Chargement…</div></div>
         </div>
       </div>
     </div>
@@ -797,6 +808,7 @@
     loadOrders();
     loadPromoCodes();
     loadDeliveryZones();
+    loadBalance();
     if(typeof subscribeToEtaNotifications === 'function'){
       subscribeToEtaNotifications('vendor', { storeId: currentStore.id });
     }
@@ -831,6 +843,50 @@
 
   // ---------- Statistiques de la page d'accueil ----------
   const PAID_STATUSES = ['confirmed','preparing','shipped','delivered'];
+
+  // ---------- Solde vendeur ----------
+  async function loadBalance(){
+    try {
+      const ordersRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${currentStore.id}&select=amount_fcfa,status`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const orders = await ordersRes.json();
+      const totalSales = orders.filter(o => PAID_STATUSES.includes(o.status)).reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
+
+      let totalPaidOut = 0;
+      let payouts = [];
+      try {
+        const payoutsRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_payouts?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+        });
+        if(payoutsRes.ok){
+          payouts = await payoutsRes.json();
+          totalPaidOut = payouts.reduce((sum,p) => sum + Number(p.amount_fcfa), 0);
+        }
+      } catch(e){ /* silencieux */ }
+
+      document.getElementById('statTotalSales').textContent = totalSales.toLocaleString('fr-FR') + ' F';
+      document.getElementById('statPaidOut').textContent = totalPaidOut.toLocaleString('fr-FR') + ' F';
+      document.getElementById('statBalanceOwed').textContent = (totalSales - totalPaidOut).toLocaleString('fr-FR') + ' FCFA';
+
+      const historyEl = document.getElementById('payoutsHistory');
+      if(payouts.length === 0){
+        historyEl.innerHTML = '<div class="empty">Aucun reversement pour l\'instant.</div>';
+      } else {
+        historyEl.innerHTML = payouts.map(p => `
+          <div style="display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--line); font-size:0.85rem;">
+            <div>
+              <div style="font-weight:700;">${Number(p.amount_fcfa).toLocaleString('fr-FR')} FCFA</div>
+              ${p.note ? `<div style="opacity:0.55; font-size:0.78rem;">${p.note}</div>` : ''}
+            </div>
+            <div style="opacity:0.5; font-size:0.78rem;">${new Date(p.created_at).toLocaleDateString('fr-FR')}</div>
+          </div>
+        `).join('');
+      }
+    } catch(err){
+      document.getElementById('payoutsHistory').innerHTML = '<div class="empty">Impossible de charger ton solde.</div>';
+    }
+  }
 
   async function loadHomeStats(){
     try {
