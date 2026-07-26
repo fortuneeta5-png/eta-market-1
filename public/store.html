@@ -222,7 +222,14 @@
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
 
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get('s');
+  let slug = params.get('s');
+  if(!slug){
+    // Pas de ?s=... dans le lien : on regarde si on est sur nomboutique.etachop.com
+    const hostParts = window.location.hostname.split('.');
+    if(hostParts.length > 2 && hostParts[0] !== 'www'){
+      slug = hostParts[0];
+    }
+  }
   const productId = params.get('p');
   let currentStore = null;
   let currentProduct = null;

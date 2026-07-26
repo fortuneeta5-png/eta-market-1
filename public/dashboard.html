@@ -319,6 +319,14 @@
           <input type="text" id="editStoreName">
         </div>
         <div class="field">
+          <label>Lien de ta boutique</label>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:0.78rem; opacity:0.5; white-space:nowrap;">.etachop.com</span>
+            <input type="text" id="editStoreSlug" oninput="checkSlugAvailability()" style="flex:1;">
+          </div>
+          <div id="slugCheckMsg" style="font-size:0.76rem; margin-top:6px;"></div>
+        </div>
+        <div class="field">
           <label>Bio de la boutique</label>
           <textarea id="editStoreDesc" rows="2" placeholder="Présente ta boutique en quelques mots..."></textarea>
         </div>
@@ -756,6 +764,48 @@
     document.getElementById('slugPreview').textContent = name ? STORE_URL_BASE + "?s=" + slugify(name) : "";
   }
 
+  let slugCheckTimeout = null;
+  let slugIsAvailable = true;
+  function checkSlugAvailability(){
+    clearTimeout(slugCheckTimeout);
+    const input = document.getElementById('editStoreSlug');
+    input.value = slugify(input.value);
+    const msg = document.getElementById('slugCheckMsg');
+    const newSlug = input.value;
+
+    if(!newSlug){
+      msg.textContent = "Le lien ne peut pas être vide."; msg.style.color = "#DC2626";
+      slugIsAvailable = false;
+      return;
+    }
+    if(newSlug === currentStore.slug){
+      msg.textContent = ""; slugIsAvailable = true;
+      return;
+    }
+
+    msg.textContent = "Vérification…"; msg.style.color = "inherit";
+    slugCheckTimeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?slug=eq.${newSlug}&select=id`, {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+        });
+        const existing = await res.json();
+        if(existing.length > 0){
+          slugIsAvailable = false;
+          const suggestions = [`${newSlug}-boutique`, `${newSlug}-${Math.floor(Math.random()*90+10)}`, `ma-${newSlug}`];
+          msg.innerHTML = `❌ Déjà pris. Essaie : ` + suggestions.map(s => `<a href="#" onclick="document.getElementById('editStoreSlug').value='${s}'; checkSlugAvailability(); return false;" style="color:var(--primary); text-decoration:underline;">${s}</a>`).join(', ');
+          msg.style.color = "#DC2626";
+        } else {
+          slugIsAvailable = true;
+          msg.textContent = "✅ Disponible !"; msg.style.color = "#059669";
+        }
+      } catch(err){
+        msg.textContent = "Erreur de vérification."; msg.style.color = "#DC2626";
+        slugIsAvailable = false;
+      }
+    }, 400);
+  }
+
   async function createStore(){
     const name = document.getElementById('storeName').value.trim();
     const description = document.getElementById('storeDesc').value.trim();
@@ -833,7 +883,7 @@
     } else {
       document.getElementById('bannerLogo').style.display = 'none';
     }
-    document.getElementById('storeLinkText').textContent = `store.html?s=${currentStore.slug}`;
+    document.getElementById('storeLinkText').textContent = `${currentStore.slug}.etachop.com`;
     document.getElementById('fbPixelInput').value = currentStore.fb_pixel_id || '';
     document.getElementById('tiktokPixelInput').value = currentStore.tiktok_pixel_id || '';
     document.getElementById('googleAdsInput').value = currentStore.google_ads_id || '';
@@ -1091,7 +1141,7 @@
   }
 
   function copyStoreLink(){
-    const link = `${STORE_URL_BASE}?s=${currentStore.slug}`;
+    const link = `https://${currentStore.slug}.etachop.com`;
     navigator.clipboard.writeText(link).then(()=>{
       const btn = event.target;
       const old = btn.textContent;
@@ -1147,6 +1197,8 @@
 
   function openStoreEdit(){
     document.getElementById('editStoreName').value = currentStore.name;
+    document.getElementById('editStoreSlug').value = currentStore.slug;
+    document.getElementById('slugCheckMsg').textContent = '';
     document.getElementById('editStoreDesc').value = currentStore.description || '';
     document.getElementById('editWhatsapp').value = currentStore.whatsapp_number || '';
     editSelectedColor = currentStore.accent_color;
@@ -1258,12 +1310,17 @@
 
   async function saveStoreEdit(){
     const name = document.getElementById('editStoreName').value.trim();
+    const newSlug = document.getElementById('editStoreSlug').value.trim();
     const description = document.getElementById('editStoreDesc').value.trim();
     const whatsapp = document.getElementById('editWhatsapp').value.trim();
     const msg = document.getElementById('storeEditMsg');
     const btn = document.getElementById('saveStoreEditBtn');
     if(!name){
       msg.textContent = "Le nom de la boutique est obligatoire."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    if(!newSlug || !slugIsAvailable){
+      msg.textContent = "Choisis un lien de boutique valide et disponible."; msg.className = "form-msg err"; msg.style.display = "block";
       return;
     }
     btn.disabled = true; btn.textContent = "Enregistrement…";
@@ -1307,7 +1364,7 @@
           'Content-Type': 'application/json', 'Prefer': 'return=representation',
         },
         body: JSON.stringify({
-          name, description, accent_color: editSelectedColor, logo_url: logoUrl,
+          name, slug: newSlug, description, accent_color: editSelectedColor, logo_url: logoUrl,
           banner_url: bannerUrl, font_theme: selectedFontTheme, whatsapp_number: whatsapp || null,
         }),
       });
