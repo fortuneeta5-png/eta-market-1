@@ -130,6 +130,17 @@
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton numéro de téléphone</label>
         <input type="tel" id="custPhone" placeholder="06 XXX XX XX" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
       </div>
+      <div style="border-top:1px solid var(--line); margin:16px 0 14px; padding-top:14px;">
+        <div style="font-weight:700; font-size:0.85rem; margin-bottom:10px;">Adresse de livraison</div>
+        <div style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Adresse complète (rue, repère...)</label>
+          <input type="text" id="custAddress" placeholder="Ex: 12 rue de la Paix, près de la pharmacie" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+        </div>
+        <div class="row2" style="margin-bottom:12px;">
+          <input type="text" id="custCity" placeholder="Ville (ex: Brazzaville)" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+          <input type="text" id="custDistrict" placeholder="Quartier (ex: Bacongo)" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+        </div>
+      </div>
       <div style="margin-bottom:18px;">
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Paiement par</label>
         <div style="display:flex; gap:10px;">
@@ -431,10 +442,17 @@
   async function submitOrder(){
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
+    const address = document.getElementById('custAddress').value.trim();
+    const city = document.getElementById('custCity').value.trim();
+    const district = document.getElementById('custDistrict').value.trim();
     const msg = document.getElementById('checkoutMsg');
     const btn = document.getElementById('confirmOrderBtn');
     if(!name || !phone){
       msg.textContent = "Merci de remplir ton nom et ton numéro."; msg.style.display = "block";
+      return;
+    }
+    if(!address || !city || !district){
+      msg.textContent = "L'adresse de livraison complète (adresse, ville, quartier) est obligatoire."; msg.style.display = "block";
       return;
     }
     if(!selectedProvider){
@@ -482,6 +500,7 @@
           p_customer_name: name, p_customer_phone: phone,
           p_promo_code: promoCode, p_delivery_zone_id: zoneId,
           p_variant_selection: variantText,
+          p_delivery_address: address, p_delivery_city: city, p_delivery_district: district,
         }),
       });
       if(!res.ok){

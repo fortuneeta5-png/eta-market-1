@@ -117,7 +117,10 @@
     <div class="login-sub">Espace administrateur</div>
     <div class="field">
       <label>Mot de passe</label>
-      <input type="password" id="passwordInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') tryLogin()">
+      <div style="position:relative;">
+        <input type="password" id="passwordInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') tryLogin()" style="width:100%; padding-right:44px;">
+        <button type="button" onclick="togglePasswordVisibility('passwordInput', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1.1rem; padding:4px; opacity:0.5;">👁️</button>
+      </div>
     </div>
     <button class="btn btn-primary" id="loginBtn" onclick="tryLogin()">Se connecter</button>
     <div class="login-error" id="loginError">Mot de passe incorrect. Réessaie.</div>
@@ -173,6 +176,32 @@
             </thead>
             <tbody id="storesOverviewBody">
               <tr><td colspan="5" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:24px;">
+      <div class="panel-head">
+        <h3>💸 Demandes de retrait</h3>
+        <button class="btn btn-dark" onclick="loadWithdrawalRequests()">Actualiser</button>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.85rem; min-width:520px;">
+            <thead>
+              <tr style="background:#faf9f7; text-align:left;">
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Vendeur</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">N° MoMo</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Montant</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Date</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Statut</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;"></th>
+              </tr>
+            </thead>
+            <tbody id="withdrawalsAdminBody">
+              <tr><td colspan="6" class="loading">Chargement…</td></tr>
             </tbody>
           </table>
         </div>
@@ -285,6 +314,17 @@
   const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
 
+  function togglePasswordVisibility(inputId, btnEl){
+    const input = document.getElementById(inputId);
+    if(input.type === 'password'){
+      input.type = 'text';
+      btnEl.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btnEl.textContent = '👁️';
+    }
+  }
+
   function tryLogin(){
     const val = document.getElementById('passwordInput').value;
     if(val === ADMIN_PASSWORD){
@@ -293,6 +333,7 @@
       sessionStorage.setItem('etaAdminLoggedIn', '1');
       loadProducts();
       loadAdminOverview();
+      loadWithdrawalRequests();
     } else {
       document.getElementById('loginError').style.display = 'block';
     }
@@ -308,6 +349,7 @@
     document.getElementById('dashboard').style.display = 'block';
     loadProducts();
     loadAdminOverview();
+    loadWithdrawalRequests();
   }
 
   // ---------- Upload photo (aperçu avant envoi) ----------
@@ -404,6 +446,65 @@
   // ---------- Charger / afficher les produits ----------
   // ---------- Vue d'ensemble EtaChop (toutes les boutiques + reversements) ----------
   let overviewStores = [];
+  // ---------- Demandes de retrait ----------
+  async function loadWithdrawalRequests(){
+    const body = document.getElementById('withdrawalsAdminBody');
+    body.innerHTML = '<tr><td colspan="6" class="loading">Chargement…</td></tr>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-withdrawals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminSecret: ADMIN_PASSWORD, action: 'list' }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || "Erreur");
+
+      if(data.requests.length === 0){
+        body.innerHTML = '<tr><td colspan="6" class="empty">Aucune demande pour l\'instant.</td></tr>';
+        return;
+      }
+      const statusLabel = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
+      const statusColor = { pending: '#92400E', approved: '#065F46', rejected: '#991B1B' };
+      const statusBg = { pending: '#FEF3C7', approved: '#D1FAE5', rejected: '#FEE2E2' };
+
+      body.innerHTML = data.requests.map(w => `
+        <tr style="border-top:1px solid var(--line);">
+          <td style="padding:10px;">${w.dp_stores?.name || '—'}</td>
+          <td style="padding:10px;">${w.momo_number}</td>
+          <td style="padding:10px; font-weight:700;">${Number(w.amount_fcfa).toLocaleString('fr-FR')} F</td>
+          <td style="padding:10px; opacity:0.6; font-size:0.78rem;">${new Date(w.created_at).toLocaleDateString('fr-FR')}</td>
+          <td style="padding:10px;"><span style="padding:4px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; background:${statusBg[w.status]}; color:${statusColor[w.status]};">${statusLabel[w.status]}</span></td>
+          <td style="padding:10px;">
+            ${w.status === 'pending' ? `
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-dark" style="font-size:0.7rem; padding:6px 10px;" onclick="processWithdrawal('${w.id}','approve')">✓ Approuver</button>
+                <button class="btn btn-ghost" style="font-size:0.7rem; padding:6px 10px; color:#DC2626;" onclick="processWithdrawal('${w.id}','reject')">✕ Rejeter</button>
+              </div>
+            ` : ''}
+          </td>
+        </tr>
+      `).join('');
+    } catch(err){
+      body.innerHTML = '<tr><td colspan="6" class="empty">Impossible de charger les demandes.</td></tr>';
+    }
+  }
+
+  async function processWithdrawal(requestId, action){
+    if(!confirm(action === 'approve' ? "Confirmer l'approbation de ce retrait ?" : "Confirmer le rejet de cette demande ?")) return;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-withdrawals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminSecret: ADMIN_PASSWORD, action, requestId }),
+      });
+      if(!res.ok) throw new Error();
+      loadWithdrawalRequests();
+      loadAdminOverview();
+    } catch(err){
+      alert("Erreur lors du traitement de la demande.");
+    }
+  }
+
   async function loadAdminOverview(){
     const body = document.getElementById('storesOverviewBody');
     body.innerHTML = '<tr><td colspan="5" class="loading">Chargement…</td></tr>';

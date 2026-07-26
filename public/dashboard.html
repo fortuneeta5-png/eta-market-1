@@ -202,7 +202,10 @@
     </div>
     <div class="field">
       <label>Mot de passe</label>
-      <input type="password" id="authPassword" placeholder="••••••••">
+      <div style="position:relative;">
+        <input type="password" id="authPassword" placeholder="••••••••" style="width:100%; padding-right:44px;">
+        <button type="button" onclick="togglePasswordVisibility('authPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1.1rem; padding:4px; opacity:0.5;">👁️</button>
+      </div>
     </div>
 
     <button class="btn btn-primary" id="authBtn" onclick="handleAuth()">Se connecter</button>
@@ -528,9 +531,32 @@
         <div class="panel-body" style="text-align:center; padding:26px 20px;">
           <div style="font-size:0.8rem; opacity:0.6; margin-bottom:6px;">Solde disponible</div>
           <div id="statBalanceOwed" style="font-size:2.2rem; font-weight:800; color:var(--primary); font-family:'Montserrat',sans-serif;">—</div>
-          <p style="font-size:0.78rem; opacity:0.5; margin-top:10px;">Contacte l'équipe EtaChop pour organiser ton retrait.</p>
         </div>
       </div>
+
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-head"><h3>Demander un retrait</h3></div>
+        <div class="panel-body">
+          <div class="field">
+            <label>Numéro MTN MoMo pour le retrait</label>
+            <input type="tel" id="withdrawMomoNumber" placeholder="06 XXX XX XX">
+          </div>
+          <div class="field">
+            <label>Montant à retirer (FCFA)</label>
+            <input type="number" id="withdrawAmount" placeholder="Ex: 10000" oninput="checkWithdrawAmount()">
+          </div>
+          <button class="btn btn-primary" id="withdrawBtn" style="width:100%;" onclick="requestWithdrawal()">Demander</button>
+          <div class="form-msg" id="withdrawMsg"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-head"><h3>Mes demandes de retrait</h3></div>
+        <div class="panel-body">
+          <div id="withdrawalsHistory"><div class="empty">Chargement…</div></div>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="panel-head"><h3>Historique des reversements</h3></div>
         <div class="panel-body">
@@ -606,6 +632,17 @@
 
   // ---------- Auth ----------
   let authMode = 'login';
+  function togglePasswordVisibility(inputId, btnEl){
+    const input = document.getElementById(inputId);
+    if(input.type === 'password'){
+      input.type = 'text';
+      btnEl.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btnEl.textContent = '👁️';
+    }
+  }
+
   function switchTab(mode){
     authMode = mode;
     document.getElementById('tabLogin').classList.toggle('active', mode==='login');
@@ -865,9 +902,22 @@
         }
       } catch(e){ /* silencieux */ }
 
+      let pendingWithdrawals = 0;
+      try {
+        const pendingRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests?store_id=eq.${currentStore.id}&status=eq.pending&select=amount_fcfa`, {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+        });
+        if(pendingRes.ok){
+          const pending = await pendingRes.json();
+          pendingWithdrawals = pending.reduce((sum,p) => sum + Number(p.amount_fcfa), 0);
+        }
+      } catch(e){ /* silencieux */ }
+
+      currentAvailableBalance = totalSales - totalPaidOut - pendingWithdrawals;
+
       document.getElementById('statTotalSales').textContent = totalSales.toLocaleString('fr-FR') + ' F';
       document.getElementById('statPaidOut').textContent = totalPaidOut.toLocaleString('fr-FR') + ' F';
-      document.getElementById('statBalanceOwed').textContent = (totalSales - totalPaidOut).toLocaleString('fr-FR') + ' FCFA';
+      document.getElementById('statBalanceOwed').textContent = currentAvailableBalance.toLocaleString('fr-FR') + ' FCFA';
 
       const historyEl = document.getElementById('payoutsHistory');
       if(payouts.length === 0){
@@ -883,10 +933,92 @@
           </div>
         `).join('');
       }
+      loadWithdrawals();
     } catch(err){
       document.getElementById('payoutsHistory').innerHTML = '<div class="empty">Impossible de charger ton solde.</div>';
     }
   }
+
+  let currentAvailableBalance = 0;
+  const WITHDRAWAL_STATUS_LABEL = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
+  const WITHDRAWAL_STATUS_COLOR = { pending: '#92400E', approved: '#065F46', rejected: '#991B1B' };
+  const WITHDRAWAL_STATUS_BG = { pending: '#FEF3C7', approved: '#D1FAE5', rejected: '#FEE2E2' };
+
+  function checkWithdrawAmount(){
+    const amount = parseInt(document.getElementById('withdrawAmount').value, 10);
+    const btn = document.getElementById('withdrawBtn');
+    const msg = document.getElementById('withdrawMsg');
+    if(amount > 0 && amount > currentAvailableBalance){
+      btn.disabled = true;
+      msg.textContent = "Solde insuffisant pour effectuer un retrait."; msg.className = "form-msg err"; msg.style.display = "block";
+    } else {
+      btn.disabled = false;
+      msg.style.display = "none";
+    }
+  }
+
+  async function requestWithdrawal(){
+    const momoNumber = document.getElementById('withdrawMomoNumber').value.trim();
+    const amount = parseInt(document.getElementById('withdrawAmount').value, 10);
+    const msg = document.getElementById('withdrawMsg');
+    const btn = document.getElementById('withdrawBtn');
+
+    if(!momoNumber || !amount || amount <= 0){
+      msg.textContent = "Remplis le numéro MoMo et un montant valide."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    if(amount > currentAvailableBalance){
+      msg.textContent = "Solde insuffisant pour effectuer un retrait."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = "Envoi…";
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ store_id: currentStore.id, momo_number: momoNumber, amount_fcfa: amount }),
+      });
+      if(!res.ok) throw new Error();
+      msg.textContent = "✅ Demande envoyée ! Elle sera traitée sous peu."; msg.className = "form-msg ok"; msg.style.display = "block";
+      document.getElementById('withdrawMomoNumber').value = '';
+      document.getElementById('withdrawAmount').value = '';
+      loadBalance();
+    } catch(err){
+      msg.textContent = "Erreur lors de l'envoi de la demande."; msg.className = "form-msg err"; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Demander";
+    }
+  }
+
+  async function loadWithdrawals(){
+    const el = document.getElementById('withdrawalsHistory');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const withdrawals = await res.json();
+      if(withdrawals.length === 0){
+        el.innerHTML = '<div class="empty">Aucune demande pour l\'instant.</div>';
+        return;
+      }
+      el.innerHTML = withdrawals.map(w => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--line); font-size:0.85rem;">
+          <div>
+            <div style="font-weight:700;">${Number(w.amount_fcfa).toLocaleString('fr-FR')} FCFA</div>
+            <div style="opacity:0.5; font-size:0.76rem;">${w.momo_number} — ${new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
+          </div>
+          <span style="padding:4px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; background:${WITHDRAWAL_STATUS_BG[w.status]}; color:${WITHDRAWAL_STATUS_COLOR[w.status]};">${WITHDRAWAL_STATUS_LABEL[w.status]}</span>
+        </div>
+      `).join('');
+    } catch(err){
+      el.innerHTML = '<div class="empty">Impossible de charger tes demandes.</div>';
+    }
+  }
+
 
   async function loadHomeStats(){
     try {
@@ -1603,7 +1735,7 @@
       body.innerHTML = orders.map(o => `
         <tr style="border-top:1px solid var(--line);">
           <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span><br><span style="opacity:0.4; font-size:0.7rem; font-family:monospace;">${o.tracking_code || ''}</span></td>
-          <td style="padding:10px 16px;">${o.product_name_snapshot}${o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${o.variant_selection}</span>` : ''}</td>
+          <td style="padding:10px 16px;">${o.product_name_snapshot}${o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${o.variant_selection}</span>` : ''}${o.delivery_address ? `<br><span style="opacity:0.5; font-size:0.72rem;">📍 ${o.delivery_address}, ${o.delivery_district}, ${o.delivery_city}</span>` : ''}</td>
           <td style="padding:10px 16px; font-weight:700;">${Number(o.amount_fcfa).toLocaleString('fr-FR')} F</td>
           <td style="padding:10px 16px;">
             <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${o.status}" style="border:none; cursor:pointer;">
