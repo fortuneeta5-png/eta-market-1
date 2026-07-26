@@ -8,11 +8,17 @@ export default {
     if (hasVendorSubdomain && (url.pathname === '/' || url.pathname === '')) {
       const rewrittenUrl = new URL(request.url);
       rewrittenUrl.pathname = '/store.html';
+      rewrittenUrl.searchParams.set('_h', hostParts[0]);
+
       const assetRequest = new Request(rewrittenUrl.toString(), {
         method: request.method,
         headers: request.headers,
+        cf: { cacheTtl: 0, cacheEverything: false },
       });
-      return env.ASSETS.fetch(assetRequest);
+      const response = await env.ASSETS.fetch(assetRequest);
+      const newResponse = new Response(response.body, response);
+      newResponse.headers.set('Cache-Control', 'no-store');
+      return newResponse;
     }
 
     return env.ASSETS.fetch(request);
