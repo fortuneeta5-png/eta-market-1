@@ -461,16 +461,11 @@
     <!-- ONGLET MENU (suite) -->
     <div class="tab-panel" data-tab="menu">
     <div class="panel" id="subscriptionPanel">
-      <div class="panel-head"><h3>Mon abonnement</h3></div>
+      <div class="panel-head"><h3>Gratuit — 10% de commission</h3></div>
       <div class="panel-body">
-        <div id="subscriptionStatus" style="margin-bottom:16px; padding:14px; border-radius:12px; font-size:0.88rem; font-weight:600;"></div>
-        <a id="paySubscriptionBtn" href="https://huorzuiv.mychariow.shop/prd_76do317m" target="_blank" class="btn btn-primary" style="width:100%; text-align:center; display:block; margin-bottom:14px; text-decoration:none;">Payer mon abonnement — 5 000 FCFA/mois</a>
-        <div class="field">
-          <label>Clé de licence reçue après paiement</label>
-          <input type="text" id="licenseKeyInput" placeholder="Colle ta clé ici">
-        </div>
-        <button class="btn btn-ghost" style="width:100%;" onclick="activateLicense()">Activer mon abonnement</button>
-        <div class="form-msg" id="licenseMsg"></div>
+        <p style="font-size:0.85rem; opacity:0.7; line-height:1.6;">
+          Créer et gérer ta boutique sur EtaChop est <strong>100% gratuit</strong>, sans abonnement. EtaChop prélève simplement <strong>10% sur chaque vente confirmée</strong> — tu gardes 90% de chaque commande, versés directement sur demande de retrait.
+        </p>
       </div>
     </div>
 
@@ -533,6 +528,7 @@
     <div class="tab-panel" data-tab="balance">
       <div class="stats-grid" style="margin-bottom:20px;">
         <div class="stat-card"><div class="stat-num" id="statTotalSales">—</div><div class="stat-lbl">Ventes totales</div></div>
+        <div class="stat-card"><div class="stat-num" id="statCommission">—</div><div class="stat-lbl">Commission EtaChop (10%)</div></div>
         <div class="stat-card"><div class="stat-num" id="statPaidOut">—</div><div class="stat-lbl">Déjà reversé</div></div>
       </div>
       <div class="panel" style="margin-bottom:20px;">
@@ -589,6 +585,14 @@
 <div id="editOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
   <div style="background:#fff; border-radius:18px; padding:26px; max-width:420px; width:100%; max-height:90vh; overflow-y:auto;">
     <h3 style="font-size:1.15rem; margin-bottom:18px;">Modifier le produit</h3>
+    <label class="upload-zone" id="editPhotoUploadZone" style="padding:16px;">
+      <div id="editPhotoPlaceholder">
+        <div style="font-size:1.8rem; margin-bottom:8px;">📷</div>
+        <div class="hint">Touche pour changer la photo principale</div>
+      </div>
+      <img id="editPhotoPreview" style="display:none; max-width:100%; max-height:150px; border-radius:10px; margin-bottom:10px;">
+      <input type="file" id="editPhotoInput" accept="image/*" onchange="previewEditPhoto(event)">
+    </label>
     <div class="field">
       <label>Nom du produit</label>
       <input type="text" id="editName">
@@ -887,7 +891,6 @@
     document.getElementById('fbPixelInput').value = currentStore.fb_pixel_id || '';
     document.getElementById('tiktokPixelInput').value = currentStore.tiktok_pixel_id || '';
     document.getElementById('googleAdsInput').value = currentStore.google_ads_id || '';
-    renderSubscriptionStatus();
     renderRatingSummary();
     renderGreeting();
     loadProducts().then(() => loadHomeStats());
@@ -939,6 +942,7 @@
       });
       const orders = await ordersRes.json();
       const totalSales = orders.filter(o => PAID_STATUSES.includes(o.status)).reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
+      const vendorShare = Math.round(totalSales * 0.9); // EtaChop garde 10% de commission
 
       let totalPaidOut = 0;
       let payouts = [];
@@ -963,9 +967,10 @@
         }
       } catch(e){ /* silencieux */ }
 
-      currentAvailableBalance = totalSales - totalPaidOut - pendingWithdrawals;
+      currentAvailableBalance = vendorShare - totalPaidOut - pendingWithdrawals;
 
       document.getElementById('statTotalSales').textContent = totalSales.toLocaleString('fr-FR') + ' F';
+      document.getElementById('statCommission').textContent = (totalSales - vendorShare).toLocaleString('fr-FR') + ' F';
       document.getElementById('statPaidOut').textContent = totalPaidOut.toLocaleString('fr-FR') + ' F';
       document.getElementById('statBalanceOwed').textContent = currentAvailableBalance.toLocaleString('fr-FR') + ' FCFA';
 
@@ -1469,7 +1474,7 @@
       const productData = await insertRes.json();
       if(!insertRes.ok) throw new Error(productData.message || "Échec de la publication");
 
-      const productLink = `${STORE_URL_BASE}?s=${currentStore.slug}&p=${productData[0].id}`;
+      const productLink = `https://${currentStore.slug}.etachop.com/${productData[0].id}`;
       msg.innerHTML = `✅ Produit publié !<br><span style="font-family:monospace; font-size:0.78rem; word-break:break-all;">${productLink}</span>`;
       msg.className = "form-msg ok"; msg.style.display = "block";
 
@@ -1557,6 +1562,7 @@
 
   // ---------- Modifier un produit ----------
   let editingId = null;
+  let selectedEditPhotoFile = null;
   function openEdit(id){
     const p = currentProducts.find(x => x.id === id);
     if(!p) return;
@@ -1566,8 +1572,30 @@
     document.getElementById('editStock').value = p.stock_quantity;
     document.getElementById('editDesc').value = p.description || '';
     document.getElementById('editMsg').style.display = 'none';
+    selectedEditPhotoFile = null;
+    if(p.image_url){
+      document.getElementById('editPhotoPreview').src = p.image_url;
+      document.getElementById('editPhotoPreview').style.display = 'block';
+      document.getElementById('editPhotoPlaceholder').style.display = 'none';
+    } else {
+      document.getElementById('editPhotoPreview').style.display = 'none';
+      document.getElementById('editPhotoPlaceholder').style.display = 'block';
+    }
     document.getElementById('editOverlay').style.display = 'flex';
     loadVariantOptions(id);
+  }
+
+  function previewEditPhoto(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    selectedEditPhotoFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('editPhotoPreview').src = e.target.result;
+      document.getElementById('editPhotoPreview').style.display = 'block';
+      document.getElementById('editPhotoPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
   }
 
   async function loadVariantOptions(productId){
@@ -1638,13 +1666,30 @@
     }
     btn.disabled = true; btn.textContent = "Enregistrement…";
     try {
+      const updateBody = { name, price_fcfa: parseInt(price,10), stock_quantity: parseInt(stock,10) || 0, description };
+
+      if(selectedEditPhotoFile){
+        const ext = (selectedEditPhotoFile.name.split('.').pop() || 'jpg').toLowerCase();
+        const fileName = `${currentStore.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': selectedEditPhotoFile.type,
+          },
+          body: selectedEditPhotoFile,
+        });
+        if(!uploadRes.ok) throw new Error("Échec de l'upload de la photo");
+        updateBody.image_url = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
+      }
+
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?id=eq.${editingId}`, {
         method: 'PATCH',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json', 'Prefer': 'return=minimal',
         },
-        body: JSON.stringify({ name, price_fcfa: parseInt(price,10), stock_quantity: parseInt(stock,10) || 0, description }),
+        body: JSON.stringify(updateBody),
       });
       if(!res.ok) throw new Error();
       closeEdit();
