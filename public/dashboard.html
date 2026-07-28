@@ -209,7 +209,40 @@
     </div>
 
     <button class="btn btn-primary" id="authBtn" onclick="handleAuth()">Se connecter</button>
+    <div style="text-align:center; margin-top:12px;">
+      <a href="#" onclick="openForgotPassword(); return false;" style="font-size:0.82rem; color:var(--primary); text-decoration:none;">Mot de passe oublié ?</a>
+    </div>
     <div class="auth-msg" id="authMsg"></div>
+  </div>
+</div>
+
+<!-- Mot de passe oublié -->
+<div id="forgotPasswordOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:95; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
+    <h3 style="font-size:1.1rem; margin-bottom:10px;">Mot de passe oublié</h3>
+    <p style="font-size:0.85rem; opacity:0.6; margin-bottom:16px;">Indique ton email, on t'envoie un lien pour créer un nouveau mot de passe.</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="forgotEmail" placeholder="toi@exemple.com">
+    </div>
+    <div class="form-msg" id="forgotMsg"></div>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeForgotPassword()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1;" id="sendResetBtn" onclick="sendPasswordReset()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nouveau mot de passe (après avoir cliqué sur le lien reçu par email) -->
+<div id="newPasswordOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:96; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
+    <h3 style="font-size:1.1rem; margin-bottom:16px;">Choisis un nouveau mot de passe</h3>
+    <div class="field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="newPasswordInput" placeholder="••••••••">
+    </div>
+    <div class="form-msg" id="newPasswordMsg"></div>
+    <button class="btn btn-primary" style="width:100%; margin-top:10px;" id="saveNewPasswordBtn" onclick="saveNewPassword()">Enregistrer le nouveau mot de passe</button>
   </div>
 </div>
 
@@ -520,6 +553,21 @@
       </div>
     </div>
 
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Changer mon mot de passe</h3></div>
+      <div class="panel-body">
+        <div class="field">
+          <label>Nouveau mot de passe</label>
+          <div style="position:relative;">
+            <input type="password" id="vendorNewPassword" placeholder="••••••••" style="width:100%; padding-right:44px;">
+            <button type="button" onclick="togglePasswordVisibility('vendorNewPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1.1rem; padding:4px; opacity:0.5;">👁️</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="changeVendorPassword()">Enregistrer le nouveau mot de passe</button>
+        <div class="form-msg" id="vendorPasswordMsg"></div>
+      </div>
+    </div>
+
     <button class="logout-btn" style="width:100%; margin-top:6px;" onclick="logout()">Déconnexion</button>
     </div>
     <!-- /ONGLET MENU -->
@@ -655,6 +703,84 @@
     }
   }
 
+  function openForgotPassword(){
+    document.getElementById('forgotEmail').value = document.getElementById('authEmail').value || '';
+    document.getElementById('forgotMsg').style.display = 'none';
+    document.getElementById('forgotPasswordOverlay').style.display = 'flex';
+  }
+  function closeForgotPassword(){
+    document.getElementById('forgotPasswordOverlay').style.display = 'none';
+  }
+
+  async function sendPasswordReset(){
+    const email = document.getElementById('forgotEmail').value.trim();
+    const msg = document.getElementById('forgotMsg');
+    const btn = document.getElementById('sendResetBtn');
+    if(!email){
+      msg.textContent = "Indique ton email."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Envoi…";
+    try {
+      await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, redirect_to: window.location.origin + window.location.pathname }),
+      });
+      // On affiche toujours le même message, même si l'email n'existe pas (sécurité)
+      msg.textContent = "✅ Si ce compte existe, un email vient d'être envoyé avec un lien pour réinitialiser ton mot de passe."; msg.className = "form-msg ok"; msg.style.display = "block";
+    } catch(err){
+      msg.textContent = "Erreur lors de l'envoi. Réessaie."; msg.className = "form-msg err"; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Envoyer";
+    }
+  }
+
+  let recoveryAccessToken = null;
+  async function saveNewPassword(){
+    const newPassword = document.getElementById('newPasswordInput').value;
+    const msg = document.getElementById('newPasswordMsg');
+    const btn = document.getElementById('saveNewPasswordBtn');
+    if(!newPassword || newPassword.length < 6){
+      msg.textContent = "Le mot de passe doit faire au moins 6 caractères."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Enregistrement…";
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        method: 'PUT',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${recoveryAccessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if(!res.ok) throw new Error();
+      msg.textContent = "✅ Mot de passe mis à jour ! Tu peux te connecter."; msg.className = "form-msg ok"; msg.style.display = "block";
+      setTimeout(() => {
+        document.getElementById('newPasswordOverlay').style.display = 'none';
+        window.history.replaceState({}, '', window.location.pathname);
+      }, 1800);
+    } catch(err){
+      msg.textContent = "Le lien a peut-être expiré. Redemande une réinitialisation."; msg.className = "form-msg err"; msg.style.display = "block";
+    } finally {
+      btn.disabled = false; btn.textContent = "Enregistrer le nouveau mot de passe";
+    }
+  }
+
+  // Si on arrive depuis le lien reçu par email (contient un token de récupération dans l'adresse)
+  (function checkForPasswordRecovery(){
+    const hash = window.location.hash;
+    if(hash && hash.includes('type=recovery')){
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const token = hashParams.get('access_token');
+      if(token){
+        recoveryAccessToken = token;
+        document.getElementById('newPasswordOverlay').style.display = 'flex';
+      }
+    }
+  })();
+
   function switchTab(mode){
     authMode = mode;
     document.getElementById('tabLogin').classList.toggle('active', mode==='login');
@@ -708,6 +834,30 @@
       msg.textContent = err.message; msg.className = "auth-msg err"; msg.style.display = "block";
     } finally {
       btn.disabled = false; btn.textContent = authMode==='login' ? 'Se connecter' : 'Créer mon compte';
+    }
+  }
+
+  async function changeVendorPassword(){
+    const newPassword = document.getElementById('vendorNewPassword').value;
+    const msg = document.getElementById('vendorPasswordMsg');
+    if(!newPassword || newPassword.length < 6){
+      msg.textContent = "Le mot de passe doit faire au moins 6 caractères."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        method: 'PUT',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if(!res.ok) throw new Error();
+      msg.textContent = "✅ Mot de passe mis à jour !"; msg.className = "form-msg ok"; msg.style.display = "block";
+      document.getElementById('vendorNewPassword').value = '';
+    } catch(err){
+      msg.textContent = "Erreur lors de la mise à jour."; msg.className = "form-msg err"; msg.style.display = "block";
     }
   }
 
