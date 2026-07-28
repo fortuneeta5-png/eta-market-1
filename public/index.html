@@ -2,9 +2,17 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=explore.html">
 <title>EtaChop</title>
-<script>window.location.href = "explore.html";</script>
+<script>
+  // Si on arrive ici avec un lien de récupération de mot de passe
+  // (ou tout autre lien d'authentification), on va vers dashboard.html
+  // EN GARDANT le jeton de sécurité, au lieu de le perdre.
+  if(window.location.hash && window.location.hash.includes('type=recovery')){
+    window.location.href = 'dashboard.html' + window.location.hash;
+  } else {
+    window.location.href = 'explore.html';
+  }
+</script>
 </head>
 <body>
 <p>Redirection vers <a href="explore.html">EtaChop</a>...</p>
