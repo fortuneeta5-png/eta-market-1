@@ -725,7 +725,7 @@
       await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, redirect_to: window.location.origin + window.location.pathname }),
+        body: JSON.stringify({ email, redirect_to: 'https://etachop.com/dashboard.html' }),
       });
       // On affiche toujours le même message, même si l'email n'existe pas (sécurité)
       msg.textContent = "✅ Si ce compte existe, un email vient d'être envoyé avec un lien pour réinitialiser ton mot de passe."; msg.className = "form-msg ok"; msg.style.display = "block";
