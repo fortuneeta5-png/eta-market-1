@@ -493,6 +493,31 @@
 
     <!-- ONGLET MENU (suite) -->
     <div class="tab-panel" data-tab="menu">
+    <div class="panel" id="boostPanel">
+      <div class="panel-head"><h3>📢 Booster ma boutique sur Facebook</h3></div>
+      <div class="panel-body">
+        <p style="font-size:0.82rem; opacity:0.65; margin-bottom:16px;">EtaChop crée et diffuse une publicité Facebook pour ta boutique, payable directement en Mobile Money. Choisis un forfait :</p>
+        <div id="boostPackages" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+          <button type="button" class="boost-pkg-btn" data-name="Boost 3 jours" data-amount="5000" onclick="selectBoostPackage(this)" style="text-align:left; padding:14px; border-radius:12px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-family:'Poppins',sans-serif;">
+            <strong>Boost 3 jours</strong> — 5 000 FCFA
+          </button>
+          <button type="button" class="boost-pkg-btn" data-name="Boost 7 jours" data-amount="10000" onclick="selectBoostPackage(this)" style="text-align:left; padding:14px; border-radius:12px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-family:'Poppins',sans-serif;">
+            <strong>Boost 7 jours</strong> — 10 000 FCFA
+          </button>
+          <button type="button" class="boost-pkg-btn" data-name="Boost 15 jours" data-amount="18000" onclick="selectBoostPackage(this)" style="text-align:left; padding:14px; border-radius:12px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-family:'Poppins',sans-serif;">
+            <strong>Boost 15 jours</strong> — 18 000 FCFA
+          </button>
+        </div>
+        <div class="field">
+          <label>Ton numéro pour le paiement</label>
+          <input type="tel" id="boostPhone" placeholder="06 XXX XX XX">
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="requestBoost()">Payer et lancer le boost</button>
+        <div class="form-msg" id="boostMsg"></div>
+        <div id="myBoosts" style="margin-top:18px;"></div>
+      </div>
+    </div>
+
     <div class="panel" id="subscriptionPanel">
       <div class="panel-head"><h3>Gratuit — 10% de commission</h3></div>
       <div class="panel-body">
@@ -837,6 +862,71 @@
     }
   }
 
+  let selectedBoostPackage = null;
+  function selectBoostPackage(btnEl){
+    selectedBoostPackage = { name: btnEl.dataset.name, amount: parseInt(btnEl.dataset.amount, 10) };
+    document.querySelectorAll('.boost-pkg-btn').forEach(b => {
+      b.style.borderColor = 'var(--line)'; b.style.background = '#fff';
+    });
+    btnEl.style.borderColor = 'var(--primary)'; btnEl.style.background = 'var(--lavender)';
+  }
+
+  async function requestBoost(){
+    const phone = document.getElementById('boostPhone').value.trim();
+    const msg = document.getElementById('boostMsg');
+    if(!selectedBoostPackage){
+      msg.textContent = "Choisis d'abord un forfait."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    if(!phone){
+      msg.textContent = "Indique ton numéro de paiement."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    msg.textContent = "Envoi de la demande de paiement…"; msg.className = "form-msg"; msg.style.display = "block";
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/openpay-initiate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: selectedBoostPackage.amount, phone, provider: 'MTN', customerName: currentStore.name, orderId: 'BOOST-' + Date.now() }),
+      });
+
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_boost_requests`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ store_id: currentStore.id, package_name: selectedBoostPackage.name, amount_fcfa: selectedBoostPackage.amount }),
+      });
+
+      msg.textContent = "✅ Demande envoyée ! Valide le paiement sur ton téléphone. EtaChop lancera ta pub sous peu."; msg.className = "form-msg ok"; msg.style.display = "block";
+      loadMyBoosts();
+    } catch(err){
+      msg.textContent = "Erreur lors de l'envoi. Réessaie."; msg.className = "form-msg err"; msg.style.display = "block";
+    }
+  }
+
+  async function loadMyBoosts(){
+    const el = document.getElementById('myBoosts');
+    if(!el) return;
+    const statusLabel = { pending: 'En attente de paiement', active: 'Pub en cours 🚀', completed: 'Terminé', cancelled: 'Annulé' };
+    const statusColor = { pending: '#92400E', active: '#065F46', completed: '#374151', cancelled: '#991B1B' };
+    const statusBg = { pending: '#FEF3C7', active: '#D1FAE5', completed: '#F3F4F6', cancelled: '#FEE2E2' };
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_boost_requests?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const boosts = await res.json();
+      if(boosts.length === 0){ el.innerHTML = ''; return; }
+      el.innerHTML = '<div style="font-weight:700; font-size:0.85rem; margin-bottom:8px;">Mes boosts</div>' + boosts.map(b => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); font-size:0.82rem;">
+          <span>${b.package_name}</span>
+          <span style="padding:3px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; background:${statusBg[b.status]}; color:${statusColor[b.status]};">${statusLabel[b.status]}</span>
+        </div>
+      `).join('');
+    } catch(err){ /* silencieux */ }
+  }
+
   async function changeVendorPassword(){
     const newPassword = document.getElementById('vendorNewPassword').value;
     const msg = document.getElementById('vendorPasswordMsg');
@@ -1049,6 +1139,7 @@
     loadPromoCodes();
     loadDeliveryZones();
     loadBalance();
+    loadMyBoosts();
     if(typeof subscribeToEtaNotifications === 'function'){
       subscribeToEtaNotifications('vendor', { storeId: currentStore.id });
     }

@@ -170,7 +170,7 @@
                 <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Boutique</th>
                 <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Ventes totales</th>
                 <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Déjà reversé</th>
-                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Solde dû</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Solde dû (90%)</th>
                 <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;"></th>
               </tr>
             </thead>
@@ -202,6 +202,31 @@
             </thead>
             <tbody id="withdrawalsAdminBody">
               <tr><td colspan="6" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:24px;">
+      <div class="panel-head">
+        <h3>📢 Demandes de boost Facebook</h3>
+        <button class="btn btn-dark" onclick="loadBoostRequests()">Actualiser</button>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.85rem; min-width:520px;">
+            <thead>
+              <tr style="background:#faf9f7; text-align:left;">
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Boutique</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Forfait</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Montant</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Statut</th>
+                <th style="padding:10px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;"></th>
+              </tr>
+            </thead>
+            <tbody id="boostsAdminBody">
+              <tr><td colspan="5" class="loading">Chargement…</td></tr>
             </tbody>
           </table>
         </div>
@@ -334,6 +359,7 @@
       loadProducts();
       loadAdminOverview();
       loadWithdrawalRequests();
+      loadBoostRequests();
     } else {
       document.getElementById('loginError').style.display = 'block';
     }
@@ -350,6 +376,7 @@
     loadProducts();
     loadAdminOverview();
     loadWithdrawalRequests();
+    loadBoostRequests();
   }
 
   // ---------- Upload photo (aperçu avant envoi) ----------
@@ -447,6 +474,66 @@
   // ---------- Vue d'ensemble EtaChop (toutes les boutiques + reversements) ----------
   let overviewStores = [];
   // ---------- Demandes de retrait ----------
+  // ---------- Demandes de boost Facebook ----------
+  async function loadBoostRequests(){
+    const body = document.getElementById('boostsAdminBody');
+    body.innerHTML = '<tr><td colspan="5" class="loading">Chargement…</td></tr>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-boosts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminSecret: ADMIN_PASSWORD, action: 'list' }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || "Erreur");
+
+      if(data.requests.length === 0){
+        body.innerHTML = '<tr><td colspan="5" class="empty">Aucune demande pour l\'instant.</td></tr>';
+        return;
+      }
+      const statusLabel = { pending: 'En attente', active: 'Actif', completed: 'Terminé', cancelled: 'Annulé' };
+      const statusColor = { pending: '#92400E', active: '#065F46', completed: '#374151', cancelled: '#991B1B' };
+      const statusBg = { pending: '#FEF3C7', active: '#D1FAE5', completed: '#F3F4F6', cancelled: '#FEE2E2' };
+
+      body.innerHTML = data.requests.map(b => `
+        <tr style="border-top:1px solid var(--line);">
+          <td style="padding:10px;">
+            ${b.dp_stores?.name || '—'}<br>
+            <a href="https://${b.dp_stores?.slug}.etachop.com" target="_blank" style="font-size:0.75rem; opacity:0.6;">${b.dp_stores?.slug}.etachop.com</a>
+            ${b.dp_stores?.whatsapp_number ? `<br><span style="font-size:0.75rem; opacity:0.6;">📞 ${b.dp_stores.whatsapp_number}</span>` : ''}
+          </td>
+          <td style="padding:10px;">${b.package_name}</td>
+          <td style="padding:10px; font-weight:700;">${Number(b.amount_fcfa).toLocaleString('fr-FR')} F</td>
+          <td style="padding:10px;"><span style="padding:4px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; background:${statusBg[b.status]}; color:${statusColor[b.status]};">${statusLabel[b.status]}</span></td>
+          <td style="padding:10px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${b.status === 'pending' ? `<button class="btn btn-dark" style="font-size:0.7rem; padding:6px 10px;" onclick="processBoost('${b.id}','activate')">Activer</button><button class="btn btn-ghost" style="font-size:0.7rem; padding:6px 10px; color:#DC2626;" onclick="processBoost('${b.id}','cancel')">Annuler</button>` : ''}
+              ${b.status === 'active' ? `<button class="btn btn-dark" style="font-size:0.7rem; padding:6px 10px;" onclick="processBoost('${b.id}','complete')">Marquer terminé</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    } catch(err){
+      body.innerHTML = '<tr><td colspan="5" class="empty">Impossible de charger les demandes.</td></tr>';
+    }
+  }
+
+  async function processBoost(requestId, action){
+    const confirmText = { activate: "Confirmer l'activation de ce boost ?", complete: "Marquer ce boost comme terminé ?", cancel: "Confirmer l'annulation ?" };
+    if(!confirm(confirmText[action])) return;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-boosts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminSecret: ADMIN_PASSWORD, action, requestId }),
+      });
+      if(!res.ok) throw new Error();
+      loadBoostRequests();
+    } catch(err){
+      alert("Erreur lors du traitement.");
+    }
+  }
+
   async function loadWithdrawalRequests(){
     const body = document.getElementById('withdrawalsAdminBody');
     body.innerHTML = '<tr><td colspan="6" class="loading">Chargement…</td></tr>';
