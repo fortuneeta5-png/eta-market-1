@@ -37,7 +37,7 @@
   .powered{ font-size:0.8rem; color:#1D1D1D; background:#fff; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,0.12); }
 
   .wrap{ max-width:1000px; margin:0 auto; padding:0 20px 60px; }
-  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:18px; margin-top:24px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:14px; margin-top:24px; }
   .card{ background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.06); transition:transform .2s ease; cursor:pointer; }
   .card:hover{ transform:translateY(-4px); }
   .card .img-wrap{ width:100%; aspect-ratio:1; background:#F3F3F3; display:flex; align-items:center; justify-content:center; }
@@ -488,20 +488,7 @@
       const promoCode = document.getElementById('promoInput').value.trim().toUpperCase() || null;
       const total = currentProduct.price_fcfa - appliedDiscount + selectedZoneFee;
 
-      // 1. Déclenche la vraie demande de paiement OpenPay sur le téléphone du client
-      const payRes = await fetch(`${SUPABASE_URL}/functions/v1/openpay-initiate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total, phone, customerName: name, provider: selectedProvider, orderId: 'ETA-' + Date.now() }),
-      });
-      if(!payRes.ok){
-        const payErr = await payRes.json();
-        throw new Error(payErr.error || "Échec de l'envoi du paiement. Vérifie ton numéro et réessaie.");
-      }
-
-      btn.textContent = "Enregistrement de la commande…";
-
-      // 2. Enregistre la commande (le vendeur confirmera une fois le paiement reçu)
+      // 1. Enregistre d'abord la commande (statut "en attente"), pour avoir un identifiant réel
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/place_order`, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
@@ -517,6 +504,23 @@
         const errData = await res.json();
         throw new Error(errData.message && errData.message.includes('rupture') ? "Ce produit vient d'être épuisé, désolé !" : "Erreur, réessaie.");
       }
+      const orderResult = await res.json();
+      const realOrderId = orderResult[0]?.order_id;
+
+      btn.textContent = "Envoi de la demande de paiement…";
+
+      // 2. Déclenche la vraie demande de paiement OpenPay, avec l'identifiant RÉEL de la commande
+      // (permet de relier la notification de paiement OpenPay à cette commande précise)
+      const payRes = await fetch(`${SUPABASE_URL}/functions/v1/openpay-initiate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: total, phone, customerName: name, provider: selectedProvider, orderId: realOrderId }),
+      });
+      if(!payRes.ok){
+        const payErr = await payRes.json();
+        throw new Error(payErr.error || "Échec de l'envoi du paiement. Vérifie ton numéro et réessaie.");
+      }
+
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
       trackPurchase(currentProduct.price_fcfa);
