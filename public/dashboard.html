@@ -1474,57 +1474,6 @@
   function closeStoreEdit(){
     document.getElementById('storeEditOverlay').style.display = 'none';
   }
-  // ---------- Abonnement (essai gratuit + licence Chariow) ----------
-  function renderSubscriptionStatus(){
-    const el = document.getElementById('subscriptionStatus');
-    const now = new Date();
-
-    if(currentStore.subscription_active && currentStore.subscription_expires_at && new Date(currentStore.subscription_expires_at) > now){
-      const daysLeft = Math.ceil((new Date(currentStore.subscription_expires_at) - now) / (1000*60*60*24));
-      el.style.background = '#D1FAE5'; el.style.color = '#065F46';
-      el.textContent = `✅ Abonnement actif — renouvellement dans ${daysLeft} jour${daysLeft>1?'s':''}`;
-      document.getElementById('paySubscriptionBtn').style.display = 'none';
-      return;
-    }
-
-    const trialEnd = new Date(currentStore.trial_ends_at);
-    const daysLeftTrial = Math.ceil((trialEnd - now) / (1000*60*60*24));
-
-    if(daysLeftTrial > 0){
-      el.style.background = '#DBEAFE'; el.style.color = '#1E40AF';
-      el.textContent = `🎁 Essai gratuit — encore ${daysLeftTrial} jour${daysLeftTrial>1?'s':''} avant de devoir t'abonner`;
-    } else {
-      el.style.background = '#FEE2E2'; el.style.color = '#991B1B';
-      el.textContent = `⚠️ Ton essai gratuit est terminé — abonne-toi pour continuer à vendre sur EtaChop`;
-    }
-    document.getElementById('paySubscriptionBtn').style.display = 'block';
-  }
-
-  async function activateLicense(){
-    const licenseKey = document.getElementById('licenseKeyInput').value.trim();
-    const msg = document.getElementById('licenseMsg');
-    if(!licenseKey){
-      msg.textContent = "Colle ta clé de licence reçue par Chariow."; msg.className = "form-msg err"; msg.style.display = "block";
-      return;
-    }
-    msg.textContent = "Vérification…"; msg.className = "form-msg"; msg.style.display = "block";
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/chariow-verify-license`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ licenseKey, storeId: currentStore.id }),
-      });
-      const data = await res.json();
-      if(!res.ok) throw new Error(data.error || "Échec de l'activation");
-
-      currentStore.subscription_active = true;
-      currentStore.subscription_expires_at = data.expiresAt;
-      msg.textContent = "✅ Abonnement activé ! Merci."; msg.className = "form-msg ok"; msg.style.display = "block";
-      renderSubscriptionStatus();
-    } catch(err){
-      msg.textContent = "❌ " + err.message; msg.className = "form-msg err"; msg.style.display = "block";
-    }
-  }
 
   async function savePixels(){
     const fbPixel = document.getElementById('fbPixelInput').value.trim();

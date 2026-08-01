@@ -413,6 +413,7 @@
         <label>Numéro de téléphone</label>
         <input type="tel" id="phoneInput" placeholder="06 XXX XX XX">
       </div>
+      <div id="checkoutMsg" style="font-size:0.82rem; color:#DC2626; margin-bottom:10px; display:none;"></div>
       <button class="btn btn-primary checkout-btn" id="payBtn" onclick="startPayment()" disabled>Payer maintenant</button>
     </div>
   </div>
@@ -685,7 +686,8 @@
         document.getElementById('successAmt').textContent = "ta commande";
       } else {
         goToStep('stepPay');
-        document.getElementById('checkoutMsg') && (document.getElementById('checkoutMsg').textContent = "Le paiement n'a pas abouti. Réessaie.");
+        const errEl = document.getElementById('checkoutMsg');
+        if(errEl){ errEl.textContent = "Le paiement n'a pas abouti. Réessaie."; errEl.style.display = "block"; }
       }
       window.history.replaceState({}, document.title, window.location.pathname);
     }

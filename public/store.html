@@ -223,12 +223,11 @@
 
   const params = new URLSearchParams(window.location.search);
   let slug = params.get('s');
-  if(!slug){
+  const hostParts = window.location.hostname.split('.');
+  const onVendorSubdomain = hostParts.length > 2 && hostParts[0] !== 'www';
+  if(!slug && onVendorSubdomain){
     // Pas de ?s=... dans le lien : on regarde si on est sur nomboutique.etachop.com
-    const hostParts = window.location.hostname.split('.');
-    if(hostParts.length > 2 && hostParts[0] !== 'www'){
-      slug = hostParts[0];
-    }
+    slug = hostParts[0];
   }
   const productId = params.get('p');
   let currentStore = null;
@@ -456,14 +455,17 @@
     const btn = document.getElementById('confirmOrderBtn');
     if(!name || !phone){
       msg.textContent = "Merci de remplir ton nom et ton numéro."; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
     if(!address || !city || !district){
       msg.textContent = "L'adresse de livraison complète (adresse, ville, quartier) est obligatoire."; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
     if(!selectedProvider){
       msg.textContent = "Choisis MTN MoMo ou Airtel Money."; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
 
@@ -473,6 +475,7 @@
       const groupName = group.querySelector('[data-group]')?.dataset.group;
       if(groupName && !selectedVariants[groupName]){
         msg.textContent = `Merci de choisir : ${groupName}`; msg.style.display = "block";
+        msg.scrollIntoView({behavior:"smooth", block:"center"});
         return;
       }
     }
@@ -537,6 +540,7 @@
       }).catch(() => {});
     } catch(err){
       msg.textContent = err.message; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
     } finally {
       btn.disabled = false; btn.textContent = "Confirmer";
     }
@@ -579,7 +583,7 @@
       document.getElementById('whatsappBtn').style.display = 'flex';
     }
     document.title = store.name + " — EtaChop";
-    document.getElementById('backLink').href = `?s=${slug}`;
+    document.getElementById('backLink').href = onVendorSubdomain ? '/' : `?s=${slug}`;
     loadMarketingPixels(store);
 
     const prodRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?store_id=eq.${store.id}&is_active=eq.true&order=created_at.desc`, {
@@ -611,7 +615,7 @@
       return;
     }
     grid.innerHTML = products.map(p => `
-      <a class="card" href="?s=${slug}&p=${p.id}">
+      <a class="card" href="${onVendorSubdomain ? '/' + p.id : '?s=' + slug + '&p=' + p.id}">
         <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}"></div>
         <div class="card-body">
           <h3>${p.name}</h3>
