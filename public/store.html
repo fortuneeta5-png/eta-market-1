@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="file_000002b4c81f4b36e79506179463b.png">
 <meta property="og:title" content="Boutique sur EtaChop">
 <meta property="og:description" content="Découvre cette boutique et ses produits sur EtaChop.">
-<meta property="og:image" content="https://etachop.com/public/arrière plan bleu.png">
+<meta property="og:image" content="https://etachop.com/arrière plan bleu.png">
 <meta property="og:type" content="website">
 <link rel="icon" type="image/png" href="arrière plan bleu.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,7 +118,7 @@
 
 <!-- checkout modal -->
 <div id="checkoutOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
-  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%;">
+  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%; max-height:88vh; overflow-y:auto;">
     <div id="checkoutForm">
       <h3 style="font-size:1.15rem; margin-bottom:6px;">Finaliser la commande</h3>
       <p style="font-size:0.85rem; opacity:0.6; margin-bottom:18px;">Tu recevras une demande de paiement sur ton téléphone à valider avec ton code secret.</p>
@@ -154,7 +154,7 @@
       </div>
       <div style="margin-bottom:10px; display:flex; gap:8px;">
         <input type="text" id="promoInput" placeholder="Code promo (optionnel)" style="flex:1; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.9rem; text-transform:uppercase;">
-        <button class="btn btn-ghost" onclick="applyPromoCode()" style="white-space:nowrap;">Appliquer</button>
+        <button class="btn btn-ghost" onclick="applyPromoCode()" style="white-space:nowrap; flex-shrink:0;">Appliquer</button>
       </div>
       <div id="promoFeedback" style="font-size:0.8rem; margin-bottom:14px; display:none;"></div>
       <div id="orderTotalWrap" style="display:flex; justify-content:space-between; font-weight:700; margin-bottom:16px; padding-top:10px; border-top:1px solid var(--line);">
@@ -170,7 +170,7 @@
       <div style="font-size:2.4rem; margin-bottom:10px;">📲</div>
       <h3 style="font-size:1.1rem; margin-bottom:8px;">Demande de paiement envoyée !</h3>
       <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Valide le paiement sur ton téléphone avec ton code secret Mobile Money pour finaliser ta commande. Sans validation de ta part, la commande ne sera pas traitée.</p>
-      <a href="suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
+      <a href="/suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
       <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
     </div>
   </div>
@@ -214,7 +214,7 @@
 </div>
 
 <div style="text-align:center; padding:24px 20px 40px; font-size:0.78rem; opacity:0.45;">
-  <a href="suivi.html" style="color:inherit;">Suivre ma commande</a> · <a href="conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="conditions.html" style="color:inherit;">Livraison & Retours</a>
+  <a href="/suivi.html" style="color:inherit;">Suivre ma commande</a> · <a href="/conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="/conditions.html" style="color:inherit;">Livraison & Retours</a>
 </div>
 
 <script>
@@ -535,7 +535,7 @@
           storeId: currentStore.id,
           title: 'Nouvelle demande de commande 🔔',
           body: `${name} — ${fmt(total)} — Vérifie le paiement avant de préparer`,
-          url: '/public/dashboard.html',
+          url: '/dashboard.html',
         }),
       }).catch(() => {});
     } catch(err){
