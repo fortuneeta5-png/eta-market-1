@@ -496,7 +496,7 @@
       });
       if(!payRes.ok){
         const payErr = await payRes.json();
-        throw new Error("Échec de l'envoi du paiement. Vérifie ton numéro et réessaie.");
+        throw new Error(payErr.error || "Échec de l'envoi du paiement. Vérifie ton numéro et réessaie.");
       }
 
       btn.textContent = "Enregistrement de la commande…";
