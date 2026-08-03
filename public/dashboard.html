@@ -457,7 +457,14 @@
           <label>Nom du produit</label>
           <input type="text" id="pName" placeholder="Ex: Sac à main artisanal">
         </div>
-        <div class="row2">
+        <div class="field">
+          <label>Type de produit</label>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="ptype-btn" data-type="physical" onclick="selectProductType('physical', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--primary); background:var(--primary); color:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">📦 Physique</button>
+            <button type="button" class="ptype-btn" data-type="digital" onclick="selectProductType('digital', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">💾 Numérique</button>
+          </div>
+        </div>
+        <div class="row2" id="stockFieldWrap">
           <div class="field">
             <label>Prix (FCFA)</label>
             <input type="number" id="pPrice" placeholder="15000">
@@ -466,6 +473,21 @@
             <label>Quantité en stock</label>
             <input type="number" id="pStock" placeholder="10" min="0">
           </div>
+        </div>
+        <div class="field" id="digitalPriceWrap" style="display:none;">
+          <label>Prix (FCFA)</label>
+          <input type="number" id="pPriceDigital" placeholder="15000">
+        </div>
+        <div class="field" id="digitalFileWrap" style="display:none;">
+          <label>Fichier à livrer (PDF, ZIP, lien...)</label>
+          <label class="upload-zone" id="digitalUploadZone" style="padding:14px;">
+            <div id="digitalUploadPlaceholder">
+              <div style="font-size:1.6rem; margin-bottom:4px;">📎</div>
+              <div class="hint">Touche pour choisir le fichier à envoyer après achat</div>
+            </div>
+            <div id="digitalFileName" style="display:none; font-size:0.82rem; font-weight:600;"></div>
+            <input type="file" id="digitalFileInput" onchange="previewDigitalFile(event)">
+          </label>
         </div>
         <div class="field">
           <label>Description</label>
@@ -515,6 +537,36 @@
         <button class="btn btn-primary" style="width:100%;" onclick="requestBoost()">Payer et lancer le boost</button>
         <div class="form-msg" id="boostMsg"></div>
         <div id="myBoosts" style="margin-top:18px;"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="alibabaPanel">
+      <div class="panel-head"><h3>📦 Commander depuis Alibaba</h3></div>
+      <div class="panel-body">
+        <p style="font-size:0.82rem; opacity:0.65; margin-bottom:16px;">EtaChop passe la commande pour toi sur Alibaba et gère l'importation. Paie un acompte en Mobile Money pour lancer la demande — l'équipe EtaChop te contactera pour la suite (montant final, délais).</p>
+        <div class="field">
+          <label>Lien du produit Alibaba</label>
+          <input type="url" id="alibabaLink" placeholder="https://www.alibaba.com/product-detail/...">
+        </div>
+        <div class="field">
+          <label>Quantité souhaitée</label>
+          <input type="number" id="alibabaQty" placeholder="Ex: 50" min="1" value="1">
+        </div>
+        <div class="field">
+          <label>Précisions (couleur, taille, variante...)</label>
+          <textarea id="alibabaNote" rows="2" placeholder="Optionnel"></textarea>
+        </div>
+        <div class="field">
+          <label>Acompte à payer (FCFA)</label>
+          <input type="number" id="alibabaDeposit" placeholder="Ex: 20000">
+        </div>
+        <div class="field">
+          <label>Ton numéro pour le paiement</label>
+          <input type="tel" id="alibabaPhone" placeholder="06 XXX XX XX">
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="requestAlibaba()">Payer l'acompte et envoyer la demande</button>
+        <div class="form-msg" id="alibabaMsg"></div>
+        <div id="myAlibabaRequests" style="margin-top:18px;"></div>
       </div>
     </div>
 
@@ -714,6 +766,36 @@
   let currentStore = null;
   let selectedColor = COLORS[0];
   let selectedImageFile = null;
+  let selectedProductType = 'physical';
+  let selectedDigitalFile = null;
+
+  function selectProductType(type, btnEl){
+    selectedProductType = type;
+    document.querySelectorAll('.ptype-btn').forEach(b => {
+      b.style.background = '#fff'; b.style.color = 'inherit'; b.style.borderColor = 'var(--line)';
+    });
+    btnEl.style.background = 'var(--primary)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--primary)';
+
+    if(type === 'digital'){
+      document.getElementById('stockFieldWrap').style.display = 'none';
+      document.getElementById('digitalPriceWrap').style.display = 'block';
+      document.getElementById('digitalFileWrap').style.display = 'block';
+    } else {
+      document.getElementById('stockFieldWrap').style.display = 'grid';
+      document.getElementById('digitalPriceWrap').style.display = 'none';
+      document.getElementById('digitalFileWrap').style.display = 'none';
+    }
+  }
+
+  function previewDigitalFile(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    selectedDigitalFile = file;
+    document.getElementById('digitalFileName').textContent = '📎 ' + file.name;
+    document.getElementById('digitalFileName').style.display = 'block';
+    document.getElementById('digitalUploadPlaceholder').style.display = 'none';
+  }
+
 
   // ---------- Auth ----------
   let authMode = 'login';
@@ -922,6 +1004,74 @@
         <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); font-size:0.82rem;">
           <span>${b.package_name}</span>
           <span style="padding:3px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; background:${statusBg[b.status]}; color:${statusColor[b.status]};">${statusLabel[b.status]}</span>
+        </div>
+      `).join('');
+    } catch(err){ /* silencieux */ }
+  }
+
+  async function requestAlibaba(){
+    const link = document.getElementById('alibabaLink').value.trim();
+    const qty = parseInt(document.getElementById('alibabaQty').value, 10) || 1;
+    const note = document.getElementById('alibabaNote').value.trim();
+    const deposit = parseInt(document.getElementById('alibabaDeposit').value, 10);
+    const phone = document.getElementById('alibabaPhone').value.trim();
+    const msg = document.getElementById('alibabaMsg');
+
+    if(!link || !link.includes('alibaba.com')){
+      msg.textContent = "Colle un vrai lien de produit Alibaba."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    if(!deposit || deposit <= 0){
+      msg.textContent = "Indique un montant d'acompte valide."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    if(!phone){
+      msg.textContent = "Indique ton numéro de paiement."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+
+    msg.textContent = "Envoi de la demande de paiement…"; msg.className = "form-msg"; msg.style.display = "block";
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/openpay-initiate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: deposit, phone, provider: 'MTN', customerName: currentStore.name, orderId: 'ALIBABA-' + Date.now() }),
+      });
+
+      await fetch(`${SUPABASE_URL}/rest/v1/dp_alibaba_requests`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ store_id: currentStore.id, product_link: link, quantity: qty, note, deposit_amount_fcfa: deposit }),
+      });
+
+      msg.textContent = "✅ Demande envoyée ! Valide le paiement sur ton téléphone. EtaChop te contactera pour la suite."; msg.className = "form-msg ok"; msg.style.display = "block";
+      document.getElementById('alibabaLink').value = '';
+      document.getElementById('alibabaNote').value = '';
+      loadMyAlibabaRequests();
+    } catch(err){
+      msg.textContent = "Erreur lors de l'envoi. Réessaie."; msg.className = "form-msg err"; msg.style.display = "block";
+    }
+  }
+
+  async function loadMyAlibabaRequests(){
+    const el = document.getElementById('myAlibabaRequests');
+    if(!el) return;
+    const statusLabel = { pending: 'En attente', ordered: 'Commandé', shipped: 'En transit', delivered: 'Livré', cancelled: 'Annulé' };
+    const statusColor = { pending: '#92400E', ordered: '#1E40AF', shipped: '#5B21B6', delivered: '#065F46', cancelled: '#991B1B' };
+    const statusBg = { pending: '#FEF3C7', ordered: '#DBEAFE', shipped: '#EDE9FE', delivered: '#D1FAE5', cancelled: '#FEE2E2' };
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_alibaba_requests?store_id=eq.${currentStore.id}&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const reqs = await res.json();
+      if(reqs.length === 0){ el.innerHTML = ''; return; }
+      el.innerHTML = '<div style="font-weight:700; font-size:0.85rem; margin-bottom:8px;">Mes demandes</div>' + reqs.map(r => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); font-size:0.82rem;">
+          <span>${r.quantity}x — ${Number(r.deposit_amount_fcfa).toLocaleString('fr-FR')} F</span>
+          <span style="padding:3px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; background:${statusBg[r.status]}; color:${statusColor[r.status]};">${statusLabel[r.status]}</span>
         </div>
       `).join('');
     } catch(err){ /* silencieux */ }
@@ -1140,6 +1290,7 @@
     loadDeliveryZones();
     loadBalance();
     loadMyBoosts();
+    loadMyAlibabaRequests();
     if(typeof subscribeToEtaNotifications === 'function'){
       subscribeToEtaNotifications('vendor', { storeId: currentStore.id });
     }
@@ -1609,7 +1760,7 @@
 
   async function publishProduct(){
     const name = document.getElementById('pName').value.trim();
-    const price = document.getElementById('pPrice').value;
+    const price = selectedProductType === 'digital' ? document.getElementById('pPriceDigital').value : document.getElementById('pPrice').value;
     const stock = document.getElementById('pStock').value;
     const description = document.getElementById('pDesc').value.trim();
     const msg = document.getElementById('formMsg');
@@ -1617,6 +1768,10 @@
 
     if(!name || !price || !selectedImageFile){
       msg.textContent = "Remplis le nom, le prix et ajoute une photo."; msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+    if(selectedProductType === 'digital' && !selectedDigitalFile){
+      msg.textContent = "Ajoute le fichier à livrer pour ce produit numérique."; msg.className = "form-msg err"; msg.style.display = "block";
       return;
     }
     btn.disabled = true; btn.textContent = "Publication…"; msg.style.display = "none";
@@ -1649,6 +1804,20 @@
         if(extraRes.ok) extraUrls.push(`${SUPABASE_URL}/storage/v1/object/public/dp-assets/${extraFileName}`);
       }
 
+      // Upload du fichier numérique si applicable
+      let digitalFileUrl = null;
+      if(selectedProductType === 'digital' && selectedDigitalFile){
+        const dExt = (selectedDigitalFile.name.split('.').pop() || 'pdf').toLowerCase();
+        const dFileName = `${currentStore.id}/digital-${Date.now()}-${Math.random().toString(36).slice(2)}.${dExt}`;
+        const dRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${dFileName}`, {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': selectedDigitalFile.type || 'application/octet-stream' },
+          body: selectedDigitalFile,
+        });
+        if(!dRes.ok) throw new Error("Échec de l'upload du fichier numérique");
+        digitalFileUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${dFileName}`;
+      }
+
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products`, {
         method: 'POST',
         headers: {
@@ -1657,8 +1826,9 @@
         },
         body: JSON.stringify({
           store_id: currentStore.id, name, description, price_fcfa: parseInt(price,10),
-          stock_quantity: stock ? parseInt(stock,10) : 999,
+          stock_quantity: selectedProductType === 'digital' ? 999999 : (stock ? parseInt(stock,10) : 999),
           image_url: imageUrl, extra_image_urls: extraUrls,
+          product_type: selectedProductType, file_url: digitalFileUrl,
         }),
       });
       const productData = await insertRes.json();
@@ -1670,6 +1840,7 @@
 
       document.getElementById('pName').value = '';
       document.getElementById('pPrice').value = '';
+      document.getElementById('pPriceDigital').value = '';
       document.getElementById('pStock').value = '';
       document.getElementById('pDesc').value = '';
       document.getElementById('imagePreview').style.display = 'none';
@@ -1677,6 +1848,10 @@
       document.getElementById('imageInput').value = '';
       document.getElementById('extraPreviewRow').style.display = 'none';
       document.getElementById('extraUploadPlaceholder').style.display = 'block';
+      selectedDigitalFile = null;
+      document.getElementById('digitalFileName').style.display = 'none';
+      document.getElementById('digitalUploadPlaceholder').style.display = 'block';
+      document.getElementById('digitalFileInput').value = '';
       document.getElementById('extraImageInput').value = '';
       selectedImageFile = null;
       selectedExtraFiles = [];
@@ -2083,7 +2258,7 @@
             customerPhone: order.customer_phone,
             title: notif.title,
             body: notif.body(order.product_name_snapshot, currentStore.name),
-            url: '/public/suivi.html',
+            url: '/suivi.html',
           }),
         }).catch(() => {});
       }
