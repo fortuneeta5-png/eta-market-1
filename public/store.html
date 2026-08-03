@@ -130,7 +130,7 @@
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton numéro de téléphone</label>
         <input type="tel" id="custPhone" placeholder="06 XXX XX XX" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
       </div>
-      <div style="border-top:1px solid var(--line); margin:16px 0 14px; padding-top:14px;">
+      <div id="deliveryAddressBlock" style="border-top:1px solid var(--line); margin:16px 0 14px; padding-top:14px;">
         <div style="font-weight:700; font-size:0.85rem; margin-bottom:10px;">Adresse de livraison</div>
         <div style="margin-bottom:12px;">
           <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Adresse complète (rue, repère...)</label>
@@ -376,7 +376,14 @@
     document.getElementById('promoInput').value = '';
     appliedDiscount = 0;
 
+    const isDigital = currentProduct && currentProduct.product_type === 'digital';
+    document.getElementById('deliveryAddressBlock').style.display = isDigital ? 'none' : 'block';
+
     try {
+      if(isDigital){
+        document.getElementById('zoneFieldWrap').style.display = 'none';
+        selectedZoneFee = 0;
+      } else {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones?store_id=eq.${currentStore.id}`, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
       });
@@ -390,6 +397,7 @@
       } else {
         zoneWrap.style.display = 'none';
         selectedZoneFee = 0;
+      }
       }
     } catch(err){ selectedZoneFee = 0; }
 
@@ -458,7 +466,8 @@
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
-    if(!address || !city || !district){
+    const isDigitalOrder = currentProduct && currentProduct.product_type === 'digital';
+    if(!isDigitalOrder && (!address || !city || !district)){
       msg.textContent = "L'adresse de livraison complète (adresse, ville, quartier) est obligatoire."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;

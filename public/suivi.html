@@ -127,6 +127,12 @@
         ${order.delivery_zone ? `<div class="detail-row"><span>Livraison</span><span>${order.delivery_zone}</span></div>` : ''}
         ${order.variant_selection ? `<div class="detail-row"><span>Choix</span><span>${order.variant_selection}</span></div>` : ''}
         <div class="detail-row"><span>Commandé le</span><span>${date}</span></div>
+        ${order.product_type === 'digital' && order.file_url && order.status !== 'pending' && order.status !== 'cancelled' ? `
+          <a href="${order.file_url}" target="_blank" style="display:block; text-align:center; margin-top:14px; padding:12px; background:#059669; color:#fff; border-radius:10px; font-weight:700; text-decoration:none;">📥 Télécharger mon fichier</a>
+        ` : ''}
+        ${order.product_type === 'digital' && order.status === 'pending' ? `
+          <div style="margin-top:14px; padding:10px; background:#FEF3C7; color:#92400E; border-radius:10px; font-size:0.82rem; text-align:center;">Le lien de téléchargement apparaîtra ici une fois le paiement confirmé.</div>
+        ` : ''}
       </div>
     `;
   }
