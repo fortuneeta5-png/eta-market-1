@@ -145,7 +145,7 @@
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Paiement par</label>
         <div style="display:flex; gap:10px;">
           <button type="button" class="pay-provider-btn" data-provider="MTN" onclick="selectProvider('MTN', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">MTN MoMo</button>
-          <button type="button" class="pay-provider-btn" data-provider="AIRTEL" disabled title="Bientôt disponible" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#f5f5f5; cursor:not-allowed; font-weight:700; font-family:'Poppins',sans-serif; opacity:0.5;">Airtel Money<br><span style="font-size:0.65rem; font-weight:400;">Bientôt disponible</span></button>
+          <button type="button" class="pay-provider-btn" data-provider="AIRTEL" onclick="selectProvider('AIRTEL', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">Airtel Money</button>
         </div>
       </div>
       <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
@@ -518,21 +518,21 @@
 
       btn.textContent = "Envoi de la demande de paiement…";
 
-      // 2. Déclenche la vraie demande de paiement OpenPay, avec l'identifiant RÉEL de la commande
-      // (permet de relier la notification de paiement OpenPay à cette commande précise)
-      const payRes = await fetch(`${SUPABASE_URL}/functions/v1/openpay-initiate`, {
+      // 2. Demande une collecte directe SebPay (MTN MoMo ou Airtel Money).
+      // Le montant et le numéro sont relus côté serveur depuis la commande enregistrée.
+      const payRes = await fetch(`${SUPABASE_URL}/functions/v1/sebpay-initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total, phone, customerName: name, provider: selectedProvider, orderId: realOrderId }),
+        body: JSON.stringify({ orderId: realOrderId, operator: selectedProvider }),
       });
+      let payData = {};
+      try { payData = await payRes.json(); } catch(e) {}
       if(!payRes.ok){
-        const payErr = await payRes.json();
-        throw new Error(payErr.error || "Échec de l'envoi du paiement. Vérifie ton numéro et réessaie.");
+        throw new Error(payData.error || payData.message || "Échec de l'envoi de la demande Mobile Money. Vérifie ton numéro et réessaie.");
       }
 
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
-      trackPurchase(currentProduct.price_fcfa);
 
       // Abonne le client aux notifications de suivi de CETTE commande
       if(typeof subscribeToEtaNotifications === 'function'){
@@ -546,8 +546,8 @@
         body: JSON.stringify({
           subscriberType: 'vendor',
           storeId: currentStore.id,
-          title: 'Nouvelle demande de commande 🔔',
-          body: `${name} — ${fmt(total)} — Vérifie le paiement avant de préparer`,
+          title: 'Commande reçue — paiement en attente',
+          body: `${name} — ${fmt(total)} — Ne prépare pas la commande avant confirmation du paiement`,
           url: '/dashboard.html',
         }),
       }).catch(() => {});
