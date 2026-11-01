@@ -518,21 +518,32 @@
 
       btn.textContent = "Envoi de la demande de paiement…";
 
-      // 2. Demande une collecte directe SebPay (MTN MoMo ou Airtel Money).
-      // Le montant et le numéro sont relus côté serveur depuis la commande enregistrée.
-      const payRes = await fetch(`${SUPABASE_URL}/functions/v1/sebpay-initiate`, {
+      // 2. Initie le paiement SasPay pour la commande enregistrée.
+      const payRes = await fetch(`${SUPABASE_URL}/functions/v1/saspay-initiate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: realOrderId, operator: selectedProvider }),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          order_id: realOrderId,
+          provider: selectedProvider.toLowerCase(),
+          phone,
+        }),
       });
-      let payData = {};
-      try { payData = await payRes.json(); } catch(e) {}
-      if(!payRes.ok){
-        throw new Error(payData.error || payData.message || "Échec de l'envoi de la demande Mobile Money. Vérifie ton numéro et réessaie.");
+      const payData = await payRes.json();
+      if(!payRes.ok || payData.success === false){
+        throw new Error(payData.error || "Échec de l'initialisation SasPay. Vérifie ton numéro et réessaie.");
+      }
+      if(payData.checkout_url){
+        window.location.href = payData.checkout_url;
+        return;
       }
 
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('checkoutSuccess').style.display = 'block';
+      trackPurchase(currentProduct.price_fcfa);
 
       // Abonne le client aux notifications de suivi de CETTE commande
       if(typeof subscribeToEtaNotifications === 'function'){
@@ -546,8 +557,8 @@
         body: JSON.stringify({
           subscriberType: 'vendor',
           storeId: currentStore.id,
-          title: 'Commande reçue — paiement en attente',
-          body: `${name} — ${fmt(total)} — Ne prépare pas la commande avant confirmation du paiement`,
+          title: 'Nouvelle demande de commande 🔔',
+          body: `${name} — ${fmt(total)} — Vérifie le paiement avant de préparer`,
           url: '/dashboard.html',
         }),
       }).catch(() => {});
