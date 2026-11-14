@@ -141,12 +141,15 @@
           <input type="text" id="custDistrict" placeholder="Quartier (ex: Bacongo)" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
         </div>
       </div>
+      <div style="margin-bottom:14px;">
+        <label for="buyerCountry" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:600;">Ton pays</label>
+        <select id="buyerCountry" onchange="onBuyerCountryChange()" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.92rem; background:#fff;"></select>
+        <div id="countryDetectHint" style="font-size:0.72rem; opacity:0.55; margin-top:5px;">Pays détecté automatiquement — tu peux le modifier.</div>
+      </div>
       <div style="margin-bottom:18px;">
-        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Paiement par</label>
-        <div style="display:flex; gap:10px;">
-          <button type="button" class="pay-provider-btn" data-provider="MTN" onclick="selectProvider('MTN', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">MTN MoMo</button>
-          <button type="button" class="pay-provider-btn" data-provider="AIRTEL" onclick="selectProvider('AIRTEL', this)" style="flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif;">Airtel Money</button>
-        </div>
+        <label for="buyerNetwork" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:600;">Moyen de paiement</label>
+        <select id="buyerNetwork" onchange="selectedNetwork=this.value" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.92rem; background:#fff;"></select>
+        <div id="paymentCurrencyHint" style="font-size:0.75rem; opacity:0.6; margin-top:6px;"></div>
       </div>
       <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Zone de livraison</label>
@@ -234,6 +237,104 @@
   let currentProduct = null;
 
   function fmt(n){ return Number(n).toLocaleString('fr-FR') + " FCFA"; }
+
+  // Devise d'affichage du client. Les prix stockés et les commandes restent en FCFA.
+  const BUYER_COUNTRIES = {
+    CG:{name:'Congo-Brazzaville',currency:'XAF',networks:[['mtn_cg','MTN MoMo'],['airtel_cg','Airtel Money']]},
+    CM:{name:'Cameroun',currency:'XAF',networks:[['mtn_cm','MTN MoMo'],['orange_cm','Orange Money']]},
+    GA:{name:'Gabon',currency:'XAF',networks:[['airtel_ga','Airtel Money'],['moov_ga','Moov Money']]},
+    CD:{name:'République démocratique du Congo',currency:'CDF',networks:[['afrimoney_cd','Afrimoney'],['airtel_cd','Airtel Money'],['orange_cd','Orange Money'],['vodacom_cd','M-Pesa / Vodacom']]},
+    CD_USD:{name:'RDC — paiement en dollars',currency:'USD',networks:[['airtel_cd_usd','Airtel Money USD'],['orange_cd_usd','Orange Money USD'],['vodacom_cd_usd','Vodacom USD']]},
+    BF:{name:'Burkina Faso',currency:'XOF',networks:[['moov_bf','Moov Money'],['orange_bf','Orange Money']]},
+    BJ:{name:'Bénin',currency:'XOF',networks:[['celtiis_bj','Celtiis'],['moov_bj','Moov Money'],['mtn_bj','MTN MoMo']]},
+    CI:{name:'Côte d’Ivoire',currency:'XOF',networks:[['djamo_ci','Djamo'],['moov_ci','Moov Money'],['mtn_ci','MTN MoMo'],['orange_ci','Orange Money'],['wave_ci','Wave']]},
+    ML:{name:'Mali',currency:'XOF',networks:[['mobi_cash_ml','MobiCash'],['moov_ml','Moov Money'],['orange_ml','Orange Money']]},
+    NE:{name:'Niger',currency:'XOF',networks:[['airtel_ne','Airtel Money']]},
+    SN:{name:'Sénégal',currency:'XOF',networks:[['djamo_sn','Djamo'],['expresso_sn','Expresso'],['freemoney_sn','Free Money'],['orange_sn','Orange Money'],['paydunya_sn','PayDunya'],['wave_sn','Wave'],['wizall_sn','Wizall']]},
+    TG:{name:'Togo',currency:'XOF',networks:[['mixx_tg','Mixx by Yas'],['moov_tg','Moov Money'],['togocel','Togocel']]},
+    GH:{name:'Ghana',currency:'GHS',networks:[['mtn_gh','MTN MoMo'],['tigo_gh','Tigo'],['vodafone_gh','Vodafone Cash']]},
+    GN:{name:'Guinée',currency:'GNF',networks:[['mtn_gn','MTN MoMo']]},
+    KE:{name:'Kenya',currency:'KES',networks:[['airtel_ke','Airtel Money'],['mpesa_ke','M-Pesa']]},
+    MW:{name:'Malawi',currency:'MWK',networks:[['airtel_mw','Airtel Money'],['tnm_mw','TNM Mpamba']]},
+    MZ:{name:'Mozambique',currency:'MZN',networks:[['movitel_mz','mKesh / Movitel'],['vodacom_mz','M-Pesa']]},
+    RW:{name:'Rwanda',currency:'RWF',networks:[['airtel_rw','Airtel Money'],['mtn_rw','MTN MoMo']]},
+    SL:{name:'Sierra Leone',currency:'SLE',networks:[['orange_sl','Orange Money']]},
+    TZ:{name:'Tanzanie',currency:'TZS',networks:[['airtel_tz','Airtel Money'],['ezypesa_tz','EzyPesa'],['halopesa_tz','HaloPesa'],['mpesa_tz','M-Pesa'],['tigo_tz','Tigo Pesa'],['ttcl_tz','TTCL Pesa']]},
+    UG:{name:'Ouganda',currency:'UGX',networks:[['airtel_ug','Airtel Money'],['mtn_ug','MTN MoMo']]}
+  };
+  let buyerCountryCode = 'CG';
+  let buyerCurrency = 'XAF';
+  let selectedNetwork = '';
+  let buyerFxRate = 1; // unités de devise locale pour 1 FCFA
+  let buyerFxReady = false;
+  const fxCache = {};
+  const COUNTRY_CURRENCY = {XAF:'FCFA',XOF:'FCFA'};
+  function currencyLabel(code){ return COUNTRY_CURRENCY[code] || code; }
+  function fmtBuyer(amount){
+    const value = buyerFxReady ? Number(amount || 0) * buyerFxRate : Number(amount || 0);
+    if(!buyerFxReady || buyerCurrency === 'XAF' || buyerCurrency === 'XOF') return Number(amount || 0).toLocaleString('fr-FR') + ' FCFA';
+    return new Intl.NumberFormat('fr-FR',{style:'currency',currency:buyerCurrency,maximumFractionDigits:2}).format(value);
+  }
+  async function loadBuyerRate(){
+    buyerCurrency = BUYER_COUNTRIES[buyerCountryCode].currency;
+    if(buyerCurrency === 'XAF' || buyerCurrency === 'XOF'){
+      buyerFxRate = 1; buyerFxReady = true; refreshBuyerPrices(); return;
+    }
+    if(fxCache[buyerCurrency]){
+      buyerFxRate = fxCache[buyerCurrency]; buyerFxReady = true; refreshBuyerPrices(); return;
+    }
+    buyerFxReady = false; refreshBuyerPrices();
+    try{
+      const response = await fetch('https://api.frankfurter.dev/v2/rates?base=EUR&quotes=' + encodeURIComponent(buyerCurrency));
+      if(!response.ok) throw new Error('Taux indisponible');
+      const data = await response.json();
+      const row = Array.isArray(data) ? data.find(x => x.quote === buyerCurrency) : null;
+      if(!row || !Number(row.rate)) throw new Error('Devise non prise en charge');
+      buyerFxRate = Number(row.rate) / 655.957;
+      fxCache[buyerCurrency] = buyerFxRate;
+      buyerFxReady = true;
+    }catch(e){ buyerFxRate = 1; buyerFxReady = false; }
+    refreshBuyerPrices();
+  }
+  function refreshBuyerPrices(){
+    document.querySelectorAll('[data-price-fcfa]').forEach(el => { el.textContent = fmtBuyer(Number(el.dataset.priceFcfa)); });
+    const hint = document.getElementById('paymentCurrencyHint');
+    if(hint) hint.textContent = buyerFxReady ? ('Prix affichés en ' + currencyLabel(buyerCurrency) + '. Le vendeur reçoit le montant de référence en FCFA.') : 'Conversion momentanément indisponible : prix affichés en FCFA.';
+    if(document.getElementById('orderTotalAmt') && currentProduct) updateOrderTotal();
+  }
+  function renderBuyerCountryOptions(){
+    const select = document.getElementById('buyerCountry');
+    if(!select) return;
+    select.innerHTML = Object.entries(BUYER_COUNTRIES).map(([code,c]) => `<option value="${code}">${c.name} (${currencyLabel(c.currency)})</option>`).join('');
+    select.value = buyerCountryCode;
+  }
+  function renderBuyerNetworks(){
+    const select = document.getElementById('buyerNetwork');
+    const country = BUYER_COUNTRIES[buyerCountryCode];
+    if(!select || !country) return;
+    select.innerHTML = country.networks.map(([code,label]) => `<option value="${code}">${label}</option>`).join('');
+    selectedNetwork = country.networks[0]?.[0] || '';
+    select.value = selectedNetwork;
+  }
+  async function onBuyerCountryChange(){
+    buyerCountryCode = document.getElementById('buyerCountry').value;
+    renderBuyerNetworks();
+    await loadBuyerRate();
+  }
+  async function detectBuyerCountry(){
+    renderBuyerCountryOptions();
+    try{
+      const response = await fetch('https://ipapi.co/json/',{cache:'no-store'});
+      if(response.ok){
+        const data = await response.json();
+        if(data && BUYER_COUNTRIES[data.country_code]) buyerCountryCode = data.country_code;
+      }
+    }catch(e){ /* Le client peut sélectionner son pays manuellement. */ }
+    const countrySelect = document.getElementById('buyerCountry');
+    if(countrySelect) countrySelect.value = buyerCountryCode;
+    renderBuyerNetworks();
+    await loadBuyerRate();
+  }
 
   // ---------- Pixels publicitaires (Facebook, TikTok, Google Ads) ----------
   function loadMarketingPixels(store){
@@ -368,8 +469,10 @@
   let selectedZoneFee = 0;
   let appliedDiscount = 0;
 
+  let buyerCountryInitialized = false;
   async function openCheckout(){
     document.getElementById('checkoutOverlay').style.display = 'flex';
+    if(!buyerCountryInitialized){ buyerCountryInitialized = true; await detectBuyerCountry(); }
     document.getElementById('checkoutForm').style.display = 'block';
     document.getElementById('checkoutSuccess').style.display = 'none';
     document.getElementById('promoFeedback').style.display = 'none';
@@ -392,7 +495,7 @@
       const zoneSelect = document.getElementById('zoneSelect');
       if(deliveryZones.length > 0){
         zoneWrap.style.display = 'block';
-        zoneSelect.innerHTML = deliveryZones.map((z,i) => `<option value="${i}">${z.zone_name} — ${fmt(z.fee_fcfa)}</option>`).join('');
+        zoneSelect.innerHTML = deliveryZones.map((z,i) => `<option value="${i}">${z.zone_name} — ${fmtBuyer(z.fee_fcfa)}</option>`).join('');
         selectedZoneFee = deliveryZones[0].fee_fcfa;
       } else {
         zoneWrap.style.display = 'none';
@@ -410,7 +513,7 @@
       selectedZoneFee = deliveryZones[parseInt(zoneSelect.value,10)].fee_fcfa;
     }
     const total = currentProduct.price_fcfa - appliedDiscount + selectedZoneFee;
-    document.getElementById('orderTotalAmt').textContent = fmt(Math.max(0,total));
+    document.getElementById('orderTotalAmt').textContent = fmtBuyer(Math.max(0,total));
   }
 
   async function applyPromoCode(){
@@ -430,7 +533,7 @@
         appliedDiscount = promo.discount_type === 'percentage'
           ? Math.round(currentProduct.price_fcfa * promo.discount_value / 100)
           : Math.min(promo.discount_value, currentProduct.price_fcfa);
-        feedback.textContent = `✅ Code appliqué : -${fmt(appliedDiscount)}`; feedback.style.color = "#059669"; feedback.style.display = 'block';
+        feedback.textContent = `✅ Code appliqué : -${fmtBuyer(appliedDiscount)}`; feedback.style.color = "#059669"; feedback.style.display = 'block';
       }
       updateOrderTotal();
     } catch(err){
@@ -444,14 +547,6 @@
     document.getElementById('custPhone').value = '';
   }
 
-  let selectedProvider = null;
-  function selectProvider(provider, btnEl){
-    selectedProvider = provider;
-    document.querySelectorAll('.pay-provider-btn').forEach(b => {
-      b.style.borderColor = 'var(--line)'; b.style.background = '#fff'; b.style.color = 'inherit';
-    });
-    btnEl.style.borderColor = 'var(--accent)'; btnEl.style.background = 'var(--accent)'; btnEl.style.color = '#fff';
-  }
 
   async function submitOrder(){
     const name = document.getElementById('custName').value.trim();
@@ -472,8 +567,13 @@
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
-    if(!selectedProvider){
-      msg.textContent = "Choisis MTN MoMo ou Airtel Money."; msg.style.display = "block";
+    if(!selectedNetwork || !BUYER_COUNTRIES[buyerCountryCode]){
+      msg.textContent = "Choisis ton pays et un moyen de paiement disponible."; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    if(buyerCurrency !== 'XAF' && buyerCurrency !== 'XOF' && !buyerFxReady){
+      msg.textContent = "Le taux de conversion de cette devise est indisponible. Réessaie ou choisis un autre pays."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
@@ -528,7 +628,9 @@
         },
         body: JSON.stringify({
           order_id: realOrderId,
-          provider: selectedProvider.toLowerCase(),
+          network: selectedNetwork,
+          country: buyerCountryCode === 'CD_USD' ? 'CD' : buyerCountryCode,
+          currency: buyerCurrency,
           phone,
         }),
       });
@@ -614,6 +716,8 @@
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
     });
     const products = await prodRes.json();
+    // Prépare la devise locale avant le rendu des prix de la boutique.
+    if(!buyerCountryInitialized){ buyerCountryInitialized = true; await detectBuyerCountry(); }
 
     if(productId){
       const p = products.find(x => x.id === productId);
@@ -643,7 +747,7 @@
         <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}"></div>
         <div class="card-body">
           <h3>${p.name}</h3>
-          <div class="price">${fmt(p.price_fcfa)}</div>
+          <div class="price" data-price-fcfa="${Number(p.price_fcfa)}">${fmtBuyer(p.price_fcfa)}</div>
         </div>
       </a>
     `).join('');
@@ -654,7 +758,8 @@
     document.getElementById('productView').style.display = 'block';
     document.getElementById('pImg').src = p.image_url;
     document.getElementById('pName').textContent = p.name;
-    document.getElementById('pPrice').textContent = fmt(p.price_fcfa);
+    document.getElementById('pPrice').dataset.priceFcfa = Number(p.price_fcfa);
+    document.getElementById('pPrice').textContent = fmtBuyer(p.price_fcfa);
     document.getElementById('pDesc').textContent = p.description || '';
 
     // Galerie de miniatures (photo principale + photos supplémentaires)
