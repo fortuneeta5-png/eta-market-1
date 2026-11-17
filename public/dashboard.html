@@ -125,7 +125,7 @@
 
   /* Tableaux : scroll horizontal propre au lieu d'un écrasement illisible */
   .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .table-scroll table{ min-width:520px; }
+  .table-scroll table{ min-width:680px; }
   select.status-tag{ min-width:150px; }
 
   /* ---------- Corrections mobile (écrans ≤ 480px) ---------- */
@@ -412,7 +412,7 @@
         <button class="btn-refresh" onclick="loadOrders()">Actualiser</button>
       </div>
       <div class="panel-body table-scroll" style="padding:0;">
-        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+        <table style="width:100%; min-width:680px; border-collapse:collapse; font-size:0.85rem;">
           <thead>
             <tr style="background:#faf9f7; text-align:left;">
               <th style="padding:10px 16px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Client</th>
@@ -2179,6 +2179,30 @@
     loadDeliveryZones();
   }
 
+  function logisticsEscapeHtml(value){
+    return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[ch]));
+  }
+  function logisticsCountryLabel(code){
+    const labels = {
+      CG:'Congo-Brazzaville', CD:'RDC', CD_USD:'RDC', CM:'Cameroun',
+      GA:'Gabon', BF:'Burkina Faso', BJ:'Bénin', CI:"Côte d’Ivoire",
+      ML:'Mali', NE:'Niger', SN:'Sénégal', TG:'Togo', GH:'Ghana',
+      GN:'Guinée', KE:'Kenya', MW:'Malawi', MZ:'Mozambique',
+      RW:'Rwanda', SL:'Sierra Leone', TZ:'Tanzanie', UG:'Ouganda'
+    };
+    return labels[code] || (code ? String(code) : 'Pays non renseigné');
+  }
+  function logisticsStatusLabel(status){
+    if(!status) return 'Non renseigné';
+    const known = {
+      reserved:'Stock réservé',
+      not_routed:'Livraison à organiser'
+    };
+    return known[String(status).toLowerCase()] || String(status).replace(/[_-]+/g,' ');
+  }
+
   async function loadOrders(){
     const body = document.getElementById('ordersBody');
     body.innerHTML = '<tr><td colspan="4" class="empty">Chargement…</td></tr>';
@@ -2199,13 +2223,27 @@
         body.innerHTML = '<tr><td colspan="4" class="empty">Aucune commande pour l\'instant.</td></tr>';
         return;
       }
-      body.innerHTML = orders.map(o => `
+      body.innerHTML = orders.map(o => {
+        const product = logisticsEscapeHtml(o.product_name_snapshot || 'Produit');
+        const variant = o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${logisticsEscapeHtml(o.variant_selection)}</span>` : '';
+        const addressParts = [o.delivery_address, o.delivery_district, o.delivery_city].filter(Boolean).map(logisticsEscapeHtml);
+        const country = logisticsCountryLabel(o.buyer_country_code);
+        const destination = [country, o.delivery_city, o.delivery_district].filter(Boolean).map(logisticsEscapeHtml).join(' · ');
+        const partner = o.delivery_zone ? logisticsEscapeHtml(o.delivery_zone) :
+          (o.seller_partner_id ? `Partenaire assigné (${logisticsEscapeHtml(String(o.seller_partner_id).slice(0,8))}…)` : 'Aucun partenaire enregistré');
+        const logisticsStatus = logisticsStatusLabel(o.logistics_status);
+        return `
         <tr style="border-top:1px solid var(--line);">
-          <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span><br><span style="opacity:0.4; font-size:0.7rem; font-family:monospace;">${o.tracking_code || ''}</span></td>
-          <td style="padding:10px 16px;">${o.product_name_snapshot}${o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${o.variant_selection}</span>` : ''}${o.delivery_address ? `<br><span style="opacity:0.5; font-size:0.72rem;">📍 ${o.delivery_address}, ${o.delivery_district}, ${o.delivery_city}</span>` : ''}</td>
+          <td style="padding:10px 16px;">${logisticsEscapeHtml(o.customer_name)}<br><span style="opacity:0.5; font-size:0.76rem;">${logisticsEscapeHtml(o.customer_phone)}</span><br><span style="opacity:0.4; font-size:0.7rem; font-family:monospace;">${logisticsEscapeHtml(o.tracking_code || '')}</span></td>
+          <td style="padding:10px 16px;">${product}${variant}
+            ${addressParts.length ? `<br><span style="opacity:0.5; font-size:0.72rem;">📍 ${addressParts.join(', ')}</span>` : ''}
+            <br><span style="display:inline-block; margin-top:5px; font-size:0.72rem; color:#555;">Destination : ${destination || 'Non renseignée'}</span>
+            <br><span style="display:inline-block; margin-top:3px; font-size:0.72rem;">Partenaire : <strong>${partner}</strong></span>
+            <br><span style="display:inline-block; margin-top:3px; font-size:0.72rem; color:#555;">Logistique : ${logisticsEscapeHtml(logisticsStatus)}</span>
+          </td>
           <td style="padding:10px 16px; font-weight:700;">${Number(o.amount_fcfa).toLocaleString('fr-FR')} F</td>
           <td style="padding:10px 16px;">
-            <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${o.status}" style="border:none; cursor:pointer;">
+            <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${logisticsEscapeHtml(o.status)}" style="border:none; cursor:pointer;">
               <option value="pending" ${o.status==='pending'?'selected':''}>En attente</option>
               <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmée</option>
               <option value="preparing" ${o.status==='preparing'?'selected':''}>En préparation</option>
@@ -2214,8 +2252,8 @@
               <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Annulée</option>
             </select>
           </td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
     } catch(err){
       body.innerHTML = '<tr><td colspan="4" class="empty">Impossible de charger les commandes.</td></tr>';
     }
