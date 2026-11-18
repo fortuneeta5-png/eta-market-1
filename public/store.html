@@ -69,10 +69,6 @@
     border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,0.25);
     text-decoration:none; font-size:1.6rem; z-index:70;
   }
-  .logistics-muted{opacity:.65}
-  .logistics-error{color:#b42318}
-  .logistics-ok{color:#087443}
-  #custCity,#custDistrict{min-width:0;width:100%}
 </style>
 </head>
 <body>
@@ -141,8 +137,8 @@
           <input type="text" id="custAddress" placeholder="Ex: 12 rue de la Paix, près de la pharmacie" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
         </div>
         <div class="row2" style="margin-bottom:12px;">
-          <input type="text" id="custCity" placeholder="Ville (ex: Brazzaville)" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
-          <input type="text" id="custDistrict" placeholder="Quartier (ex: Bacongo)" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+          <input type="text" id="custCity" placeholder="Ville (ex: Brazzaville)" onblur="refreshDeliveryQuote()" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+          <input type="text" id="custDistrict" placeholder="Quartier (ex: Bacongo)" onblur="refreshDeliveryQuote()" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
         </div>
       </div>
       <div style="margin-bottom:14px;">
@@ -159,9 +155,9 @@
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Zone de livraison</label>
         <select id="zoneSelect" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;" onchange="updateOrderTotal()"></select>
       </div>
-      <div id="logisticsQuoteBox" style="display:none; margin:0 0 16px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fafafa; font-size:0.82rem;">
-        <div id="logisticsQuoteTitle" style="font-weight:700; margin-bottom:5px;">Livraison</div>
-        <div id="logisticsQuoteDetails" style="line-height:1.55; opacity:.8;"></div>
+      <div id="deliveryQuoteBox" style="display:none; margin:-6px 0 16px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#FAFAFA; font-size:0.8rem; line-height:1.5;">
+        <div id="deliveryQuoteTitle" style="font-weight:700; margin-bottom:3px;">Solution de livraison</div>
+        <div id="deliveryQuoteDetails" style="opacity:0.72;">Renseigne ta ville et ton quartier pour vérifier la livraison.</div>
       </div>
       <div style="margin-bottom:10px; display:flex; gap:8px;">
         <input type="text" id="promoInput" placeholder="Code promo (optionnel)" style="flex:1; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.9rem; text-transform:uppercase;">
@@ -326,9 +322,10 @@
   }
   async function onBuyerCountryChange(){
     buyerCountryCode = document.getElementById('buyerCountry').value;
+    deliveryQuote = null;
     renderBuyerNetworks();
     await loadBuyerRate();
-    if(document.getElementById('checkoutOverlay').style.display === 'flex') await refreshDeliveryQuote();
+    if(document.getElementById('checkoutOverlay').style.display === 'flex') refreshDeliveryQuote();
   }
   async function detectBuyerCountry(){
     renderBuyerCountryOptions();
@@ -477,161 +474,9 @@
   let deliveryZones = [];
   let selectedZoneFee = 0;
   let appliedDiscount = 0;
-  let logisticsQuote = null;
-  let logisticsQuoteFee = 0;
-  let logisticsQuotePayer = null;
-  let logisticsQuoteActive = false;
-  let logisticsQuoteSequence = 0;
-  let checkoutSubmitting = false;
+  let deliveryQuote = null;
+  let deliveryQuoteRequest = 0;
 
-  function logisticsCountryCode(){
-    return buyerCountryCode === 'CD_USD' ? 'CD' : buyerCountryCode;
-  }
-  function isPhysicalProduct(){
-    return !!currentProduct && currentProduct.product_type !== 'digital';
-  }
-  function isLongrichProduct(){
-    if(!currentProduct) return false;
-    const haystack = [
-      currentProduct.brand, currentProduct.brand_name, currentProduct.category,
-      currentProduct.category_name, currentProduct.name, currentProduct.product_name,
-      currentProduct.product_type
-    ].filter(Boolean).join(' ').toLowerCase();
-    return currentProduct.is_longrich === true || /longrich/.test(haystack);
-  }
-  function escapeLogistics(value){
-    return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[ch]));
-  }
-  function setLogisticsMessage(title, details, state){
-    const box = document.getElementById('logisticsQuoteBox');
-    const heading = document.getElementById('logisticsQuoteTitle');
-    const body = document.getElementById('logisticsQuoteDetails');
-    if(!box || !heading || !body) return;
-    box.style.display = 'block';
-    heading.textContent = title;
-    heading.className = state === 'error' ? 'logistics-error' : (state === 'ok' ? 'logistics-ok' : '');
-    body.innerHTML = details;
-  }
-  function resetLogisticsQuote(){
-    logisticsQuote = null;
-    logisticsQuoteFee = 0;
-    logisticsQuotePayer = null;
-    logisticsQuoteActive = false;
-    selectedZoneFee = 0;
-    const box = document.getElementById('logisticsQuoteBox');
-    if(box) box.style.display = 'none';
-  }
-  function applyLegacyZoneFallback(){
-    const zoneWrap = document.getElementById('zoneFieldWrap');
-    const zoneSelect = document.getElementById('zoneSelect');
-    if(deliveryZones.length){
-      zoneWrap.style.display = 'block';
-      if(!zoneSelect.value || !deliveryZones[Number(zoneSelect.value)]){
-        zoneSelect.value = '0';
-      }
-      selectedZoneFee = Number(deliveryZones[Number(zoneSelect.value)]?.fee_fcfa || 0);
-    } else {
-      zoneWrap.style.display = 'none';
-      selectedZoneFee = 0;
-    }
-  }
-  function renderLogisticsQuote(data){
-    logisticsQuote = data;
-    const available = data && data.success !== false && data.available === true;
-    const fee = Number(data && data.delivery_fee);
-    logisticsQuoteFee = Number.isFinite(fee) && fee >= 0 ? fee : 0;
-    logisticsQuotePayer = data && data.delivery_payer ? String(data.delivery_payer).toLowerCase() : null;
-    logisticsQuoteActive = available;
-    const zoneWrap = document.getElementById('zoneFieldWrap');
-
-    if(available){
-      zoneWrap.style.display = 'none';
-      selectedZoneFee = (logisticsQuotePayer === 'buyer' || logisticsQuotePayer === 'customer' || logisticsQuotePayer === 'client') ? logisticsQuoteFee : 0;
-      const type = String(data.fulfillment_type || '').toLowerCase();
-      let kind = 'Partenaire logistique';
-      if(type.includes('longrich')) kind = 'Partenaire Longrich — stock vérifié';
-      else if(type.includes('seller')) kind = 'Livraison organisée par le vendeur';
-      else if(type.includes('partner') || type.includes('logistic')) kind = 'Partenaire de livraison';
-      const partner = data.partner_name ? `<br>Partenaire : <strong>${escapeLogistics(data.partner_name)}</strong>` : '';
-      const city = data.partner_city ? `<br>Ville : ${escapeLogistics(data.partner_city)}` : '';
-      const partnerType = data.partner_type ? `<br>Type : ${escapeLogistics(data.partner_type)}` : '';
-      const feeText = Number.isFinite(fee) ? fmtBuyer(fee) : 'À confirmer';
-      const payerText = logisticsQuotePayer === 'seller' || logisticsQuotePayer === 'vendor'
-        ? 'Vendeur' : (logisticsQuotePayer ? 'Client' : 'Selon les conditions du service');
-      const note = type.includes('longrich')
-        ? '<br><span class="logistics-muted">La réservation du stock sera validée par le backend lors de la commande.</span>' : '';
-      setLogisticsMessage(kind, `${partner}${city}${partnerType}<br>Frais : <strong>${feeText}</strong><br>Pris en charge par : ${payerText}<br>Service disponible${note}`, 'ok');
-    } else {
-      logisticsQuoteActive = false;
-      logisticsQuoteFee = 0;
-      logisticsQuotePayer = null;
-      const reason = data && (data.message || data.reason)
-        ? escapeLogistics(data.message || data.reason) : 'Aucun partenaire disponible pour cette adresse.';
-      if(isLongrichProduct()){
-        zoneWrap.style.display = 'none';
-        selectedZoneFee = 0;
-        setLogisticsMessage('Livraison Longrich indisponible', `${reason}<br>Choisis une autre adresse ou réessaie plus tard.`, 'error');
-      } else {
-        applyLegacyZoneFallback();
-        setLogisticsMessage('Livraison du vendeur', `${reason}<br>${deliveryZones.length ? 'Les anciennes zones de livraison de cette boutique restent disponibles.' : 'Le vendeur devra organiser la livraison.'}`, 'info');
-      }
-    }
-    updateOrderTotal();
-  }
-  async function refreshDeliveryQuote(){
-    const sequence = ++logisticsQuoteSequence;
-    if(!isPhysicalProduct() || !currentStore || !currentProduct){
-      resetLogisticsQuote();
-      updateOrderTotal();
-      return;
-    }
-    const city = document.getElementById('custCity').value.trim();
-    const district = document.getElementById('custDistrict').value.trim();
-    if(!city || !district || !BUYER_COUNTRIES[buyerCountryCode]){
-      resetLogisticsQuote();
-      applyLegacyZoneFallback();
-      setLogisticsMessage('Informations de livraison', 'Indique ta ville et ton quartier pour rechercher une solution de livraison.', 'info');
-      updateOrderTotal();
-      return;
-    }
-    setLogisticsMessage('Recherche de livraison…', 'Vérification des partenaires et des frais disponibles.', 'info');
-    try{
-      const quoteResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/etachop_quote_delivery`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          p_store_id: currentStore.id,
-          p_product_id: currentProduct.id,
-          p_buyer_country: logisticsCountryCode(),
-          p_city: city,
-          p_district: district
-        })
-      });
-      if(sequence !== logisticsQuoteSequence) return;
-      const data = await quoteResponse.json();
-      if(!quoteResponse.ok) throw new Error(data && (data.message || data.details) || 'Devis indisponible.');
-      const result = Array.isArray(data) ? data[0] : data;
-      if(!result || typeof result !== 'object') throw new Error('Réponse de devis invalide.');
-      renderLogisticsQuote(result);
-    }catch(error){
-      if(sequence !== logisticsQuoteSequence) return;
-      resetLogisticsQuote();
-      if(isLongrichProduct()){
-        document.getElementById('zoneFieldWrap').style.display = 'none';
-        setLogisticsMessage('Devis temporairement indisponible', 'Impossible de vérifier le stock ou le partenaire. Réessaie avant de commander.', 'error');
-      } else {
-        applyLegacyZoneFallback();
-        setLogisticsMessage('Devis indisponible', 'Le système logistique ne répond pas. Les zones de livraison habituelles de la boutique restent utilisables.', 'info');
-      }
-      updateOrderTotal();
-    }
-  }
   let buyerCountryInitialized = false;
   async function openCheckout(){
     document.getElementById('checkoutOverlay').style.display = 'flex';
@@ -641,53 +486,111 @@
     document.getElementById('promoFeedback').style.display = 'none';
     document.getElementById('promoInput').value = '';
     appliedDiscount = 0;
-    resetLogisticsQuote();
+    deliveryQuote = null;
 
     const isDigital = currentProduct && currentProduct.product_type === 'digital';
     document.getElementById('deliveryAddressBlock').style.display = isDigital ? 'none' : 'block';
-    const zoneWrap = document.getElementById('zoneFieldWrap');
+
     try {
       if(isDigital){
-        zoneWrap.style.display = 'none';
+        document.getElementById('zoneFieldWrap').style.display = 'none';
         selectedZoneFee = 0;
-        deliveryZones = [];
       } else {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones?store_id=eq.${currentStore.id}`, {
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         });
-        if(!res.ok) throw new Error('Zones de livraison indisponibles');
         deliveryZones = await res.json();
+        const zoneWrap = document.getElementById('zoneFieldWrap');
         const zoneSelect = document.getElementById('zoneSelect');
-        zoneSelect.innerHTML = deliveryZones.map((z,i) => `<option value="${i}">${escapeLogistics(z.zone_name)} — ${fmtBuyer(z.fee_fcfa)}</option>`).join('');
-        if(deliveryZones.length) zoneSelect.value = '0';
-        applyLegacyZoneFallback();
+        if(deliveryZones.length > 0){
+          zoneWrap.style.display = 'block';
+          zoneSelect.innerHTML = deliveryZones.map((z,i) => `<option value="${i}">${z.zone_name} — ${fmtBuyer(z.fee_fcfa)}</option>`).join('');
+          selectedZoneFee = Number(deliveryZones[0].fee_fcfa || 0);
+        } else {
+          zoneWrap.style.display = 'none';
+          selectedZoneFee = 0;
+        }
       }
-    } catch(err){
-      deliveryZones = [];
-      selectedZoneFee = 0;
-      zoneWrap.style.display = 'none';
-    }
+    } catch(err){ selectedZoneFee = 0; }
+
     updateOrderTotal();
-    if(isPhysicalProduct()) await refreshDeliveryQuote();
+    if(!isDigital) refreshDeliveryQuote();
+  }
+
+  async function refreshDeliveryQuote(){
+    const box = document.getElementById('deliveryQuoteBox');
+    const title = document.getElementById('deliveryQuoteTitle');
+    const details = document.getElementById('deliveryQuoteDetails');
+    if(!box || !currentProduct || currentProduct.product_type === 'digital') return;
+    const city = document.getElementById('custCity').value.trim();
+    const district = document.getElementById('custDistrict').value.trim();
+    if(!city || !district || !buyerCountryCode){
+      deliveryQuote = null;
+      box.style.display = 'block';
+      title.textContent = 'Solution de livraison';
+      details.textContent = 'Renseigne ta ville et ton quartier pour vérifier la disponibilité et les frais.';
+      updateOrderTotal();
+      return;
+    }
+    const requestId = ++deliveryQuoteRequest;
+    box.style.display = 'block';
+    title.textContent = 'Vérification de la livraison…';
+    details.textContent = 'Recherche d’un partenaire disponible dans ton pays.';
+    try{
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/etachop_quote_delivery`, {
+        method:'POST',
+        headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json'},
+        body:JSON.stringify({
+          p_store_id:currentStore.id,
+          p_product_id:currentProduct.id,
+          p_buyer_country:buyerCountryCode === 'CD_USD' ? 'CD' : buyerCountryCode,
+          p_city:city,
+          p_district:district
+        })
+      });
+      const quote = await res.json();
+      if(requestId !== deliveryQuoteRequest) return;
+      if(!res.ok) throw new Error(quote.message || quote.error || 'Vérification impossible.');
+      deliveryQuote = quote;
+      const zoneWrap = document.getElementById('zoneFieldWrap');
+      if(quote.success === false || quote.available === false){
+        if(zoneWrap) zoneWrap.style.display = 'none';
+        title.textContent = 'Livraison indisponible';
+        details.textContent = quote.reason || 'Aucun partenaire logistique disponible dans cette destination.';
+      } else if(quote.partner_id){
+        if(zoneWrap) zoneWrap.style.display = 'none';
+        const partner = quote.partner_name ? `Partenaire : ${quote.partner_name}${quote.partner_city ? ' — '+quote.partner_city : ''}. ` : 'Partenaire logistique disponible. ';
+        const fee = Number(quote.delivery_fee || 0);
+        const payer = quote.delivery_payer === 'seller' ? 'Les frais sont pris en charge par le vendeur.' : `Frais de livraison : ${fmtBuyer(fee)}.`;
+        title.textContent = quote.fulfillment_type === 'longrich_stockist' ? 'Stockiste Longrich disponible' : 'Partenaire de livraison disponible';
+        details.textContent = partner + payer;
+      } else {
+        if(zoneWrap) zoneWrap.style.display = deliveryZones.length > 0 ? 'block' : 'none';
+        title.textContent = 'Livraison par le vendeur';
+        details.textContent = quote.message || 'Le vendeur assurera la livraison. Les zones de livraison configurées peuvent s’appliquer.';
+      }
+      updateOrderTotal();
+    }catch(err){
+      if(requestId !== deliveryQuoteRequest) return;
+      deliveryQuote = null;
+      title.textContent = 'Vérification momentanément indisponible';
+      details.textContent = 'Les frais et la disponibilité seront revérifiés lors de la commande.';
+      updateOrderTotal();
+    }
   }
 
   function updateOrderTotal(){
     const zoneSelect = document.getElementById('zoneSelect');
-    if(!logisticsQuoteActive && deliveryZones.length > 0 && zoneSelect.value !== ''){
-      const zone = deliveryZones[parseInt(zoneSelect.value,10)];
-      if(zone) selectedZoneFee = Number(zone.fee_fcfa || 0);
+    if(deliveryZones.length > 0 && zoneSelect && zoneSelect.value !== ''){
+      selectedZoneFee = Number(deliveryZones[parseInt(zoneSelect.value,10)]?.fee_fcfa || 0);
     }
-    if(logisticsQuoteActive){
-      const payer = logisticsQuotePayer;
-      selectedZoneFee = (payer === 'buyer' || payer === 'customer' || payer === 'client') ? logisticsQuoteFee : 0;
+    let deliveryToCharge = selectedZoneFee;
+    if(deliveryQuote && deliveryQuote.success && deliveryQuote.partner_id){
+      deliveryToCharge = deliveryQuote.delivery_payer === 'seller' ? 0 : Number(deliveryQuote.delivery_fee || 0);
     }
-    if(!isPhysicalProduct()) selectedZoneFee = 0;
-    const total = Number(currentProduct.price_fcfa || 0) - appliedDiscount + selectedZoneFee;
+    const total = currentProduct.price_fcfa - appliedDiscount + deliveryToCharge;
     document.getElementById('orderTotalAmt').textContent = fmtBuyer(Math.max(0,total));
   }
-
-  document.getElementById('custCity').addEventListener('change', refreshDeliveryQuote);
-  document.getElementById('custDistrict').addEventListener('change', refreshDeliveryQuote);
 
   async function applyPromoCode(){
     const code = document.getElementById('promoInput').value.trim().toUpperCase();
@@ -722,7 +625,6 @@
 
 
   async function submitOrder(){
-    if(checkoutSubmitting) return;
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
     const address = document.getElementById('custAddress').value.trim();
@@ -764,12 +666,12 @@
     }
     const variantText = Object.entries(selectedVariants).map(([k,v]) => `${k}: ${v}`).join(', ') || null;
 
-    btn.disabled = true; checkoutSubmitting = true; btn.textContent = "Envoi de la demande de paiement…";
+    btn.disabled = true; btn.textContent = "Envoi de la demande de paiement…";
     try {
       const zoneSelect = document.getElementById('zoneSelect');
       const zoneId = (deliveryZones.length > 0 && zoneSelect.value !== '') ? deliveryZones[parseInt(zoneSelect.value,10)].id : null;
       const promoCode = document.getElementById('promoInput').value.trim().toUpperCase() || null;
-      const total = currentProduct.price_fcfa - appliedDiscount + (isDigitalOrder ? 0 : selectedZoneFee);
+      const total = currentProduct.price_fcfa - appliedDiscount + selectedZoneFee;
 
       // 1. Enregistre d'abord la commande (statut "en attente"), pour avoir un identifiant réel
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/place_order`, {
@@ -781,7 +683,7 @@
           p_promo_code: promoCode, p_delivery_zone_id: zoneId,
           p_variant_selection: variantText,
           p_delivery_address: address, p_delivery_city: city, p_delivery_district: district,
-          p_buyer_country: logisticsCountryCode(),
+          p_buyer_country: buyerCountryCode === 'CD_USD' ? 'CD' : buyerCountryCode,
         }),
       });
       if(!res.ok){
@@ -843,7 +745,6 @@
       msg.textContent = err.message; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
     } finally {
-      checkoutSubmitting = false;
       btn.disabled = false; btn.textContent = "Confirmer";
     }
   }
