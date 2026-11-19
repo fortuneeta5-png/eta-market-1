@@ -127,14 +127,31 @@
         ${order.delivery_zone ? `<div class="detail-row"><span>Livraison</span><span>${order.delivery_zone}</span></div>` : ''}
         ${order.variant_selection ? `<div class="detail-row"><span>Choix</span><span>${order.variant_selection}</span></div>` : ''}
         <div class="detail-row"><span>Commandé le</span><span>${date}</span></div>
-        ${order.product_type === 'digital' && order.file_url && order.status !== 'pending' && order.status !== 'cancelled' ? `
-          <a href="${order.file_url}" target="_blank" style="display:block; text-align:center; margin-top:14px; padding:12px; background:#059669; color:#fff; border-radius:10px; font-weight:700; text-decoration:none;">📥 Télécharger mon fichier</a>
+        ${order.product_type === 'digital' && order.status !== 'pending' && order.status !== 'cancelled' ? `
+          <button onclick="downloadDigitalFile('${order.order_id}','${order.tracking_code}')" style="display:block;width:100%;margin-top:14px;padding:12px;background:#059669;color:#fff;border:0;border-radius:10px;font-weight:700;cursor:pointer;">Télécharger mon fichier</button>
         ` : ''}
         ${order.product_type === 'digital' && order.status === 'pending' ? `
           <div style="margin-top:14px; padding:10px; background:#FEF3C7; color:#92400E; border-radius:10px; font-size:0.82rem; text-align:center;">Le lien de téléchargement apparaîtra ici une fois le paiement confirmé.</div>
         ` : ''}
       </div>
     `;
+  }
+
+
+  async function downloadDigitalFile(orderId, trackingCode){
+    const buttons = [...document.querySelectorAll('button[onclick^="downloadDigitalFile"]')];
+    buttons.forEach(b => { if(b.getAttribute('onclick').includes(orderId)) { b.disabled=true; b.textContent='Vérification du paiement…'; } });
+    try{
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/digital-download`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+        body:JSON.stringify({order_id:orderId,tracking_code:trackingCode})
+      });
+      const data=await res.json();
+      if(!res.ok || !data.download_url) throw new Error(data.error || 'Téléchargement indisponible');
+      window.open(data.download_url,'_blank','noopener');
+    }catch(err){alert(err.message || 'Impossible de télécharger ce fichier.')}
+    finally{buttons.forEach(b => { if(b.getAttribute('onclick').includes(orderId)) { b.disabled=false; b.textContent='Télécharger mon fichier'; } });}
   }
 
   document.getElementById('phoneInput').addEventListener('keypress', e => {

@@ -163,23 +163,21 @@
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; }
 
-  /* Menu du bas façon app mobile */
-  .bottom-nav{
-    position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line);
-    display:flex; justify-content:space-around; padding:8px 4px calc(8px + env(safe-area-inset-bottom));
-    z-index:80;
-  }
-  .nav-item{
-    background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px;
-    font-size:0.66rem; color:#999; cursor:pointer; padding:6px 4px; flex:1; font-family:'Poppins',sans-serif;
-  }
-  .nav-item .nav-icon{ font-size:1.25rem; line-height:1; }
-  .nav-item.active{ color:var(--primary); font-weight:700; }
-  body{ padding-bottom:70px; }
-  .site-logo-text{ display:inline-block; padding:2px; }
-  .site-logo-text img{ height:40px; display:block; }
-  @media(min-width:768px){ .site-logo-text img{ height:50px; } }
-</style>
+  /* Navigation vendeur : panneau latéral sur ordinateur, barre compacte sur mobile */
+  .seller-sidebar{position:fixed;z-index:70;left:0;top:75px;bottom:0;width:236px;background:#fff;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+  .sidebar-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#aaa;padding:8px 12px 6px}
+  .nav-item{background:none;border:0;display:flex;align-items:center;gap:12px;text-align:left;width:100%;font-size:.83rem;color:#666;cursor:pointer;padding:12px;border-radius:11px;font-family:'Poppins',sans-serif;font-weight:600}
+  .nav-item .nav-icon{font-size:1.05rem;line-height:1;width:22px;text-align:center}
+  .nav-item.active{background:var(--lavender);color:var(--primary-dark);font-weight:800}
+  .sidebar-help{margin-top:auto;padding:14px;border-radius:13px;background:#faf7f7;font-size:.74rem;line-height:1.6;color:#777}
+  .sidebar-help strong{display:block;color:var(--ink);font-size:.8rem;margin-bottom:4px}
+  .bottom-nav{display:none}
+  #dashboard>.wrap{max-width:1240px;margin:0 0 0 236px;padding:30px 30px 60px}
+  .site-logo-text{display:inline-block;padding:2px}.site-logo-text img{height:40px;display:block}
+  @media(min-width:768px){.site-logo-text img{height:46px}}
+  @media(max-width:767px){.seller-sidebar{display:none}#dashboard>.wrap{margin:0;padding:20px 14px 92px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:80;box-shadow:0 -5px 20px #00000008}.nav-item{flex:1;flex-direction:column;justify-content:center;gap:3px;text-align:center;font-size:.65rem;padding:7px 3px;border-radius:9px}.nav-item .nav-icon{font-size:1.15rem;width:auto}body{padding-bottom:0}}
+  .wrap{max-width:none}
+  .site-logo-text img{object-fit:contain}</style>
 </head>
 <body>
 
@@ -217,6 +215,7 @@
       <a href="#" onclick="openForgotPassword(); return false;" style="font-size:0.82rem; color:var(--primary); text-decoration:none;">Mot de passe oublié ?</a>
     </div>
     <div class="auth-msg" id="authMsg"></div>
+    <div style="text-align:center;margin-top:18px;font-size:.82rem;color:#777;">Tu es livreur ? <a href="courier.html" style="color:var(--primary);font-weight:700;">Créer un compte livreur</a></div>
   </div>
 </div>
 
@@ -261,15 +260,6 @@
       <input type="text" id="storeName" placeholder="Ex: Boutique Marie" oninput="updateSlugPreview()">
       <div class="slug-preview" id="slugPreview"></div>
     </div>
-    <div class="field">
-      <label>Profil d'activité</label>
-      <select id="sellerProfileType" onchange="updateSellerProfileFields()">
-        <option value="classic">Vendeur classique</option>
-        <option value="longrich">Distributeur Longrich</option>
-        <option value="logistics">Partenaire logistique</option>
-      </select>
-      <div style="font-size:.75rem;opacity:.6;margin-top:6px;">Choisis le profil qui correspond réellement à ton activité.</div>
-    </div>
     <div class="row2">
       <div class="field">
         <label>Pays d'activité</label>
@@ -295,36 +285,6 @@
       <label>Adresse ou localisation</label>
       <input type="text" id="sellerAddress" placeholder="Quartier, rue, repère...">
     </div>
-    <div id="longrichFields" style="display:none;">
-      <div class="field">
-        <label>Numéro / identifiant distributeur Longrich (si disponible)</label>
-        <input type="text" id="longrichMemberId" placeholder="Identifiant de distributeur">
-      </div>
-      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:11px 12px;font-size:.78rem;color:#9A3412;margin-bottom:14px;">
-        Ta demande de référencement comme distributeur sera vérifiée. Le choix de ce profil ne vaut pas validation.
-      </div>
-    </div>
-    <div id="logisticsFields" style="display:none;">
-      <div class="field">
-        <label>Type de service logistique</label>
-        <select id="logisticsType">
-          <option value="courier">Coursier / livraison</option>
-          <option value="warehouse">Entrepôt / stockage</option>
-          <option value="warehouse_delivery">Stockage + livraison</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Zones desservies (séparées par des virgules)</label>
-        <input type="text" id="logisticsAreas" placeholder="Ex: Talangaï, Poto-Poto, Bacongo">
-      </div>
-      <div class="field" id="warehouseCapacityField" style="display:none;">
-        <label>Capacité de stockage approximative (nombre d'articles)</label>
-        <input type="number" id="warehouseCapacity" min="1" placeholder="Ex: 500">
-      </div>
-      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:11px 12px;font-size:.78rem;color:#9A3412;margin-bottom:14px;">
-        Ton dossier sera soumis à validation par EtaChop. Tu ne recevras aucune commande logistique avant approbation.
-      </div>
-    </div>
     <div class="field">
       <label>Description courte</label>
       <textarea id="storeDesc" rows="2" placeholder="Présente brièvement ton activité"></textarea>
@@ -346,9 +306,21 @@
       <a href="explore.html" class="site-logo-text"><img src="arrière plan blanc.png" alt="EtaChop"></a>
     </div>
     <div class="header-right">
+      <a class="logout-btn" href="explore.html" style="text-decoration:none;">Voir EtaChop</a>
       <button class="logout-btn" onclick="logout()">Déconnexion</button>
     </div>
   </header>
+
+  <aside class="seller-sidebar" aria-label="Navigation vendeur">
+    <div class="sidebar-label">Espace vendeur</div>
+    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">⌂</span>Vue d'ensemble</button>
+    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">▦</span>Mes produits</button>
+    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">▤</span>Commandes et ventes</button>
+    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">₣</span>Finances et retraits</button>
+    <div class="sidebar-label" style="margin-top:12px;">Ma boutique</div>
+    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">◇</span>Boutique et paramètres</button>
+    <div class="sidebar-help"><strong>Besoin d'aide ?</strong>Retrouve ici les outils pour gérer tes ventes, tes produits et ta boutique EtaChop.</div>
+  </aside>
 
   <div class="wrap">
 
@@ -356,7 +328,7 @@
     <div class="tab-panel active" data-tab="home">
       <div class="greeting-block">
         <h2 id="greetingTitle">Bonjour !</h2>
-        <p id="greetingSub"></p>
+        <p id="greetingSub">Retrouve ici les indicateurs et les raccourcis de ton activité.</p>
       </div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-num" id="statTotalRevenue">—</div><div class="stat-lbl">Revenu total</div></div>
@@ -365,7 +337,7 @@
       </div>
       <div class="quick-actions">
         <button class="btn btn-primary" onclick="goToTab('products')">+ Ajouter un produit</button>
-        <button class="btn btn-ghost" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('promoCodeInput')?.scrollIntoView({behavior:'smooth'}), 100);">🏷️ Créer une promo</button>
+        <button class="btn btn-ghost" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('promoCodeInput')?.scrollIntoView({behavior:'smooth'}), 100);">Créer une promotion</button>
       </div>
       <div class="panel">
         <div class="panel-head"><h3>Produits les plus vendus</h3></div>
@@ -766,10 +738,10 @@
 
   <!-- Menu du bas -->
   <div class="bottom-nav">
-    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">🏠</span>Accueil</button>
-    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">📦</span>Produits</button>
-    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">🧾</span>Ventes</button>
-    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">💰</span>Solde</button>
+    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">⌂</span>Accueil</button>
+    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">▦</span>Produits</button>
+    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">▤</span>Commandes</button>
+    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">₣</span>Finances</button>
     <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☰</span>Menu</button>
   </div>
 </div>
@@ -1273,21 +1245,6 @@
     CG: 'XAF', CM: 'XAF', GA: 'XAF', CD: 'CDF', CI: 'XOF', SN: 'XOF'
   };
 
-  function updateSellerProfileFields(){
-    const type = document.getElementById('sellerProfileType').value;
-    document.getElementById('longrichFields').style.display = type === 'longrich' ? 'block' : 'none';
-    document.getElementById('logisticsFields').style.display = type === 'logistics' ? 'block' : 'none';
-    document.getElementById('sellerAddressField').style.display = type === 'logistics' ? 'block' : 'none';
-    updateLogisticsTypeFields();
-  }
-
-  function updateLogisticsTypeFields(){
-    const typeEl = document.getElementById('logisticsType');
-    if(!typeEl) return;
-    const type = typeEl.value;
-    document.getElementById('warehouseCapacityField').style.display =
-      (type === 'warehouse' || type === 'warehouse_delivery') ? 'block' : 'none';
-  }
 
   function updateSellerCountryHint(){
     const country = document.getElementById('sellerCountry').value;
@@ -1316,68 +1273,19 @@
     return data;
   }
 
-  async function saveSellerProfile(country, city, address, sellerType, longrichId){
+  async function saveSellerProfile(country, city, address){
+    // Ne jamais écraser un ancien profil (notamment les profils historiques) lors d'une nouvelle création de boutique.
+    const existing = await apiJson(`dp_seller_profiles?user_id=eq.${encodeURIComponent(session.user.id)}&select=user_id&limit=1`);
+    if(existing && existing.length) return existing[0];
     const payload = {
       user_id: session.user.id,
-      seller_type: sellerType,
+      seller_type: 'classic',
       country_code: country,
       city,
       address: address || null,
-      longrich_partner_id: longrichId || null,
       updated_at: new Date().toISOString()
     };
-    return await apiJson('dp_seller_profiles?on_conflict=user_id', {
-      method: 'POST',
-      headers: {'Prefer':'resolution=merge-duplicates,return=representation'},
-      body: JSON.stringify(payload)
-    });
-  }
-
-  async function savePartnerApplication(profileType, name, country, city, phone, address){
-    if(profileType !== 'longrich' && profileType !== 'logistics') return null;
-
-    const partnerType = profileType === 'longrich'
-      ? 'longrich_stockist'
-      : document.getElementById('logisticsType').value;
-    const areasInput = profileType === 'logistics'
-      ? document.getElementById('logisticsAreas').value.trim()
-      : '';
-    const serviceAreas = areasInput
-      ? areasInput.split(',').map(x => x.trim()).filter(Boolean)
-      : [];
-
-    const payload = {
-      user_id: session.user.id,
-      business_name: name,
-      partner_type: partnerType,
-      country_code: country,
-      city,
-      address: address || null,
-      phone,
-      service_areas: serviceAreas,
-      approval_status: 'pending',
-      is_available: false,
-      updated_at: new Date().toISOString()
-    };
-
-    if(profileType === 'logistics'){
-      const capacity = parseInt(document.getElementById('warehouseCapacity').value, 10);
-      if(Number.isFinite(capacity) && capacity > 0) payload.storage_capacity = capacity;
-    }
-
-    // Une candidature déjà existante est mise à jour plutôt que dupliquée.
-    const existing = await apiJson(`dp_logistics_partners?user_id=eq.${encodeURIComponent(session.user.id)}&select=id,approval_status&limit=1`);
-    if(existing && existing.length){
-      const partner = existing[0];
-      if(partner.approval_status === 'approved') return partner;
-      return await apiJson(`dp_logistics_partners?id=eq.${partner.id}`, {
-        method: 'PATCH',
-        headers: {'Prefer':'return=representation'},
-        body: JSON.stringify(payload)
-      });
-    }
-
-    return await apiJson('dp_logistics_partners', {
+    return await apiJson('dp_seller_profiles', {
       method: 'POST',
       headers: {'Prefer':'return=representation'},
       body: JSON.stringify(payload)
@@ -1387,12 +1295,10 @@
   async function createStore(){
     const name = document.getElementById('storeName').value.trim();
     const description = document.getElementById('storeDesc').value.trim();
-    const profileType = document.getElementById('sellerProfileType').value;
     const country = document.getElementById('sellerCountry').value;
     const city = document.getElementById('sellerCity').value.trim();
     const phone = document.getElementById('sellerPhone').value.trim();
     const address = document.getElementById('sellerAddress').value.trim();
-    const longrichId = document.getElementById('longrichMemberId').value.trim();
     const msg = document.getElementById('createStoreMsg');
     const btn = document.getElementById('createStoreBtn');
 
@@ -1402,30 +1308,15 @@
       msg.className = "form-msg err"; msg.style.display = "block";
       return;
     }
-    if(profileType === 'logistics' && !address){
-      msg.textContent = "Indique l'adresse ou la localisation de ton activité logistique.";
-      msg.className = "form-msg err"; msg.style.display = "block";
-      return;
-    }
-
     btn.disabled = true; btn.textContent = "Enregistrement…";
     try {
       const refreshed = await refreshSession();
       if(!refreshed) throw new Error("Ta session a expiré. Reconnecte-toi avant de continuer.");
 
       // 1. Enregistrer les informations du vendeur.
-      await saveSellerProfile(
-        country, city, address,
-        profileType === 'longrich' ? 'longrich' : 'classic',
-        longrichId
-      );
+      await saveSellerProfile(country, city, address);
 
-      // 2. Enregistrer les candidatures partenaires en attente de validation.
-      if(profileType === 'longrich' || profileType === 'logistics'){
-        await savePartnerApplication(profileType, name, country, city, phone, address);
-      }
-
-      // 3. Créer la boutique avec le pays et la devise correspondante.
+      // Créer la boutique avec le pays et la devise correspondante.
       let slug = slugify(name);
       const check = await apiJson(`dp_stores?slug=eq.${encodeURIComponent(slug)}&select=id&limit=1`);
       if(check && check.length) slug = slug + '-' + Math.floor(Math.random()*9000 + 1000);
@@ -1449,13 +1340,7 @@
       document.getElementById('createStoreScreen').style.display = 'none';
       showDashboard();
 
-      if(profileType === 'longrich'){
-        alert("Boutique créée. Ta demande de référencement Longrich est enregistrée en attente de vérification par EtaChop.");
-      } else if(profileType === 'logistics'){
-        alert("Boutique créée. Ta candidature comme partenaire logistique est enregistrée en attente de validation. Tu ne peux pas encore recevoir de missions.");
-      } else {
-        alert("Ta boutique EtaChop a été créée avec succès !");
-      }
+      alert("Ta boutique EtaChop a été créée avec succès !");
     } catch(err){
       msg.textContent = err.message || "Une erreur est survenue. Vérifie ta connexion et réessaie.";
       msg.className = "form-msg err"; msg.style.display = "block";
@@ -1464,9 +1349,6 @@
     }
   }
 
-  const logisticsTypeControl = document.getElementById('logisticsType');
-  if(logisticsTypeControl) logisticsTypeControl.addEventListener('change', updateLogisticsTypeFields);
-  updateSellerProfileFields();
   updateSellerCountryHint();
 
   // ---------- Dashboard ----------
@@ -2013,13 +1895,13 @@
       if(selectedProductType === 'digital' && selectedDigitalFile){
         const dExt = (selectedDigitalFile.name.split('.').pop() || 'pdf').toLowerCase();
         const dFileName = `${currentStore.id}/digital-${Date.now()}-${Math.random().toString(36).slice(2)}.${dExt}`;
-        const dRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${dFileName}`, {
+        const dRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-digital-private/${dFileName}`, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': selectedDigitalFile.type || 'application/octet-stream' },
           body: selectedDigitalFile,
         });
         if(!dRes.ok) throw new Error("Échec de l'upload du fichier numérique");
-        digitalFileUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${dFileName}`;
+        digitalFileUrl = dFileName;
       }
 
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products`, {

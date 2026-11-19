@@ -562,7 +562,7 @@
         const partner = quote.partner_name ? `Partenaire : ${quote.partner_name}${quote.partner_city ? ' — '+quote.partner_city : ''}. ` : 'Partenaire logistique disponible. ';
         const fee = Number(quote.delivery_fee || 0);
         const payer = quote.delivery_payer === 'seller' ? 'Les frais sont pris en charge par le vendeur.' : `Frais de livraison : ${fmtBuyer(fee)}.`;
-        title.textContent = quote.fulfillment_type === 'longrich_stockist' ? 'Stockiste Longrich disponible' : 'Partenaire de livraison disponible';
+        title.textContent = 'Partenaire de livraison disponible';
         details.textContent = partner + payer;
       } else {
         if(zoneWrap) zoneWrap.style.display = deliveryZones.length > 0 ? 'block' : 'none';

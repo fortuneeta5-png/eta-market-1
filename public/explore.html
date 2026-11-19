@@ -1,226 +1,46 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Découvrir les boutiques — EtaChop</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#E63946">
-<link rel="apple-touch-icon" href="arrière plan noir.png">
-<meta property="og:title" content="EtaChop — Marketplace de Brazzaville">
-<meta property="og:description" content="Découvre des boutiques locales et achète en toute confiance sur EtaChop.">
-<meta property="og:image" content="https://etachop.com/public/arrière plan bleu.png">
-<meta property="og:type" content="website">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EtaChop — La plateforme pour vendre et développer ton activité</title>
+<meta name="description" content="Crée ta boutique en ligne avec EtaChop. Vends des produits physiques et numériques, reçois des commandes et organise tes livraisons depuis un seul espace.">
+<meta name="theme-color" content="#171717"><link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="arrière plan bleu.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --red:#E63946; --red-dark:#B4222D; --black:#1D1D1D; --white:#FFFFFF; --yellow:#FCA311;
-    --line:rgba(29,29,29,0.1);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{ background:#FAFAFA; color:var(--black); font-family:'Poppins',sans-serif; min-height:100vh; overflow-wrap:break-word; word-break:normal; overflow-x:hidden; }
-  h1,h2,h3{ font-family:'Montserrat',sans-serif; font-weight:800; }
-  a{ color:inherit; text-decoration:none; }
-
-  header{ background:var(--black); color:#fff; padding:18px 24px; text-align:center; }
-  .logo{ font-size:1.3rem; font-weight:900; }
-  .logo span{ color:var(--red); }
-
-  .hero{ background:linear-gradient(125deg, var(--red), var(--red-dark)); color:#fff; padding:44px 24px; text-align:center; }
-  .hero h1{ font-size:1.8rem; margin-bottom:10px; }
-  .hero p{ opacity:0.9; font-size:0.95rem; }
-
-  .wrap{ max-width:1000px; margin:0 auto; padding:30px 20px 60px; }
-  .section-title{ font-size:1.1rem; margin:24px 0 14px; display:flex; align-items:center; gap:8px; }
-  .badge-top{ background:var(--yellow); color:var(--black); font-size:0.65rem; font-weight:800; padding:3px 10px; border-radius:100px; text-transform:uppercase; }
-
-  .store-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px; }
-  .store-card{
-    background:#fff; border-radius:16px; overflow:hidden; border:1px solid var(--line);
-    transition:transform .2s ease; position:relative;
-  }
-  .store-card:hover{ transform:translateY(-4px); }
-  .store-card.top{ border:2px solid var(--yellow); box-shadow:0 8px 24px rgba(252,163,17,0.2); }
-  .store-top{ height:70px; }
-  .store-body{ padding:16px; }
-  .store-body h3{ font-size:1rem; margin-bottom:4px; }
-  .store-body p{ font-size:0.8rem; opacity:0.6; line-height:1.4; margin-bottom:10px; min-height:2.2em; }
-  .store-rating{ font-size:0.8rem; color:var(--yellow); font-weight:700; }
-  .store-rating .count{ color:var(--black); opacity:0.5; font-weight:400; }
-  .rank-tag{ position:absolute; top:10px; right:10px; background:var(--yellow); color:var(--black); font-size:0.62rem; font-weight:800; padding:4px 8px; border-radius:100px; }
-
-  .empty{ text-align:center; padding:60px 20px; opacity:0.5; }
-  .cta-vendor{ text-align:center; margin-top:50px; padding:30px; background:var(--black); border-radius:18px; color:#fff; }
-  .cta-vendor h3{ margin-bottom:10px; }
-  .cta-vendor a{ display:inline-block; margin-top:14px; background:var(--red); padding:12px 26px; border-radius:100px; font-weight:600; font-size:0.9rem; }
-  .site-logo-text{ display:inline-block; padding:2px; }
-  .site-logo-text img{ height:40px; display:block; }
-  @media(min-width:768px){ .site-logo-text img{ height:50px; } }
+:root{--ink:#171717;--muted:#707070;--line:#ececec;--accent:#e63946;--paper:#fff;--soft:#faf7f7;--red-soft:#fff0f1;--max:1160px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif}a{color:inherit;text-decoration:none}button{font:inherit}.container{width:min(var(--max),calc(100% - 40px));margin:auto}
+header{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100vw - var(--max))/2));position:sticky;top:0;z-index:20}.brand img{height:45px;max-width:155px;object-fit:contain}.nav{display:flex;align-items:center;gap:9px}.nav a{font-size:.86rem;font-weight:800;padding:11px 15px;border-radius:11px}.nav .login{border:1px solid var(--line)}.nav .sell{background:var(--accent);color:#fff}
+.hero{overflow:hidden;background:var(--ink);color:#fff;position:relative}.hero:before{content:"";position:absolute;width:560px;height:560px;border:1px solid #ffffff16;border-radius:50%;right:-130px;top:-230px;box-shadow:0 0 0 55px #ffffff08,0 0 0 110px #ffffff05}.hero-inner{position:relative;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:45px;padding-top:82px;padding-bottom:82px}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:#ffb9be;font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;font-weight:900}.eyebrow:before{content:"";width:22px;height:2px;background:var(--accent)}h1,h2,h3{font-family:Manrope,sans-serif}.hero h1{font-size:clamp(2.45rem,5vw,4.45rem);line-height:1.04;letter-spacing:-.055em;margin:18px 0 18px;max-width:700px}.hero h1 span{color:#ff7b84}.hero-copy{font-size:1.05rem;line-height:1.75;color:#d0d0d0;max-width:570px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}.btn{display:inline-flex;justify-content:center;align-items:center;padding:14px 19px;border-radius:12px;font-size:.9rem;font-weight:900}.btn-primary{background:var(--accent);color:#fff}.btn-light{background:#fff;color:var(--ink)}.hero-note{font-size:.77rem;color:#aaa;margin-top:17px}.hero-visual{position:relative;min-height:365px;display:flex;align-items:center;justify-content:center}.mock-window{width:min(100%,430px);background:#fff;color:var(--ink);border-radius:20px;padding:19px;box-shadow:0 30px 90px #0008;transform:rotate(2deg)}.mock-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:15px;border-bottom:1px solid var(--line)}.mock-brand{font-weight:900;font-family:Manrope;font-size:1.05rem}.mock-brand span{color:var(--accent)}.mock-status{font-size:.67rem;background:#e9f8ef;color:#187a43;border-radius:30px;padding:6px 9px;font-weight:800}.mock-title{font:800 1.2rem Manrope;margin:18px 0 4px}.mock-sub{font-size:.72rem;color:var(--muted)}.mock-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}.mock-stat{background:#fafafa;border:1px solid var(--line);border-radius:12px;padding:14px}.mock-stat small{display:block;color:var(--muted);font-size:.68rem}.mock-stat strong{display:block;font:900 1.2rem Manrope;margin-top:6px}.mock-order{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:13px;margin-top:15px}.mock-icon{width:35px;height:35px;border-radius:10px;background:var(--red-soft);display:grid;place-items:center;color:var(--accent);font-weight:900}.mock-order strong{font-size:.76rem}.mock-order small{display:block;font-size:.65rem;color:var(--muted);margin-top:3px}.mock-pill{margin-left:auto;background:#fff4df;color:#9b6510;font-size:.64rem;padding:5px 8px;border-radius:30px;font-weight:800}
+.trust{border-bottom:1px solid var(--line);background:#fff}.trust-inner{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;padding:22px 0}.trust-item{display:flex;align-items:center;justify-content:center;gap:11px;font-size:.84rem;font-weight:800}.trust-icon{width:35px;height:35px;border-radius:11px;background:var(--red-soft);color:var(--accent);display:grid;place-items:center;font-size:1rem}
+section.content{padding:78px 0}.section-intro{text-align:center;max-width:700px;margin:0 auto 38px}.kicker{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:900}.section-intro h2{font-size:clamp(1.8rem,3.5vw,2.8rem);line-height:1.12;letter-spacing:-.04em;margin:12px 0}.section-intro p{color:var(--muted);line-height:1.7;margin:0}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature{border:1px solid var(--line);border-radius:17px;padding:24px;background:#fff}.feature-icon{width:44px;height:44px;border-radius:13px;background:var(--red-soft);display:grid;place-items:center;color:var(--accent);font-size:1.25rem;font-weight:900}.feature h3{font-size:1.02rem;margin:17px 0 8px}.feature p{font-size:.85rem;line-height:1.7;color:var(--muted);margin:0}.soft-section{background:var(--soft)}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}.step-num{font:900 1.6rem Manrope;color:var(--accent)}.step h3{font-size:.98rem;margin:12px 0 7px}.step p{font-size:.82rem;color:var(--muted);line-height:1.65;margin:0}.audience-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.audience{border-radius:20px;padding:30px;background:#171717;color:#fff;position:relative;overflow:hidden}.audience.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}.audience-tag{font-size:.72rem;font-weight:900;color:#ff9ca3;text-transform:uppercase;letter-spacing:.1em}.audience h3{font-size:1.5rem;margin:12px 0}.audience p{color:#d1d1d1;font-size:.88rem;line-height:1.7;max-width:480px}.audience.alt p{color:var(--muted)}.audience a{display:inline-flex;margin-top:14px;font-size:.84rem;font-weight:900;color:#ff9ca3}.audience.alt a{color:var(--accent)}.faq{max-width:820px;margin:auto}.faq details{border-bottom:1px solid var(--line);padding:18px 2px}.faq summary{cursor:pointer;font-weight:900;font-size:.93rem}.faq p{font-size:.85rem;color:var(--muted);line-height:1.7;margin:12px 0 0}.final-cta{background:var(--ink);color:#fff;border-radius:22px;padding:42px;text-align:center}.final-cta h2{font-size:clamp(1.8rem,3vw,2.6rem);margin:0 0 10px}.final-cta p{color:#ccc;line-height:1.7;margin:0 auto;max-width:600px}.final-cta .actions{justify-content:center}
+footer{background:#fff;border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:.78rem}.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.footer-links{display:flex;gap:16px;flex-wrap:wrap}.footer-links a{color:var(--ink);font-weight:800}
+@media(max-width:850px){.hero-inner{grid-template-columns:1fr;gap:25px;padding-top:62px;padding-bottom:55px}.hero-visual{min-height:300px}.mock-window{transform:none}.feature-grid{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){header{height:64px;padding:0 14px}.brand img{height:37px}.nav{gap:4px}.nav a{font-size:.72rem;padding:9px 10px}.container{width:calc(100% - 30px)}.hero-inner{padding-top:48px;padding-bottom:42px}.hero h1{font-size:2.55rem}.hero-copy{font-size:.92rem}.hero-visual{min-height:260px}.mock-window{padding:14px;border-radius:15px}.mock-title{font-size:1.05rem}.trust-inner{grid-template-columns:1fr;gap:12px;padding:17px 0}.trust-item{justify-content:flex-start}.content{padding:58px 0!important}.feature-grid,.steps,.audience-grid{grid-template-columns:1fr}.feature{padding:20px}.audience{padding:24px}.final-cta{padding:30px 20px}.footer-inner{align-items:flex-start;flex-direction:column}}
+@media(max-width:360px){.nav a{padding:8px 7px}.hero h1{font-size:2.25rem}}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="logo" style="display:flex; align-items:center; justify-content:center; gap:8px;">
-    <a href="explore.html" class="site-logo-text"><img src="arrière plan noir.png" alt="EtaChop"></a>
-  </div>
-</header>
-
-<div class="hero">
-  <h1>Découvre les boutiques EtaChop</h1>
-  <p>Des vendeurs de tout le Congo, classés selon les avis de vrais clients.</p>
-  <div style="max-width:420px; margin:22px auto 0; display:flex; gap:8px;">
-    <input type="text" id="searchInput" placeholder="Rechercher un produit…" oninput="handleSearch()"
-      style="flex:1; padding:13px 16px; border-radius:100px; border:none; font-size:0.92rem; font-family:'Poppins',sans-serif;">
-  </div>
-</div>
-
-<div class="wrap">
-  <div id="searchResults" style="display:none;">
-    <div class="section-title">Résultats de recherche</div>
-    <div class="store-grid" id="searchGrid"></div>
-  </div>
-
-  <div id="browseSections">
-  <div id="topSection" style="display:none;">
-    <div class="section-title">⭐ Les mieux notées <span class="badge-top">Avis clients</span></div>
-    <div class="store-grid" id="topGrid"></div>
-  </div>
-
-  <div class="section-title">Toutes les boutiques</div>
-  <div class="store-grid" id="allGrid">
-    <div class="empty">Chargement…</div>
-  </div>
-  </div>
-
-  <div class="cta-vendor">
-    <h3>Tu veux vendre sur EtaChop ?</h3>
-    <p style="opacity:0.75; font-size:0.88rem;">Crée ta boutique gratuitement en 2 minutes.</p>
-    <a href="dashboard.html">Créer ma boutique →</a>
-  </div>
-
-  <div style="text-align:center; margin-top:30px; font-size:0.8rem; opacity:0.5;">
-    <a href="suivi.html" style="color:inherit;">Suivre ma commande</a> · <a href="conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="conditions.html" style="color:inherit;">Livraison & Retours</a>
-  </div>
-</div>
-
-<script>
-  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
-
-  let searchTimeout = null;
-  function handleSearch(){
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(runSearch, 350);
-  }
-
-  function productCard(p){
-    const store = p.dp_stores;
-    return `
-      <a class="store-card" href="store.html?s=${store.slug}&p=${p.id}">
-        <img src="${p.image_url}" style="width:100%; aspect-ratio:1; object-fit:cover;" alt="${p.name}">
-        <div class="store-body">
-          <h3>${p.name}</h3>
-          <p style="min-height:auto;">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</p>
-          <div class="store-meta">Chez ${store.name}</div>
-        </div>
-      </a>
-    `;
-  }
-
-  async function runSearch(){
-    const query = document.getElementById('searchInput').value.trim();
-    if(!query){
-      document.getElementById('searchResults').style.display = 'none';
-      document.getElementById('browseSections').style.display = 'block';
-      return;
-    }
-    document.getElementById('searchResults').style.display = 'block';
-    document.getElementById('browseSections').style.display = 'none';
-    const grid = document.getElementById('searchGrid');
-    grid.innerHTML = '<div class="empty">Recherche…</div>';
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?is_active=eq.true&name=ilike.*${encodeURIComponent(query)}*&select=*,dp_stores(name,slug,accent_color)&limit=24`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      });
-      const products = await res.json();
-      if(products.length === 0){
-        grid.innerHTML = `<div class="empty">Aucun produit trouvé pour "${query}".</div>`;
-        return;
-      }
-      grid.innerHTML = products.map(productCard).join('');
-    } catch(err){
-      grid.innerHTML = '<div class="empty">Erreur lors de la recherche.</div>';
-    }
-  }
-
-  function storeCard(s, isTop){
-    const ratingHtml = s.reviewCount > 0
-      ? `<div class="store-rating">${'★'.repeat(Math.round(s.avgRating))}${'☆'.repeat(5-Math.round(s.avgRating))} ${s.avgRating.toFixed(1)} <span class="count">(${s.reviewCount} avis)</span></div>`
-      : `<div class="store-rating" style="color:var(--black); opacity:0.4;">Pas encore d'avis</div>`;
-    return `
-      <a class="store-card ${isTop?'top':''}" href="store.html?s=${s.slug}">
-        ${isTop ? '<div class="rank-tag">⭐ Top boutique</div>' : ''}
-        <div class="store-top" style="background:${s.accent_color || '#E63946'}; display:flex; align-items:center; justify-content:center;">
-          ${s.logo_url ? `<img src="${s.logo_url}" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.7);">` : ''}
-        </div>
-        <div class="store-body">
-          <h3>${s.name}</h3>
-          <p>${s.description || 'Boutique en ligne sur EtaChop.'}</p>
-          ${ratingHtml}
-        </div>
-      </a>
-    `;
-  }
-
-  async function init(){
-    try {
-      const storesRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?is_published=eq.true&order=created_at.desc`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      });
-      const stores = await storesRes.json();
-
-      const reviewsRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_reviews?select=store_id,rating`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      });
-      const reviews = await reviewsRes.json();
-
-      const withRatings = stores.map(s => {
-        const storeReviews = reviews.filter(r => r.store_id === s.id);
-        const avgRating = storeReviews.length > 0 ? storeReviews.reduce((sum,r)=>sum+r.rating,0) / storeReviews.length : 0;
-        return { ...s, avgRating, reviewCount: storeReviews.length };
-      });
-
-      const top = [...withRatings].filter(s => s.reviewCount > 0).sort((a,b) => b.avgRating - a.avgRating || b.reviewCount - a.reviewCount).slice(0, 3);
-      const topIds = new Set(top.map(s => s.id));
-      const rest = withRatings.filter(s => !topIds.has(s.id));
-
-      if(top.length > 0){
-        document.getElementById('topSection').style.display = 'block';
-        document.getElementById('topGrid').innerHTML = top.map(s => storeCard(s, true)).join('');
-      }
-
-      const allGrid = document.getElementById('allGrid');
-      if(withRatings.length === 0){
-        allGrid.innerHTML = '<div class="empty">Aucune boutique pour l\'instant. Sois le premier à en créer une !</div>';
-        return;
-      }
-      allGrid.innerHTML = rest.map(s => storeCard(s, false)).join('') || '<div class="empty">Toutes les boutiques sont dans le classement ci-dessus.</div>';
-    } catch(err){
-      document.getElementById('allGrid').innerHTML = '<div class="empty">Impossible de charger les boutiques.</div>';
-    }
-  }
-
-  init();
-</script>
-
-<script src="assistant.js"></script>
-<script>initEtaAssistant('both');</script>
-<script src="install-banner.js"></script>
-<script>
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
-</script>
-</body>
-</html>
+<header><a class="brand" href="explore.html" aria-label="EtaChop accueil"><img src="arrière plan blanc.png" alt="EtaChop"></a><nav class="nav"><a class="login" href="dashboard.html">Se connecter</a><a class="sell" href="dashboard.html">Créer ma boutique</a></nav></header>
+<main>
+<section class="hero"><div class="container hero-inner"><div><div class="eyebrow">La plateforme e-commerce EtaChop</div><h1>Ton activité mérite une boutique <span>à sa hauteur.</span></h1><p class="hero-copy">Crée ton espace de vente, présente tes produits physiques ou numériques, reçois tes commandes et organise tes livraisons. EtaChop rassemble les outils essentiels pour développer ton commerce en ligne.</p><div class="actions"><a class="btn btn-primary" href="dashboard.html">Créer ma boutique gratuitement</a><a class="btn btn-light" href="#fonctionnement">Comment ça marche ?</a></div><p class="hero-note">Pas besoin de savoir coder. Tu peux commencer simplement.</p></div>
+<div class="hero-visual" aria-label="Aperçu illustratif du tableau de bord EtaChop"><div class="mock-window"><div class="mock-top"><div class="mock-brand">ETA<span>CHOP</span></div><div class="mock-status">● Espace vendeur</div></div><div class="mock-title">Bonjour, vendeur !</div><div class="mock-sub">Voici un aperçu de ton activité</div><div class="mock-stats"><div class="mock-stat"><small>Commandes</small><strong>Suivies au même endroit</strong></div><div class="mock-stat"><small>Produits</small><strong>Physiques & digitaux</strong></div></div><div class="mock-order"><div class="mock-icon">↗</div><div><strong>Gestion des ventes</strong><small>Commandes, paiements et suivi</small></div><span class="mock-pill">Centralisé</span></div><div class="mock-order"><div class="mock-icon">⌁</div><div><strong>Livraison organisée</strong><small>Partenaires et suivi des colis</small></div><span class="mock-pill">Connecté</span></div></div></div>
+</div></section>
+<div class="trust"><div class="container trust-inner"><div class="trust-item"><span class="trust-icon">▣</span>Une boutique à ton image</div><div class="trust-item"><span class="trust-icon">↗</span>Produits physiques et numériques</div><div class="trust-item"><span class="trust-icon">⌁</span>Vente et logistique réunies</div></div></div>
+<section class="content" id="avantages"><div class="container"><div class="section-intro"><span class="kicker">Tout au même endroit</span><h2>Les outils pour gérer ton commerce sans te disperser</h2><p>EtaChop t'aide à passer de la présentation de tes produits à la gestion des commandes, avec un espace conçu pour les réalités du commerce en ligne.</p></div><div class="feature-grid">
+<article class="feature"><div class="feature-icon">▦</div><h3>Ta boutique en ligne</h3><p>Personnalise le nom, le lien, le logo et la présentation de ta boutique pour partager ton espace de vente facilement.</p></article>
+<article class="feature"><div class="feature-icon">◇</div><h3>Tous tes types de produits</h3><p>Propose des produits physiques à livrer et des produits numériques à télécharger après confirmation du paiement.</p></article>
+<article class="feature"><div class="feature-icon">▤</div><h3>Gestion des commandes</h3><p>Retrouve tes commandes, consulte leur état et suis leur traitement depuis ton espace vendeur.</p></article>
+<article class="feature"><div class="feature-icon">⌁</div><h3>Livraison et logistique</h3><p>Travaille avec les partenaires logistiques disponibles pour faciliter l'expédition et le suivi des commandes physiques.</p></article>
+<article class="feature"><div class="feature-icon">◷</div><h3>Suivi des ventes et revenus</h3><p>Consulte tes indicateurs, tes transactions, ton solde disponible et tes demandes de retrait.</p></article>
+<article class="feature"><div class="feature-icon">↗</div><h3>Liens et promotion</h3><p>Partage ta boutique, diffuse tes fiches produits et utilise les outils de promotion disponibles dans ton tableau de bord.</p></article>
+</div></div></section>
+<section class="content soft-section" id="fonctionnement"><div class="container"><div class="section-intro"><span class="kicker">Simple pour commencer</span><h2>Comment fonctionne EtaChop ?</h2><p>Quelques étapes pour mettre ton activité en ligne et commencer à recevoir des commandes.</p></div><div class="steps"><article class="step"><div class="step-num">01</div><h3>Crée ton compte</h3><p>Inscris-toi et configure ton espace vendeur sur EtaChop.</p></article><article class="step"><div class="step-num">02</div><h3>Configure ta boutique</h3><p>Ajoute les informations de ton commerce et personnalise ta boutique.</p></article><article class="step"><div class="step-num">03</div><h3>Publie tes produits</h3><p>Ajoute tes produits physiques ou numériques avec leurs prix et leurs informations.</p></article><article class="step"><div class="step-num">04</div><h3>Gère tes commandes</h3><p>Reçois les commandes, suis les paiements et organise la livraison si nécessaire.</p></article></div></div></section>
+<section class="content" id="partenaires"><div class="container"><div class="section-intro"><span class="kicker">Un écosystème</span><h2>EtaChop accompagne les vendeurs et les livreurs</h2><p>Chaque acteur dispose de son propre espace et de ses outils adaptés à son activité.</p></div><div class="audience-grid"><article class="audience"><span class="audience-tag">Pour les vendeurs</span><h3>Développe tes ventes en ligne</h3><p>Crée ta boutique, gère tes produits, reçois les commandes et suis tes revenus depuis un tableau de bord dédié.</p><a href="dashboard.html">Accéder à l'espace vendeur →</a></article><article class="audience alt"><span class="audience-tag">Pour les livreurs et partenaires</span><h3>Rejoins le réseau logistique</h3><p>Crée ton compte partenaire, renseigne tes zones d'intervention et gère les missions qui te sont attribuées après validation.</p><a href="courier.html">Accéder à l'espace livreur →</a></article></div></div></section>
+<section class="content soft-section" id="faq"><div class="container"><div class="section-intro"><span class="kicker">Questions fréquentes</span><h2>Tu veux en savoir plus ?</h2><p>Quelques réponses pour mieux comprendre le fonctionnement de la plateforme.</p></div><div class="faq"><details><summary>Quels produits puis-je vendre sur EtaChop ?</summary><p>Tu peux proposer des produits physiques ainsi que des produits numériques, selon les règles et les fonctionnalités disponibles sur la plateforme.</p></details><details><summary>Est-ce que je dois savoir créer un site web ?</summary><p>Non. Tu peux créer et gérer ta boutique depuis ton espace vendeur, sans développer toi-même un site web.</p></details><details><summary>Comment les commandes physiques sont-elles livrées ?</summary><p>Les commandes physiques peuvent être prises en charge par les partenaires logistiques selon les zones desservies et les disponibilités.</p></details><details><summary>Quand un client reçoit-il un produit numérique ?</summary><p>Le téléchargement est accessible après confirmation effective du paiement de la commande.</p></details><details><summary>Comment suivre une commande ?</summary><p>Le client peut utiliser la page de suivi EtaChop avec les informations de sa commande.</p></details></div></div></section>
+<section class="content"><div class="container"><div class="final-cta"><h2>Prêt à lancer ta boutique ?</h2><p>Crée ton espace vendeur et commence à organiser ton activité avec EtaChop.</p><div class="actions"><a class="btn btn-primary" href="dashboard.html">Commencer maintenant</a><a class="btn btn-light" href="suivi.html">Suivre une commande</a></div></div></div></section>
+</main>
+<footer><div class="container footer-inner"><div>© EtaChop — La plateforme pour vendre et développer ton activité.</div><nav class="footer-links"><a href="dashboard.html">Espace vendeur</a><a href="courier.html">Espace livreur</a><a href="suivi.html">Suivi commande</a><a href="conditions.html">Conditions d'utilisation</a></nav></div></footer>
+<script src="assistant.js"></script><script>if(typeof initEtaAssistant==='function')initEtaAssistant('client');</script><script src="install-banner.js"></script><script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');</script>
+</body></html>
