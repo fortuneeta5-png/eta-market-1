@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=/dashboard.html">
-  <title>Redirection vers EtaChop</title>
-  <script>
-    (function () {
-      var target = '/dashboard.html' + window.location.search + window.location.hash;
-      if (window.location.pathname !== target) {
-        window.location.replace(target);
-      }
-    })();
-  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index,follow">
+<title>EtaChop — La plateforme pour développer ton commerce</title>
+<script>
+(function () {
+  const hash = window.location.hash || '';
+  const query = window.location.search || '';
+  const isRecovery = hash.includes('type=recovery');
+  const destination = isRecovery
+    ? 'dashboard.html' + query + hash
+    : 'accueil.html';
+  window.location.replace(destination);
+})();
+</script>
 </head>
-<body>
-  <p>Redirection vers EtaChop… <a href="/dashboard.html">Ouvrir la connexion</a></p>
-</body>
+<body><p>Ouverture d'EtaChop… <a href="accueil.html">Continuer vers EtaChop</a></p></body>
 </html>
