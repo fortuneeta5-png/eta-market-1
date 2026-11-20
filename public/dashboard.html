@@ -1128,18 +1128,79 @@
   }
 
   async function afterLogin(){
-    document.getElementById('authScreen').style.display = 'none';
-    await refreshSession(); // toujours repartir avec un token frais
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${session.user.id}&select=*`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
-    });
-    const stores = await res.json();
-    if(stores && stores.length > 0){
-      currentStore = stores[0];
-      showDashboard();
-    } else {
+    const authScreen = document.getElementById('authScreen');
+    const createStoreScreen = document.getElementById('createStoreScreen');
+    const dashboard = document.getElementById('dashboard');
+    const authMsg = document.getElementById('authMsg');
+
+    // Ne jamais confondre une erreur de session/API avec une boutique inexistante.
+    dashboard.style.display = 'none';
+    createStoreScreen.style.display = 'none';
+    authScreen.style.display = 'none';
+    authMsg.style.display = 'none';
+
+    const showAuthError = (message) => {
+      authScreen.style.display = 'flex';
+      authMsg.textContent = message;
+      authMsg.className = 'auth-msg err';
+      authMsg.style.display = 'block';
+    };
+
+    if(!session || !session.access_token || !session.user || !session.user.id){
+      showAuthError("Ta session n'est pas valide. Connecte-toi à nouveau.");
+      return;
+    }
+
+    const fetchStores = () => fetch(
+      `${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${encodeURIComponent(session.user.id)}&select=*`,
+      {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      }
+    );
+
+    try {
+      let res = await fetchStores();
+
+      // Si le jeton d'accès a expiré, renouveler la session puis refaire la requête.
+      if(res.status === 401 && session.refresh_token){
+        const refreshed = await refreshSession();
+        if(refreshed) res = await fetchStores();
+      }
+
+      if(res.status === 401){
+        logout();
+        showAuthError("Ta session a expiré. Reconnecte-toi pour accéder à ta boutique.");
+        return;
+      }
+
+      if(!res.ok){
+        const detail = await res.text().catch(() => '');
+        console.error('EtaChop: vérification de la boutique impossible', res.status, detail);
+        throw new Error("EtaChop n'a pas réussi à vérifier ta boutique. Vérifie ta connexion puis réessaie.");
+      }
+
+      const stores = await res.json();
+      if(!Array.isArray(stores)){
+        throw new Error("La réponse du serveur est inattendue. Réessaie dans quelques instants.");
+      }
+
+      if(stores.length > 0){
+        currentStore = stores[0];
+        showDashboard();
+        return;
+      }
+
+      // L'écran de création n'apparaît que si Supabase a répondu correctement
+      // et a confirmé qu'aucune boutique n'est associée à ce compte.
+      currentStore = null;
       renderColorPicker();
-      document.getElementById('createStoreScreen').style.display = 'flex';
+      createStoreScreen.style.display = 'flex';
+    } catch(err){
+      console.error('EtaChop afterLogin:', err);
+      showAuthError(err.message || "Impossible de charger ton espace vendeur. Réessaie.");
     }
   }
 
