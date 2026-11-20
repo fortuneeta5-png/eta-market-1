@@ -3,36 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#171717">
-<meta name="description" content="EtaChop aide les entrepreneurs à créer leur boutique en ligne et à vendre des produits physiques ou numériques.">
-<meta property="og:title" content="EtaChop — Ton commerce, simplement en ligne">
-<meta property="og:description" content="Crée ta boutique, présente tes produits et gère tes commandes avec EtaChop.">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="EtaChop aide les entrepreneurs à créer leur boutique en ligne et à vendre leurs produits physiques ou numériques.">
+<meta property="og:title" content="EtaChop — Tes produits méritent leur boutique.">
+<meta property="og:description" content="Crée ta boutique, présente tes produits et développe tes ventes avec EtaChop.">
 <meta property="og:type" content="website">
-<title>EtaChop — Ton commerce, simplement en ligne</title>
+<title>EtaChop — Tes produits méritent leur boutique</title>
 <link rel="icon" type="image/png" href="etachop-logo-black-bg.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#171717;--muted:#686868;--red:#e63946;--red2:#c92e3a;--paper:#faf9f7;--line:#ece9e6;--white:#fff}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}.shell{width:min(1120px,calc(100% - 40px));margin:auto}
-header{height:78px;display:flex;align-items:center;background:#fff;border-bottom:1px solid var(--line)}.nav{display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font:900 1.55rem Manrope,sans-serif;letter-spacing:-1.3px}.brand span{color:var(--red)}.navlinks{display:flex;align-items:center;gap:27px;color:#555;font-size:.92rem;font-weight:600}.navlinks a:hover{color:var(--red)}.navcta,.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:11px;padding:12px 19px;font-weight:800;transition:.2s}.navcta,.primary{background:var(--red);color:white}.navcta:hover,.primary:hover{background:var(--red2);transform:translateY(-1px)}
-.hero{padding:82px 0 76px;background:radial-gradient(circle at 85% 20%,#ffe4e5 0,transparent 31%),linear-gradient(120deg,#fff 0%,#fff9f7 100%);overflow:hidden}.hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:55px;align-items:center}.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border-radius:99px;background:#fff0f0;color:#b72d38;font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}.dot{width:7px;height:7px;border-radius:50%;background:var(--red)}h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.12;letter-spacing:-.045em}h1{font-size:clamp(2.55rem,5vw,4.55rem);margin:22px 0 18px;max-width:680px}h1 em{font-style:normal;color:var(--red)}.lead{max-width:570px;color:var(--muted);font-size:1.12rem;line-height:1.8}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.btn{padding:15px 22px}.secondary{background:#fff;border:1px solid var(--line)}.secondary:hover{border-color:#d7b6b8}.hero-note{margin-top:18px;color:#85817e;font-size:.82rem}.visual{position:relative;min-height:360px;display:grid;place-items:center}.visual-card{width:min(100%,420px);background:#fff;border:1px solid #f0e8e6;border-radius:25px;padding:27px;box-shadow:0 28px 70px #3b17171a;transform:rotate(2deg)}.visual-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:17px}.mini-brand{font:900 1.1rem Manrope}.pill{background:#eaf8ef;color:#26804a;border-radius:30px;padding:6px 10px;font-size:.72rem;font-weight:800}.visual-title{font:800 1.5rem Manrope;margin:24px 0 6px}.visual-sub{color:#888;font-size:.85rem}.feature-row{display:flex;align-items:center;gap:12px;background:#faf9f7;padding:13px;border-radius:13px;margin-top:12px}.feature-icon{width:39px;height:39px;border-radius:11px;background:#fff0f0;color:var(--red);display:grid;place-items:center;font-size:1.1rem}.feature-row strong{display:block;font-size:.88rem}.feature-row small{color:#888}.floating{position:absolute;right:-2px;bottom:14px;background:#171717;color:#fff;border-radius:15px;padding:14px 17px;box-shadow:0 15px 35px #0002;font-size:.82rem;font-weight:700}.floating b{color:#ff9ba2}
-.section{padding:78px 0}.section.white{background:#fff}.section-head{text-align:center;max-width:690px;margin:0 auto 38px}.kicker{color:var(--red);font-size:.76rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.section h2{font-size:clamp(2rem,3.5vw,3rem);margin:12px 0}.section-head p{color:var(--muted);font-size:1rem}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{padding:25px;border:1px solid var(--line);border-radius:18px;background:#fff}.white .card{background:#fff}.card-symbol{width:46px;height:46px;border-radius:13px;background:#fff0f0;color:var(--red);display:grid;place-items:center;font-size:1.25rem}.card h3{font-size:1.12rem;letter-spacing:-.02em;margin:19px 0 9px}.card p{color:var(--muted);font-size:.91rem;margin:0}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}.step{border-top:2px solid var(--line);padding-top:20px}.step-num{color:var(--red);font:900 1rem Manrope}.step h3{font-size:1.15rem;margin:12px 0 8px}.step p{color:var(--muted);font-size:.9rem}.cta{background:#191919;color:#fff;border-radius:24px;padding:46px;display:flex;align-items:center;justify-content:space-between;gap:30px}.cta h2{font-size:clamp(1.8rem,3vw,2.7rem);margin:0 0 10px}.cta p{color:#c6c6c6;margin:0}.cta .primary{white-space:nowrap}.faq{max-width:780px;margin:auto}.faq details{border-bottom:1px solid var(--line);padding:18px 0}.faq summary{font-weight:800;cursor:pointer}.faq p{color:var(--muted);margin:10px 0 0}.footer{background:#171717;color:#fff;padding:34px 0}.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}.footer p,.footer a{color:#bcbcbc;font-size:.84rem}.footer-links{display:flex;gap:20px;flex-wrap:wrap}.footer a:hover{color:#fff}
-@media(max-width:800px){.navlinks{gap:13px}.hero{padding:58px 0}.hero-grid{grid-template-columns:1fr;gap:20px}.visual{min-height:310px}.visual-card{max-width:430px}.floating{right:4%}.cards{grid-template-columns:1fr}.steps{grid-template-columns:1fr;gap:18px}.cta{padding:30px;display:block}.cta .btn{margin-top:22px}}
-@media(max-width:560px){.shell{width:min(100% - 30px,1120px)}header{height:68px}.navlinks a:not(.navcta){display:none}.navcta{padding:10px 13px;font-size:.82rem}.hero{padding:48px 0 42px}h1{font-size:2.55rem}.lead{font-size:1rem}.visual{min-height:290px}.visual-card{padding:20px}.section{padding:58px 0}.footer-inner{display:block}.footer-links{margin-top:15px}}
+:root{--ink:#171717;--muted:#686868;--red:#e63946;--red-dark:#c92e3a;--paper:#fff;--soft:#f7f6f4;--line:#ece9e6}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,a{-webkit-tap-highlight-color:transparent}.shell{width:min(1160px,calc(100% - 44px));margin:auto}
+header{height:78px;background:#fff;border-bottom:1px solid #f0eeeb;display:flex;align-items:center;position:relative;z-index:5}.nav{display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{font:900 1.7rem Manrope,sans-serif;letter-spacing:-1.5px}.brand span{color:var(--red)}.navlinks{display:flex;align-items:center;gap:28px;font-size:.92rem;font-weight:700;color:#555}.navlinks a:hover{color:var(--red)}.nav-actions{display:flex;align-items:center;gap:10px}.login-link{padding:10px 15px;font-weight:800;font-size:.9rem}.login-link:hover{color:var(--red)}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 21px;border-radius:9px;font-weight:800;font-size:.94rem;transition:background .2s,transform .2s,border-color .2s}.primary{background:var(--red);color:white;box-shadow:0 7px 18px #e6394626}.primary:hover{background:var(--red-dark);transform:translateY(-2px)}.outline{border:1px solid #dedbd8;background:#fff;color:#222}.outline:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:58px 0 72px;background:linear-gradient(180deg,#fff 0%,#fff 74%,#faf8f6 100%);overflow:hidden}.hero-grid{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:58px}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:#b52d39;background:#fff0f0;border-radius:4px;padding:8px 12px;font-size:.75rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.eyebrow:before{content:"";width:7px;height:7px;background:var(--red);border-radius:50%}h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.12;letter-spacing:-.045em}h1{font-size:clamp(2.8rem,5.2vw,4.65rem);font-weight:900;margin:22px 0 20px;max-width:650px}h1 em{font-style:normal;color:var(--red)}.lead{font-size:1.08rem;color:#666;max-width:540px;line-height:1.8;margin:0}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.trustline{display:flex;align-items:center;gap:10px;margin-top:24px;color:#777;font-size:.84rem}.trustline b{color:#262626}.trust-dot{width:5px;height:5px;background:#aaa;border-radius:50%}
+.hero-gallery{height:470px;position:relative;display:grid;grid-template-columns:1.08fr .92fr;grid-template-rows:1fr 1fr;gap:13px;transform:rotate(.5deg)}.photo{position:relative;overflow:hidden;border-radius:12px;background:#eee}.photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}.photo:hover img{transform:scale(1.04)}.photo-main{grid-row:1/3}.photo-main img{object-position:52% center}.photo-top img{object-position:center}.photo-bottom img{object-position:center}.photo:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#0007)}.photo-caption{position:absolute;z-index:1;left:17px;bottom:15px;color:#fff;font-weight:800;font-size:.9rem;text-shadow:0 1px 6px #0005}.photo-main .photo-caption{font-size:1.1rem}.gallery-sticker{position:absolute;z-index:2;left:-25px;top:38px;background:#fff;padding:14px 17px;border-radius:9px;box-shadow:0 12px 35px #00000017;font-size:.8rem;font-weight:800}.gallery-sticker strong{display:block;color:var(--red);font:900 1.2rem Manrope}.gallery-bottom{position:absolute;right:-15px;bottom:24px;background:#191919;color:white;padding:14px 18px;border-radius:9px;font-size:.82rem;box-shadow:0 12px 30px #0002}.gallery-bottom b{color:#ff9da4}
+.strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff}.strip-inner{display:grid;grid-template-columns:repeat(3,1fr);padding:21px 0;gap:20px}.strip-item{display:flex;align-items:center;justify-content:center;gap:11px;font-weight:800;font-size:.9rem}.strip-icon{width:34px;height:34px;border-radius:50%;background:#fff0f0;color:var(--red);display:grid;place-items:center;font-size:1rem}
+.section{padding:82px 0}.section.soft{background:var(--soft)}.section-head{max-width:700px;margin:0 auto 42px;text-align:center}.kicker{color:var(--red);font-size:.75rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.section h2{font-size:clamp(2rem,3.5vw,3rem);margin:13px 0}.section-head p{color:var(--muted);font-size:1rem;margin:0}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:#fff;border:1px solid #ece9e6;border-radius:12px;padding:27px;transition:transform .2s,box-shadow .2s}.card:hover{transform:translateY(-4px);box-shadow:0 15px 35px #1b17100d}.card-icon{width:46px;height:46px;border-radius:10px;background:#fff0f0;color:var(--red);display:grid;place-items:center;font-size:1.3rem;font-weight:900}.card h3{font-size:1.17rem;letter-spacing:-.025em;margin:19px 0 9px}.card p{font-size:.92rem;color:var(--muted);margin:0;line-height:1.7}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}.step{border-top:2px solid #e6e1dd;padding-top:20px}.step-num{font:900 .82rem Manrope;color:var(--red);letter-spacing:.08em}.step h3{font-size:1.2rem;margin:12px 0 8px}.step p{font-size:.91rem;color:var(--muted);margin:0}
+.feature-band{background:#1b1b1b;color:#fff;border-radius:14px;padding:48px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:28px}.feature-band h2{font-size:clamp(1.9rem,3.2vw,2.8rem);margin:0 0 12px}.feature-band p{margin:0;color:#c5c5c5;max-width:650px}.feature-band .btn{white-space:nowrap}
+.faq{max-width:800px;margin:auto}.faq details{border-bottom:1px solid var(--line);padding:19px 0}.faq summary{font-weight:800;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:20px}.faq summary:after{content:"+";color:var(--red);font-size:1.2rem}.faq details[open] summary:after{content:"−"}.faq p{color:var(--muted);margin:12px 0 0}
+footer{background:#171717;color:#fff;padding:36px 0}.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:25px;flex-wrap:wrap}.footer p,.footer a{color:#bdbdbd;font-size:.85rem}.footer-links{display:flex;gap:20px;flex-wrap:wrap}.footer a:hover{color:#fff}
+@media(max-width:850px){.hero-grid{grid-template-columns:1fr;gap:38px}.hero-gallery{height:420px;max-width:620px;width:100%;margin:auto}.cards{grid-template-columns:1fr 1fr}.feature-band{grid-template-columns:1fr}.feature-band .btn{justify-self:start}.navlinks{gap:14px}.navlinks>a:not(:last-child){display:none}}
+@media(max-width:560px){.shell{width:calc(100% - 30px)}header{height:68px}.brand{font-size:1.5rem}.nav{gap:8px}.nav-actions{gap:2px}.login-link{padding:9px 8px;font-size:.82rem}.nav-actions .btn{padding:10px 12px;font-size:.8rem}.hero{padding:43px 0 48px}.hero-grid{gap:32px}h1{font-size:2.65rem;margin:18px 0 15px}.lead{font-size:.98rem}.hero-actions{gap:9px}.hero-actions .btn{width:100%}.hero-gallery{height:330px;gap:8px}.photo{border-radius:8px}.gallery-sticker{left:-5px;top:17px;padding:10px 12px;font-size:.7rem}.gallery-sticker strong{font-size:1rem}.gallery-bottom{right:-4px;bottom:13px;padding:11px 13px;font-size:.72rem}.photo-caption{left:10px;bottom:10px;font-size:.75rem}.photo-main .photo-caption{font-size:.9rem}.strip-inner{grid-template-columns:1fr;gap:13px;padding:18px 0}.strip-item{justify-content:flex-start}.section{padding:60px 0}.section-head{margin-bottom:30px}.cards,.steps{grid-template-columns:1fr}.feature-band{padding:28px 23px}.footer-inner{display:block}.footer-links{margin-top:16px;gap:13px}}
 </style>
 </head>
 <body>
-<header><div class="shell nav"><a class="brand" href="accueil.html" aria-label="EtaChop accueil">Eta<span>Chop</span></a><nav class="navlinks" aria-label="Navigation principale"><a href="#fonctionnement">Comment ça marche</a><a href="#solutions">Solutions</a><a href="suivi.html">Suivre une commande</a><a class="navcta" href="dashboard.html">Créer ma boutique</a></nav></div></header>
+<header>
+  <div class="shell nav">
+    <a class="brand" href="accueil.html" aria-label="EtaChop accueil">Eta<span>Chop</span></a>
+    <nav class="navlinks" aria-label="Navigation principale">
+      <a href="#solutions">Solutions</a>
+      <a href="#fonctionnement">Comment ça marche</a>
+      <a href="suivi.html">Suivre une commande</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="login-link" href="dashboard.html">Connexion</a>
+      <a class="btn primary" href="dashboard.html">Créer ma boutique <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</header>
 <main>
-<section class="hero"><div class="shell hero-grid"><div><span class="eyebrow"><i class="dot"></i> La plateforme du commerce en ligne</span><h1>Ton activité mérite une vraie <em>présence en ligne.</em></h1><p class="lead">EtaChop accompagne les entrepreneurs et vendeurs dans la création de leur boutique en ligne, pour présenter et vendre leurs produits physiques ou numériques simplement.</p><div class="actions"><a class="btn primary" href="dashboard.html">Créer ma boutique <span aria-hidden="true">→</span></a><a class="btn secondary" href="#fonctionnement">Découvrir EtaChop</a></div><p class="hero-note">Une plateforme pensée pour les vendeurs et les entrepreneurs.</p></div>
-<div class="visual" aria-label="Illustration des outils de gestion EtaChop"><div class="visual-card"><div class="visual-top"><span class="mini-brand">Eta<span style="color:#e63946">Chop</span></span><span class="pill">Espace vendeur</span></div><div class="visual-title">Ta boutique. Tes produits.</div><div class="visual-sub">Les outils essentiels pour gérer ton activité.</div><div class="feature-row"><span class="feature-icon">▦</span><span><strong>Ta vitrine en ligne</strong><small>Présente ton activité et tes articles</small></span></div><div class="feature-row"><span class="feature-icon">↗</span><span><strong>Tes commandes</strong><small>Retrouve et suis tes ventes</small></span></div><div class="feature-row"><span class="feature-icon">◇</span><span><strong>Physique ou numérique</strong><small>Plusieurs types de produits</small></span></div></div><div class="floating">Ton commerce, <b>à ta façon.</b></div></div></div></section>
-<section class="section white" id="solutions"><div class="shell"><div class="section-head"><span class="kicker">Une plateforme, plusieurs possibilités</span><h2>Tout commence avec ton activité.</h2><p>Que tu vendes des articles à livrer ou des contenus numériques, EtaChop te donne un espace pour organiser ta présence commerciale.</p></div><div class="cards"><article class="card"><div class="card-symbol">▣</div><h3>Produits physiques</h3><p>Crée une boutique pour présenter tes articles, renseigner tes prix et recevoir les commandes de tes clients.</p></article><article class="card"><div class="card-symbol">◇</div><h3>Produits numériques</h3><p>Propose tes ressources et produits digitaux depuis ton espace vendeur, en complément ou au cœur de ton activité.</p></article><article class="card"><div class="card-symbol">⌘</div><h3>Gestion de ton activité</h3><p>Accède à un espace dédié pour gérer les informations de ta boutique et suivre les commandes reçues.</p></article></div></div></section>
-<section class="section" id="fonctionnement"><div class="shell"><div class="section-head"><span class="kicker">Simple pour commencer</span><h2>Comment fonctionne EtaChop ?</h2><p>Tu gardes la maîtrise de ton activité. La plateforme t'accompagne dans sa mise en ligne.</p></div><div class="steps"><article class="step"><span class="step-num">ÉTAPE 01</span><h3>Crée ton espace</h3><p>Renseigne le nom de ta boutique et les informations liées à ton activité.</p></article><article class="step"><span class="step-num">ÉTAPE 02</span><h3>Configure ta boutique</h3><p>Complète ta présentation et ajoute les produits ou services que tu souhaites proposer.</p></article><article class="step"><span class="step-num">ÉTAPE 03</span><h3>Développe tes ventes</h3><p>Partage ta boutique avec tes clients et gère les commandes depuis ton espace vendeur.</p></article></div></div></section>
-<section class="section white"><div class="shell"><div class="cta"><div><h2>Prêt à mettre ton activité en ligne ?</h2><p>Commence par créer ton espace vendeur sur EtaChop.</p></div><a class="btn primary" href="dashboard.html">Créer ma boutique →</a></div></div></section>
-<section class="section"><div class="shell"><div class="section-head"><span class="kicker">Questions fréquentes</span><h2>Tu veux en savoir plus ?</h2></div><div class="faq"><details><summary>Quels types de produits puis-je vendre ?</summary><p>EtaChop est conçu pour les produits physiques et les produits numériques.</p></details><details><summary>Comment créer ma boutique ?</summary><p>Clique sur « Créer ma boutique », puis complète le formulaire de création et les informations demandées.</p></details><details><summary>Où retrouver les conditions de la plateforme ?</summary><p>Les conditions d'utilisation et les informations relatives à la livraison et aux retours sont disponibles dans la page Conditions & Politiques.</p></details></div></div></section>
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div>
+        <span class="eyebrow">La vente en ligne, à ta portée</span>
+        <h1>Tes produits méritent mieux qu'un simple <em>statut WhatsApp.</em></h1>
+        <p class="lead">Présente tes articles dans une vraie boutique en ligne, partage ton lien avec tes clients et retrouve tes commandes au même endroit. Physique ou numérique, ton commerce a sa place sur EtaChop.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="dashboard.html">Créer ma boutique <span aria-hidden="true">→</span></a>
+          <a class="btn outline" href="dashboard.html">J'ai déjà un compte</a>
+        </div>
+        <div class="trustline"><b>Simple à démarrer.</b><span class="trust-dot"></span><span>Pensé pour les vendeurs et entrepreneurs.</span></div>
+      </div>
+      <div class="hero-gallery" aria-label="Exemples de produits vendus en ligne">
+        <div class="photo photo-main">
+          <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1000&q=85" alt="Sac à main présenté dans une boutique">
+          <span class="photo-caption">Mode & accessoires</span>
+        </div>
+        <div class="photo photo-top">
+          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=85" alt="Chaussure de sport">
+          <span class="photo-caption">Chaussures</span>
+        </div>
+        <div class="photo photo-bottom">
+          <img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=700&q=85" alt="Produits de beauté">
+          <span class="photo-caption">Beauté & soins</span>
+        </div>
+        <div class="gallery-sticker"><strong>Ta boutique</strong>À ton image</div>
+        <div class="gallery-bottom">Tes produits. <b>Tes ventes.</b></div>
+      </div>
+    </div>
+  </section>
+  <section class="strip"><div class="shell strip-inner">
+    <div class="strip-item"><span class="strip-icon">▣</span>Une boutique à partager</div>
+    <div class="strip-item"><span class="strip-icon">↗</span>Des commandes au même endroit</div>
+    <div class="strip-item"><span class="strip-icon">◇</span>Produits physiques et numériques</div>
+  </div></section>
+  <section class="section" id="solutions"><div class="shell">
+    <div class="section-head"><span class="kicker">Ton commerce, tes possibilités</span><h2>Tout ce qu'il faut pour présenter ce que tu vends.</h2><p>Que tu sois commerçant, entrepreneur ou créateur de produits digitaux, démarre avec un espace qui présente clairement ton offre.</p></div>
+    <div class="cards">
+      <article class="card"><div class="card-icon">▣</div><h3>Vends tes produits physiques</h3><p>Habits, sacs, chaussures, téléphones, cosmétiques et bien plus : présente tes articles et reçois les commandes de tes clients.</p></article>
+      <article class="card"><div class="card-icon">◇</div><h3>Propose tes produits numériques</h3><p>E-books, formations, fichiers et autres contenus digitaux : mets tes créations à disposition de tes acheteurs.</p></article>
+      <article class="card"><div class="card-icon">↗</div><h3>Gère tes commandes</h3><p>Retrouve les commandes de ta boutique depuis ton espace vendeur et garde une meilleure visibilité sur ton activité.</p></article>
+    </div>
+  </div></section>
+  <section class="section soft" id="fonctionnement"><div class="shell">
+    <div class="section-head"><span class="kicker">Trois étapes pour commencer</span><h2>De ton idée à ta boutique en ligne.</h2><p>Pas besoin de construire un site compliqué pour présenter tes produits.</p></div>
+    <div class="steps">
+      <article class="step"><span class="step-num">ÉTAPE 01</span><h3>Crée ton espace vendeur</h3><p>Inscris-toi et renseigne les premières informations de ton activité.</p></article>
+      <article class="step"><span class="step-num">ÉTAPE 02</span><h3>Ajoute tes produits</h3><p>Présente tes articles, leurs photos, leurs descriptions et leurs prix.</p></article>
+      <article class="step"><span class="step-num">ÉTAPE 03</span><h3>Partage ta boutique</h3><p>Envoie ton lien à tes clients sur WhatsApp et tes réseaux sociaux pour faire connaître ton offre.</p></article>
+    </div>
+  </div></section>
+  <section class="section"><div class="shell">
+    <div class="feature-band"><div><h2>Et si ton prochain client te trouvait en ligne ?</h2><p>Donne à tes produits un espace clair et professionnel. Lance ta boutique EtaChop et partage-la avec les personnes qui comptent.</p></div><a class="btn primary" href="dashboard.html">Je lance ma boutique →</a></div>
+  </div></section>
+  <section class="section soft"><div class="shell">
+    <div class="section-head"><span class="kicker">Questions fréquentes</span><h2>Avant de te lancer.</h2></div>
+    <div class="faq">
+      <details><summary>Quels produits puis-je vendre sur EtaChop ?</summary><p>Tu peux proposer des produits physiques et des produits numériques, selon les fonctionnalités disponibles dans ton espace vendeur.</p></details>
+      <details><summary>Comment créer ma boutique ?</summary><p>Clique sur « Créer ma boutique », crée ton compte puis suis les étapes indiquées dans ton espace vendeur.</p></details>
+      <details><summary>J'ai déjà un compte, comment me connecter ?</summary><p>Clique sur « Connexion » en haut de cette page. Tu arriveras sur l'écran de connexion de ton espace vendeur.</p></details>
+      <details><summary>Comment mes clients trouvent-ils ma boutique ?</summary><p>Une fois ta boutique configurée, tu peux partager son lien avec tes clients, notamment sur WhatsApp et les réseaux sociaux.</p></details>
+    </div>
+  </div></section>
 </main>
-<footer class="footer"><div class="shell footer-inner"><div><a class="brand" href="accueil.html">Eta<span>Chop</span></a><p>La plateforme pour développer ton commerce en ligne.</p></div><nav class="footer-links"><a href="accueil.html">Accueil</a><a href="dashboard.html">Créer ma boutique</a><a href="suivi.html">Suivre ma commande</a><a href="conditions.html">Conditions & Politiques</a></nav></div></footer>
+<footer><div class="shell footer-inner">
+  <div><a class="brand" href="accueil.html">Eta<span>Chop</span></a><p>Ton commerce mérite sa place en ligne.</p></div>
+  <nav class="footer-links"><a href="accueil.html">Accueil</a><a href="dashboard.html">Connexion</a><a href="dashboard.html">Créer ma boutique</a><a href="suivi.html">Suivre une commande</a><a href="conditions.html">Conditions & politiques</a></nav>
+</div></footer>
 </body>
 </html>
