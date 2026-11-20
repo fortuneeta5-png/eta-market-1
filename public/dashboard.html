@@ -180,12 +180,36 @@
   .site-logo-text img{ height:40px; display:block; }
   @media(min-width:768px){ .site-logo-text img{ height:50px; } }
 
-  .tool-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:0 18px 18px}
-  .tool-shortcuts button{appearance:none;text-align:left;background:#fafaf8;border:1px solid var(--line);border-radius:10px;padding:13px;cursor:pointer;color:inherit;min-height:82px}
-  .tool-shortcuts button:hover{border-color:var(--primary);background:#fff}
-  .tool-shortcuts b{display:block;font-size:.82rem;margin-bottom:5px}
-  .tool-shortcuts span{display:block;font-size:.7rem;line-height:1.45;color:#6b756d}
-  @media(max-width:700px){.tool-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 12px 14px}}
+  /* Navigation professionnelle : sidebar ordinateur, barre mobile conservée */
+  .app-layout{display:flex;align-items:flex-start;max-width:1500px;margin:0 auto;}
+  .desktop-sidebar{display:none;}
+  .side-link{width:100%;flex:none;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-radius:10px;background:transparent;color:#5f6368;text-align:left;font:600 .88rem 'Poppins',sans-serif;cursor:pointer;margin:2px 0;}
+  .side-link:hover{background:#f6f6f6;color:var(--ink);}
+  .side-link.active{background:#fff0f1;color:var(--primary-dark);}
+  .side-link .side-icon{width:22px;text-align:center;font-size:1.05rem;}
+  .side-label{padding:18px 14px 7px;color:#9a9a9a;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;}
+  .tool-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px;}
+  .tool-shortcut{border:1px solid var(--line);border-radius:12px;background:#fff;padding:15px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;min-width:0;}
+  .tool-shortcut:hover{border-color:#e9a0a6;background:#fffafa;}
+  .tool-shortcut strong{display:block;font-size:.86rem;margin-bottom:4px;}
+  .tool-shortcut span{display:block;font-size:.75rem;color:#777;line-height:1.45;}
+  .section-kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#888;font-weight:700;margin:22px 0 12px;}
+  .pixel-provider{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;background:#fff;}
+  .pixel-provider strong{display:block;margin-bottom:4px;}
+  .pixel-provider p{font-size:.78rem;color:#777;margin-bottom:12px;}
+  @media(min-width:1000px){
+    body{padding-bottom:0;}
+    .desktop-sidebar{display:block;position:sticky;top:0;flex:0 0 248px;height:calc(100vh - 0px);overflow:auto;background:#fff;border-right:1px solid var(--line);padding:22px 14px;}
+    .desktop-sidebar .side-brand{font-size:1.15rem;font-weight:800;padding:0 14px 22px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+    .desktop-sidebar .side-brand span{color:var(--primary);}
+    .wrap{flex:1;min-width:0;max-width:none;margin:0;padding:30px clamp(22px,3vw,48px) 60px;}
+    .bottom-nav{display:none;}
+    #dashboard header{padding:14px 28px;}
+    .tool-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr));}
+  }
+  @media(max-width:999px){.desktop-sidebar{display:none}.tool-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media(max-width:480px){.tool-shortcuts{gap:8px}.tool-shortcut{padding:12px}.tool-shortcut strong{font-size:.8rem}.tool-shortcut span{font-size:.7rem}}
+
 </style>
 </head>
 <body>
@@ -224,9 +248,6 @@
       <a href="#" onclick="openForgotPassword(); return false;" style="font-size:0.82rem; color:var(--primary); text-decoration:none;">Mot de passe oublié ?</a>
     </div>
     <div class="auth-msg" id="authMsg"></div>
-    <div style="text-align:center;margin-top:18px;font-size:.72rem;color:#777;line-height:1.6;">
-      En continuant, vous acceptez nos <a href="conditions.html" style="color:var(--primary);">conditions d'utilisation</a> et notre <a href="confidentialite.html" style="color:var(--primary);">politique de confidentialité</a>.
-    </div>
   </div>
 </div>
 
@@ -360,6 +381,20 @@
     </div>
   </header>
 
+  <div class="app-layout">
+    <aside class="desktop-sidebar" aria-label="Navigation vendeur">
+      <div class="side-brand">ETA<span>CHOP</span></div>
+      <div class="side-label">Espace vendeur</div>
+      <button class="side-link nav-item active" data-tab="home" onclick="goToTab('home')"><span class="side-icon">⌂</span>Vue d'ensemble</button>
+      <button class="side-link nav-item" data-tab="products" onclick="goToTab('products')"><span class="side-icon">▦</span>Produits</button>
+      <button class="side-link nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="side-icon">▤</span>Commandes & ventes</button>
+      <button class="side-link nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="side-icon">₣</span>Finances</button>
+      <div class="side-label">Développement</div>
+      <button class="side-link nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="side-icon">▣</span>Boutique & marketing</button>
+      <button class="side-link nav-item" data-tab="pixels" onclick="goToTab('pixels')"><span class="side-icon">◉</span>Pixels & tracking</button>
+      <button class="side-link nav-item" data-tab="settings" onclick="goToTab('settings')"><span class="side-icon">⚙</span>Paramètres</button>
+    </aside>
+
   <div class="wrap">
 
     <!-- ONGLET ACCUEIL -->
@@ -377,19 +412,6 @@
         <button class="btn btn-primary" onclick="goToTab('products')">+ Ajouter un produit</button>
         <button class="btn btn-ghost" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('promoCodeInput')?.scrollIntoView({behavior:'smooth'}), 100);">🏷️ Créer une promo</button>
       </div>
-      <div class="panel" style="margin-top:18px;">
-        <div class="panel-head"><h3>Outils pour développer votre boutique</h3><span style="font-size:.75rem;color:#6b756d;">Accès rapide</span></div>
-        <div class="tool-shortcuts">
-          <button type="button" onclick="goToTab('products')"><b>Catalogue</b><span>Produits physiques et numériques</span></button>
-          <button type="button" onclick="goToTab('sales')"><b>Commandes</b><span>Suivi et traitement des ventes</span></button>
-          <button type="button" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('vendorPromoPanel')?.scrollIntoView({behavior:'smooth'}),120)"><b>Promotions</b><span>Codes de réduction</span></button>
-          <button type="button" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('vendorDeliveryPanel')?.scrollIntoView({behavior:'smooth'}),120)"><b>Livraison</b><span>Zones et frais de livraison</span></button>
-          <button type="button" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('boostPanel')?.scrollIntoView({behavior:'smooth'}),120)"><b>Visibilité</b><span>Demande de boost Facebook</span></button>
-          <button type="button" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('vendorPixelsPanel')?.scrollIntoView({behavior:'smooth'}),120)"><b>Mesure publicitaire</b><span>Meta, TikTok et Google Ads</span></button>
-          <button type="button" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('alibabaPanel')?.scrollIntoView({behavior:'smooth'}),120)"><b>Approvisionnement</b><span>Demande de commande Alibaba</span></button>
-          <button type="button" onclick="goToTab('balance')"><b>Finances</b><span>Solde, retraits et reversements</span></button>
-        </div>
-      </div>
       <div class="panel">
         <div class="panel-head"><h3>Produits les plus vendus</h3></div>
         <div id="topProductsBody">
@@ -400,6 +422,14 @@
 
     <!-- ONGLET MENU (boutique, réputation, promo, livraison) -->
     <div class="tab-panel" data-tab="menu">
+    <div class="panel"><div class="panel-head"><h3>Outils de votre boutique</h3><span style="font-size:.78rem;color:#888">Accès rapide</span></div><div class="panel-body"><div class="tool-shortcuts">
+      <button class="tool-shortcut" onclick="document.getElementById('storeBanner').scrollIntoView({behavior:'smooth'})"><strong>Ma boutique</strong><span>Identité, apparence et lien public</span></button>
+      <button class="tool-shortcut" onclick="goToTab('pixels')"><strong>Pixels & tracking</strong><span>Meta, TikTok et Google Ads</span></button>
+      <button class="tool-shortcut" onclick="goToTab('settings')"><strong>Paramètres</strong><span>Compte et sécurité</span></button>
+      <button class="tool-shortcut" onclick="document.getElementById('promoToolsPanel').scrollIntoView({behavior:'smooth'})"><strong>Promotions</strong><span>Codes de réduction et offres</span></button>
+      <button class="tool-shortcut" onclick="document.getElementById('boostPanel').scrollIntoView({behavior:'smooth'})"><strong>Visibilité</strong><span>Options de mise en avant</span></button>
+      <button class="tool-shortcut" onclick="document.getElementById('deliveryZonesPanel').scrollIntoView({behavior:'smooth'})"><strong>Livraison</strong><span>Zones et frais de livraison</span></button>
+    </div></div></div>
     <div class="store-banner" id="storeBanner">
       <div style="display:flex; align-items:center; gap:14px;">
         <img id="bannerLogo" style="display:none; width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.5);">
@@ -670,7 +700,7 @@
       </div>
     </div>
 
-    <div class="panel" id="vendorPromoPanel">
+    <div class="panel" id="promoToolsPanel">
       <div class="panel-head"><h3>Codes promo</h3></div>
       <div class="panel-body">
         <div class="row2" style="margin-bottom:12px;">
@@ -688,7 +718,7 @@
       </div>
     </div>
 
-    <div class="panel" id="vendorDeliveryPanel">
+    <div class="panel" id="deliveryZonesPanel">
       <div class="panel-head"><h3>Zones de livraison</h3></div>
       <div class="panel-body">
         <div class="row2" style="margin-bottom:12px;">
@@ -700,29 +730,17 @@
       </div>
     </div>
 
-    <div class="panel" id="vendorPixelsPanel">
-      <div class="panel-head"><h3>Pixels publicitaires</h3></div>
-      <div class="panel-body">
-        <p style="font-size:0.8rem; opacity:0.6; margin-bottom:14px;">Suis tes visiteurs et tes ventes depuis tes campagnes Facebook, TikTok ou Google Ads. Laisse vide si tu n'utilises pas une de ces plateformes.</p>
-        <div class="field">
-          <label>Facebook Pixel ID</label>
-          <input type="text" id="fbPixelInput" placeholder="Ex: 123456789012345">
-        </div>
-        <div class="field">
-          <label>TikTok Pixel ID</label>
-          <input type="text" id="tiktokPixelInput" placeholder="Ex: C4A1B2C3D4E5F6G7">
-        </div>
-        <div class="field">
-          <label>Google Ads ID</label>
-          <input type="text" id="googleAdsInput" placeholder="Ex: AW-123456789">
-        </div>
-        <button class="btn btn-primary" style="width:100%;" onclick="savePixels()">Enregistrer les pixels</button>
-        <div class="form-msg" id="pixelsMsg"></div>
-      </div>
     </div>
 
-    <div class="panel" style="margin-bottom:20px;">
-      <div class="panel-head"><h3>Changer mon mot de passe</h3></div>
+    <button class="logout-btn" style="width:100%; margin-top:6px;" onclick="logout()">Déconnexion</button>
+    </div>
+    <!-- /ONGLET MENU -->
+
+    <div class="tab-panel" data-tab="settings">
+      <div class="greeting-block"><h2>Paramètres</h2><p>Gérez les informations de votre boutique et la sécurité de votre compte.</p></div>
+      <div class="panel"><div class="panel-head"><h3>Paramètres de la boutique</h3></div><div class="panel-body"><p style="font-size:.85rem;color:#666;line-height:1.6;margin-bottom:14px">Modifiez le nom, le lien, la présentation, le logo, la bannière et les coordonnées de votre boutique.</p><button class="btn btn-primary" style="width:100%" onclick="goToTab('menu'); setTimeout(()=>openStoreEdit(),80)">Modifier les informations de ma boutique</button></div></div>
+    <div class="panel" id="accountSettingsPanel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Paramètres du compte et sécurité</h3></div>
       <div class="panel-body">
         <div class="field">
           <label>Nouveau mot de passe</label>
@@ -736,9 +754,19 @@
       </div>
     </div>
 
-    <button class="logout-btn" style="width:100%; margin-top:6px;" onclick="logout()">Déconnexion</button>
+      <div class="panel"><div class="panel-head"><h3>Outils de suivi</h3></div><div class="panel-body"><p style="font-size:.84rem;color:#666;line-height:1.6;margin-bottom:12px">Configurez vos outils publicitaires et de mesure.</p><button class="btn btn-ghost" style="width:100%" onclick="goToTab('pixels')">Ouvrir Pixels & tracking</button></div></div>
     </div>
-    <!-- /ONGLET MENU -->
+
+    <div class="tab-panel" data-tab="pixels">
+      <div class="greeting-block"><h2>Pixels & suivi publicitaire</h2><p>Connectez vos outils de mesure pour suivre les visites et les conversions sur votre boutique.</p></div>
+      <div class="panel"><div class="panel-head"><h3>Configuration des pixels</h3></div><div class="panel-body">
+        <div class="pixel-provider"><strong>Meta Pixel (Facebook & Instagram)</strong><p>Ajoutez l'identifiant du pixel Meta pour mesurer les visites et les actions sur votre boutique.</p><div class="field"><label>Identifiant du pixel Meta</label><input type="text" id="fbPixelInput" placeholder="Ex. 123456789012345" inputmode="numeric"></div></div>
+        <div class="pixel-provider"><strong>TikTok Pixel</strong><p>Mesurez les visites et les conversions provenant de vos campagnes TikTok.</p><div class="field"><label>Identifiant TikTok Pixel</label><input type="text" id="tiktokPixelInput" placeholder="Ex. C4A1B2C3D4E5F6G7"></div></div>
+        <div class="pixel-provider"><strong>Google Ads</strong><p>Associez votre identifiant de suivi Google Ads à votre boutique.</p><div class="field"><label>Identifiant Google Ads</label><input type="text" id="googleAdsInput" placeholder="Ex. AW-123456789"></div></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="savePixels()">Enregistrer les paramètres de suivi</button><div class="form-msg" id="pixelsMsg"></div>
+      </div></div>
+      <div class="panel"><div class="panel-head"><h3>Comment ça fonctionne ?</h3></div><div class="panel-body" style="font-size:.86rem;line-height:1.7;color:#666"><p>Les identifiants enregistrés sont associés à votre boutique et utilisés sur sa page publique. Vérifiez toujours vos événements dans les gestionnaires Meta, TikTok ou Google avant de lancer une campagne.</p><p style="margin-top:10px">Respectez les règles de consentement et informez vos visiteurs des outils de mesure utilisés dans votre politique de confidentialité.</p></div></div>
+    </div>
 
     <!-- ONGLET SOLDE -->
     <div class="tab-panel" data-tab="balance">
@@ -786,6 +814,7 @@
     </div>
 
   </div>
+  </div><!-- /.app-layout -->
 
   <!-- Menu du bas -->
   <div class="bottom-nav">
@@ -889,8 +918,7 @@
 
 
   // ---------- Auth ----------
-  let authMode = new URLSearchParams(window.location.search).get('mode') === 'signup' ? 'signup' : 'login';
-  if(authMode === 'signup'){ switchTab('signup'); }
+  let authMode = 'login';
   function togglePasswordVisibility(inputId, btnEl){
     const input = document.getElementById(inputId);
     if(input.type === 'password'){
@@ -1220,46 +1248,58 @@
   }
 
   async function afterLogin(){
-    const authScreen = document.getElementById('authScreen');
-    const authMsg = document.getElementById('authMsg');
-    if(!session || !session.user || !session.user.id){
-      localStorage.removeItem('vendoSession'); session = null;
-      authScreen.style.display = 'flex';
-      return;
-    }
-    const refreshed = await refreshSession();
-    if(!refreshed){
-      localStorage.removeItem('vendoSession'); session = null;
+    if(!session || !session.access_token || !session.user || !session.user.id){
+      localStorage.removeItem('vendoSession');
+      session = null;
       document.getElementById('dashboard').style.display = 'none';
       document.getElementById('createStoreScreen').style.display = 'none';
-      authScreen.style.display = 'flex';
-      authMsg.textContent = 'Votre session a expiré. Connectez-vous à nouveau.';
-      authMsg.className = 'auth-msg err'; authMsg.style.display = 'block';
+      document.getElementById('authScreen').style.display = 'flex';
       return;
     }
+
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('createStoreScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'none';
+
+    // Rafraîchir la session si possible, sans transformer une erreur réseau en "aucune boutique".
+    await refreshSession();
+    let res;
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${encodeURIComponent(session.user.id)}&select=*`, {
+      res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${encodeURIComponent(session.user.id)}&select=*`, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
       });
-      if(!res.ok) throw new Error(`Lecture du compte impossible (${res.status}).`);
-      const stores = await res.json();
-      if(!Array.isArray(stores)) throw new Error('Réponse inattendue du serveur.');
-      authScreen.style.display = 'none';
-      if(stores.length > 0){
-        currentStore = stores[0];
-        document.getElementById('createStoreScreen').style.display = 'none';
-        showDashboard();
-      } else {
-        // La création de boutique n'est affichée qu'après une vérification réussie
-        // confirmant que ce compte ne possède réellement aucune boutique.
-        renderColorPicker();
-        document.getElementById('createStoreScreen').style.display = 'flex';
-      }
-    } catch(err){
-      authScreen.style.display = 'flex';
+    } catch(networkError) {
+      const authMessage = document.getElementById('authMsg');
+      document.getElementById('authScreen').style.display = 'flex';
+      authMessage.textContent = 'Connexion au serveur impossible. Vérifiez votre réseau puis réessayez.';
+      authMessage.className = 'auth-msg err';
+      authMessage.style.display = 'block';
+      return;
+    }
+
+    if(!res.ok){
+      const authMessage = document.getElementById('authMsg');
+      document.getElementById('dashboard').style.display = 'none';
       document.getElementById('createStoreScreen').style.display = 'none';
-      authMsg.textContent = err.message || 'Impossible de vérifier votre boutique. Réessayez.';
-      authMsg.className = 'auth-msg err'; authMsg.style.display = 'block';
+      document.getElementById('authScreen').style.display = 'flex';
+      authMessage.textContent = res.status === 401 || res.status === 403
+        ? 'Votre session a expiré ou l’accès à votre boutique a été refusé. Reconnectez-vous.'
+        : 'Impossible de vérifier votre boutique pour le moment. Vérifiez votre connexion puis réessayez.';
+      authMessage.className = 'auth-msg err';
+      authMessage.style.display = 'block';
+      return;
+    }
+
+    const stores = await res.json();
+    if(!Array.isArray(stores)){
+      throw new Error('Réponse inattendue lors de la vérification de la boutique.');
+    }
+    if(stores.length > 0){
+      currentStore = stores[0];
+      showDashboard();
+    } else {
+      renderColorPicker();
+      document.getElementById('createStoreScreen').style.display = 'flex';
     }
   }
 
@@ -2527,7 +2567,16 @@
 
   // ---------- Init ----------
   if(session && session.access_token){
-    afterLogin();
+    afterLogin().catch(err => {
+      console.error('EtaChop session initialization:', err);
+      const authMessage = document.getElementById('authMsg');
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('createStoreScreen').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
+      authMessage.textContent = 'Impossible de charger votre espace pour le moment. Réessayez.';
+      authMessage.className = 'auth-msg err';
+      authMessage.style.display = 'block';
+    });
   }
 </script>
 
