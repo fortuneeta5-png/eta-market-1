@@ -2,19 +2,22 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>EtaChop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EtaChop — Vends tes produits numériques et physiques</title>
+<meta name="description" content="EtaChop est la plateforme pour vendre tes produits numériques et physiques. Crée ta boutique, présente tes offres et retrouve tes commandes au même endroit.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://etachop.com/explore.html">
+<meta http-equiv="refresh" content="0;url=/explore.html">
 <script>
-  // Si on arrive ici avec un lien de récupération de mot de passe
-  // (ou tout autre lien d'authentification), on va vers dashboard.html
-  // EN GARDANT le jeton de sécurité, au lieu de le perdre.
-  if(window.location.hash && window.location.hash.includes('type=recovery')){
-    window.location.href = 'dashboard.html' + window.location.hash;
+  // Conserver les liens de récupération de mot de passe Supabase.
+  if (window.location.hash && window.location.hash.includes('type=recovery')) {
+    window.location.replace('/dashboard.html' + window.location.hash);
   } else {
-    window.location.href = 'explore.html';
+    window.location.replace('/explore.html');
   }
 </script>
 </head>
 <body>
-<p>Redirection vers <a href="explore.html">EtaChop</a>...</p>
+<p>Redirection vers <a href="/explore.html">EtaChop</a>…</p>
 </body>
 </html>
