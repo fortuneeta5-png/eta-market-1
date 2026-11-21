@@ -1,21 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="index,follow">
-<title>EtaChop — La plateforme pour développer ton commerce</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>EtaChop — Votre commerce en ligne</title>
 <script>
-(function () {
-  const hash = window.location.hash || '';
-  const query = window.location.search || '';
-  const isRecovery = hash.includes('type=recovery');
-  const destination = isRecovery
-    ? 'public/dashboard.html' + query + hash
-    : 'public/accueil.html';
-  window.location.replace(destination);
+(function(){
+  var target = '/public/accueil.html' + window.location.search;
+  if (window.location.hash && window.location.hash.indexOf('type=recovery') !== -1) {
+    target = '/public/dashboard.html' + window.location.search + window.location.hash;
+  }
+  window.location.replace(target);
 })();
 </script>
 </head>
-<body><p>Ouverture d'EtaChop… <a href="public/accueil.html">Continuer vers EtaChop</a></p></body>
+<body><p>Ouverture d’EtaChop… <a href="/public/accueil.html">Continuer</a></p></body>
 </html>
