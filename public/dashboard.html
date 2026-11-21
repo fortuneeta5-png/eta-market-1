@@ -2474,8 +2474,13 @@
   }
 
   // ---------- Init ----------
+  // Les liens depuis l'accueil peuvent demander explicitement l'onglet de connexion ou d'inscription.
+  // Une session existante garde la priorité et continue vers le tableau de bord / la création de boutique.
+  const requestedAuthMode = new URLSearchParams(window.location.search).get('auth');
   if(session && session.access_token){
     afterLogin();
+  } else {
+    switchTab(requestedAuthMode === 'signup' ? 'signup' : 'login');
   }
 </script>
 

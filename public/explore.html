@@ -3,224 +3,414 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Découvrir les boutiques — EtaChop</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#E63946">
-<link rel="apple-touch-icon" href="arrière plan noir.png">
-<meta property="og:title" content="EtaChop — Marketplace de Brazzaville">
-<meta property="og:description" content="Découvre des boutiques locales et achète en toute confiance sur EtaChop.">
-<meta property="og:image" content="https://etachop.com/public/arrière plan bleu.png">
+<title>EtaChop — La plateforme pour vendre tes produits numériques et physiques</title>
+<meta name="description" content="Crée ta boutique en ligne sur EtaChop. Vends tes ebooks, formations, templates et produits physiques depuis un seul espace.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="EtaChop — Donne de la valeur à tes produits">
+<meta property="og:description" content="La plateforme pour présenter et vendre tes produits numériques et physiques.">
 <meta property="og:type" content="website">
-<link rel="icon" type="image/png" href="arrière plan bleu.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --red:#E63946; --red-dark:#B4222D; --black:#1D1D1D; --white:#FFFFFF; --yellow:#FCA311;
-    --line:rgba(29,29,29,0.1);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{ background:#FAFAFA; color:var(--black); font-family:'Poppins',sans-serif; min-height:100vh; overflow-wrap:break-word; word-break:normal; overflow-x:hidden; }
-  h1,h2,h3{ font-family:'Montserrat',sans-serif; font-weight:800; }
-  a{ color:inherit; text-decoration:none; }
-
-  header{ background:var(--black); color:#fff; padding:18px 24px; text-align:center; }
-  .logo{ font-size:1.3rem; font-weight:900; }
-  .logo span{ color:var(--red); }
-
-  .hero{ background:linear-gradient(125deg, var(--red), var(--red-dark)); color:#fff; padding:44px 24px; text-align:center; }
-  .hero h1{ font-size:1.8rem; margin-bottom:10px; }
-  .hero p{ opacity:0.9; font-size:0.95rem; }
-
-  .wrap{ max-width:1000px; margin:0 auto; padding:30px 20px 60px; }
-  .section-title{ font-size:1.1rem; margin:24px 0 14px; display:flex; align-items:center; gap:8px; }
-  .badge-top{ background:var(--yellow); color:var(--black); font-size:0.65rem; font-weight:800; padding:3px 10px; border-radius:100px; text-transform:uppercase; }
-
-  .store-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px; }
-  .store-card{
-    background:#fff; border-radius:16px; overflow:hidden; border:1px solid var(--line);
-    transition:transform .2s ease; position:relative;
-  }
-  .store-card:hover{ transform:translateY(-4px); }
-  .store-card.top{ border:2px solid var(--yellow); box-shadow:0 8px 24px rgba(252,163,17,0.2); }
-  .store-top{ height:70px; }
-  .store-body{ padding:16px; }
-  .store-body h3{ font-size:1rem; margin-bottom:4px; }
-  .store-body p{ font-size:0.8rem; opacity:0.6; line-height:1.4; margin-bottom:10px; min-height:2.2em; }
-  .store-rating{ font-size:0.8rem; color:var(--yellow); font-weight:700; }
-  .store-rating .count{ color:var(--black); opacity:0.5; font-weight:400; }
-  .rank-tag{ position:absolute; top:10px; right:10px; background:var(--yellow); color:var(--black); font-size:0.62rem; font-weight:800; padding:4px 8px; border-radius:100px; }
-
-  .empty{ text-align:center; padding:60px 20px; opacity:0.5; }
-  .cta-vendor{ text-align:center; margin-top:50px; padding:30px; background:var(--black); border-radius:18px; color:#fff; }
-  .cta-vendor h3{ margin-bottom:10px; }
-  .cta-vendor a{ display:inline-block; margin-top:14px; background:var(--red); padding:12px 26px; border-radius:100px; font-weight:600; font-size:0.9rem; }
-  .site-logo-text{ display:inline-block; padding:2px; }
-  .site-logo-text img{ height:40px; display:block; }
-  @media(min-width:768px){ .site-logo-text img{ height:50px; } }
+:root{
+  --red:#e63946;--red-dark:#c92e3a;--ink:#17191f;--muted:#68707d;
+  --line:#e9e9ed;--paper:#fff;--soft:#f7f7f8;--soft-red:#fff3f3;
+  --green:#16845b;--radius:20px;--shadow:0 18px 55px rgba(23,25,31,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"DM Sans",sans-serif;line-height:1.6;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+img{display:block;max-width:100%}
+.container{width:min(1160px,calc(100% - 48px));margin-inline:auto}
+.site-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(23,25,31,.07)}
+.nav{height:78px;display:flex;align-items:center;justify-content:space-between;gap:28px}
+.brand{display:inline-flex;align-items:center;font-family:Manrope,sans-serif;font-size:28px;font-weight:800;letter-spacing:-1.7px;white-space:nowrap}
+.brand .eta{color:#17191f}.brand .chop{color:var(--red)}
+.nav-links{display:flex;align-items:center;gap:30px;margin-left:auto}
+.nav-links a{font-size:14px;font-weight:700;color:#515866;transition:color .2s}
+.nav-links a:hover{color:var(--red)}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:0 20px;border-radius:10px;font-weight:800;font-size:14px;border:1px solid transparent;cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--red);color:white;box-shadow:0 8px 20px rgba(230,57,70,.18)}
+.btn-primary:hover{background:var(--red-dark)}
+.btn-outline{background:#fff;border-color:#dedfe4;color:var(--ink)}
+.btn-outline:hover{border-color:#bfc2ca}
+.menu-toggle{display:none;width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);align-items:center;justify-content:center;cursor:pointer}
+.menu-toggle svg{width:21px;height:21px}
+.hero{position:relative;padding:82px 0 74px;overflow:hidden;background:linear-gradient(180deg,#fff 0%,#fff 72%,#fffafa 100%)}
+.hero:before{content:"";position:absolute;width:560px;height:560px;right:-240px;top:-250px;border-radius:50%;background:radial-gradient(circle,rgba(230,57,70,.10),rgba(230,57,70,0) 68%);pointer-events:none}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.03fr .97fr;align-items:center;gap:58px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border-radius:7px;background:var(--soft-red);color:#b52b37;font-size:11px;font-weight:800;letter-spacing:1.05px;text-transform:uppercase}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+h1,h2,h3,p{margin-top:0}
+h1,h2,h3{font-family:Manrope,sans-serif;letter-spacing:-1.5px}
+.hero h1{font-size:clamp(42px,5.2vw,66px);line-height:1.08;margin:22px 0 20px;font-weight:800;max-width:650px}
+.hero h1 span{color:var(--red)}
+.hero-copy{max-width:580px;color:var(--muted);font-size:17px;line-height:1.8;margin-bottom:28px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+.hero-actions .btn{min-height:54px;padding-inline:23px}
+.hero-note{display:flex;align-items:center;gap:10px;margin-top:23px;color:#747b86;font-size:12px;font-weight:600}
+.hero-note svg{width:17px;height:17px;color:var(--green);flex:none}
+.hero-visual{position:relative;min-height:440px}
+.hero-photo{position:absolute;inset:12px 22px 12px 42px;border-radius:26px;overflow:hidden;background:#f0ece9;box-shadow:var(--shadow)}
+.hero-photo img{width:100%;height:100%;object-fit:cover}
+.hero-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,17,22,0) 55%,rgba(15,17,22,.22))}
+.float-card{position:absolute;z-index:2;background:#fff;border:1px solid rgba(23,25,31,.07);border-radius:15px;box-shadow:0 15px 40px rgba(23,25,31,.13);padding:13px 15px;display:flex;align-items:center;gap:11px}
+.float-card.one{left:0;top:42px}
+.float-card.two{right:0;bottom:44px}
+.float-icon{width:39px;height:39px;border-radius:11px;background:#fff0f1;color:var(--red);display:grid;place-items:center;flex:none}
+.float-icon svg{width:20px;height:20px}
+.float-card strong{display:block;font-size:12px;line-height:1.3}
+.float-card small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.hero-caption{position:absolute;z-index:2;bottom:30px;left:68px;color:#fff;font-size:12px;font-weight:700;letter-spacing:.3px}
+.trust-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff}
+.trust-inner{min-height:76px;display:flex;align-items:center;justify-content:center;gap:36px;flex-wrap:wrap;color:#747b86;font-size:12px;font-weight:700}
+.trust-item{display:flex;align-items:center;gap:8px}
+.trust-item svg{width:17px;height:17px;color:var(--red)}
+.section{padding:86px 0}
+.section-soft{background:var(--soft)}
+.section-head{text-align:center;max-width:700px;margin:0 auto 38px}
+.section-kicker{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--red);font-weight:800;margin-bottom:10px}
+.section-head h2{font-size:clamp(30px,4vw,43px);line-height:1.15;margin-bottom:13px}
+.section-head p{font-size:15px;line-height:1.8;color:var(--muted);margin:0}
+.category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.category-card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .22s,box-shadow .22s}
+.category-card:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+.category-image{height:178px;overflow:hidden;background:#eee}
+.category-image img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.category-card:hover .category-image img{transform:scale(1.04)}
+.category-body{padding:18px 17px 20px}
+.category-body h3{font-size:16px;letter-spacing:-.4px;margin-bottom:7px}
+.category-body p{font-size:12px;color:var(--muted);line-height:1.65;margin:0}
+.section-footnote{text-align:center;color:#858b95;font-size:11px;margin:18px 0 0}
+.physical-section{display:grid;grid-template-columns:.8fr 1.2fr;gap:54px;align-items:center}
+.physical-copy h2{font-size:clamp(30px,3.7vw,42px);line-height:1.15;margin:13px 0 15px}
+.physical-copy p{color:var(--muted);font-size:15px;line-height:1.8;margin-bottom:23px}
+.physical-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.physical-card{position:relative;min-width:0;border-radius:15px;overflow:hidden;background:#eaeaea;aspect-ratio:4/5}
+.physical-card img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.physical-card:hover img{transform:scale(1.04)}
+.physical-card:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.62))}
+.physical-card span{position:absolute;z-index:1;bottom:14px;left:12px;right:12px;color:#fff;font-size:12px;font-weight:800;line-height:1.3}
+.feature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.feature{padding:23px 20px;background:#fff;border:1px solid var(--line);border-radius:15px}
+.feature-icon{width:43px;height:43px;border-radius:12px;background:var(--soft-red);display:grid;place-items:center;color:var(--red);margin-bottom:17px}
+.feature-icon svg{width:21px;height:21px}
+.feature h3{font-size:15px;letter-spacing:-.3px;margin-bottom:8px}
+.feature p{font-size:12px;line-height:1.7;color:var(--muted);margin:0}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;counter-reset:step}
+.step{position:relative;padding:24px 20px;border:1px solid var(--line);border-radius:15px;background:#fff}
+.step-number{width:35px;height:35px;display:grid;place-items:center;border-radius:50%;background:#fff0f1;color:var(--red);font-weight:900;font-size:13px;margin-bottom:17px}
+.step h3{font-size:15px;letter-spacing:-.3px;margin-bottom:7px}
+.step p{font-size:12px;color:var(--muted);line-height:1.7;margin:0}
+.final-cta{padding:0 0 86px}
+.cta-panel{position:relative;overflow:hidden;border-radius:22px;background:#1c1e25;color:#fff;padding:54px 56px;display:flex;align-items:center;justify-content:space-between;gap:30px}
+.cta-panel:after{content:"";position:absolute;width:360px;height:360px;right:14%;top:-240px;border-radius:50%;background:rgba(230,57,70,.3);filter:blur(3px)}
+.cta-copy{position:relative;z-index:1;max-width:650px}
+.cta-copy h2{font-size:clamp(29px,3.7vw,42px);line-height:1.15;margin-bottom:12px}
+.cta-copy p{color:#c4c7ce;font-size:14px;line-height:1.7;margin:0}
+.cta-panel .btn{position:relative;z-index:1;white-space:nowrap;min-height:54px;padding-inline:24px}
+.site-footer{background:#f8f8f9;border-top:1px solid var(--line);padding:35px 0 25px}
+.footer-top{display:flex;align-items:flex-start;justify-content:space-between;gap:35px;padding-bottom:25px}
+.footer-brand p{max-width:330px;color:var(--muted);font-size:12px;line-height:1.7;margin:10px 0 0}
+.footer-links{display:flex;gap:25px;flex-wrap:wrap}
+.footer-links a{font-size:12px;color:#5d6470;font-weight:700}
+.footer-links a:hover{color:var(--red)}
+.footer-bottom{border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:15px;color:#9297a0;font-size:11px}
+.mobile-menu{display:none}
+@media(max-width:980px){
+ .nav-links{gap:18px}.nav-links a{font-size:13px}
+ .hero-grid{gap:28px}.hero-visual{min-height:390px}
+ .category-grid,.feature-grid,.steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .physical-section{gap:30px}
+}
+@media(max-width:700px){
+ .container{width:min(100% - 36px,560px)}
+ .nav{height:68px;gap:12px}
+ .brand{font-size:25px}
+ .nav-links{display:none}
+ .nav-actions .btn-outline{display:none}
+ .nav-actions .btn-primary{min-height:41px;padding:0 13px;font-size:12px}
+ .menu-toggle{display:flex;width:40px;height:40px}
+ .mobile-menu{position:absolute;left:0;right:0;top:68px;background:#fff;border-bottom:1px solid var(--line);padding:10px 18px 18px;box-shadow:0 14px 22px rgba(20,20,30,.08)}
+ .mobile-menu.open{display:grid;gap:3px}
+ .mobile-menu a{padding:12px 8px;font-size:14px;font-weight:700;color:#4f5662;border-radius:8px}
+ .mobile-menu a:hover{background:var(--soft)}
+ .mobile-menu .mobile-login{color:var(--red)}
+ .hero{padding:49px 0 45px}
+ .hero-grid{grid-template-columns:1fr;gap:27px}
+ .hero h1{font-size:clamp(37px,10vw,49px);margin:18px 0 15px;letter-spacing:-1.8px}
+ .hero-copy{font-size:14px;line-height:1.75;margin-bottom:21px}
+ .hero-actions{display:grid;grid-template-columns:1fr;gap:10px}
+ .hero-actions .btn{width:100%;min-height:51px}
+ .hero-note{font-size:11px;line-height:1.5;margin-top:16px}
+ .hero-visual{min-height:300px;margin:0 2px}
+ .hero-photo{inset:8px 16px 8px 24px;border-radius:19px}
+ .float-card{padding:10px 11px;border-radius:12px;gap:8px}
+ .float-card.one{top:20px;left:0}
+ .float-card.two{bottom:20px;right:0}
+ .float-icon{width:32px;height:32px}
+ .float-card strong{font-size:10px}.float-card small{font-size:9px}
+ .hero-caption{left:43px;bottom:23px;font-size:10px}
+ .trust-inner{gap:12px 19px;padding:17px 0;justify-content:flex-start}
+ .trust-item{font-size:10px}
+ .section{padding:61px 0}
+ .section-head{margin-bottom:25px;text-align:left}
+ .section-head h2{font-size:31px}
+ .section-head p{font-size:13px}
+ .category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+ .category-image{height:132px}
+ .category-body{padding:13px 12px 15px}
+ .category-body h3{font-size:13px;margin-bottom:5px}
+ .category-body p{font-size:10px}
+ .section-footnote{text-align:left;font-size:10px;line-height:1.5}
+ .physical-section{grid-template-columns:1fr;gap:22px}
+ .physical-copy h2{font-size:31px}
+ .physical-copy p{font-size:13px}
+ .physical-grid{gap:9px}
+ .physical-card{border-radius:11px}
+ .physical-card span{font-size:10px;bottom:10px;left:8px;right:8px}
+ .feature-grid,.steps{grid-template-columns:1fr 1fr;gap:10px}
+ .feature,.step{padding:17px 14px}
+ .feature h3,.step h3{font-size:13px}
+ .feature p,.step p{font-size:10px}
+ .feature-icon{width:36px;height:36px;margin-bottom:12px}
+ .step-number{width:30px;height:30px;margin-bottom:12px}
+ .final-cta{padding-bottom:60px}
+ .cta-panel{padding:31px 23px;display:block;border-radius:17px}
+ .cta-copy h2{font-size:30px}
+ .cta-copy p{font-size:12px}
+ .cta-panel .btn{width:100%;margin-top:22px}
+ .footer-top{display:block}
+ .footer-links{gap:14px 19px;margin-top:22px}
+ .footer-bottom{display:block;line-height:1.8}
+}
+@media(max-width:370px){
+ .container{width:calc(100% - 28px)}
+ .nav-actions .btn-primary{font-size:11px;padding:0 10px}
+ .category-image{height:112px}
+ .hero-visual{min-height:265px}
+ .trust-inner{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*:before,*:after{transition:none!important;animation:none!important}
+}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="logo" style="display:flex; align-items:center; justify-content:center; gap:8px;">
-    <a href="explore.html" class="site-logo-text"><img src="arrière plan noir.png" alt="EtaChop"></a>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="explore.html" aria-label="EtaChop accueil"><span class="eta">Eta</span><span class="chop">Chop</span></a>
+    <nav class="nav-links" aria-label="Navigation principale">
+      <a href="#numerique">Produits numériques</a>
+      <a href="#physique">Produits physiques</a>
+      <a href="#fonctionnement">Comment ça marche</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-outline" href="dashboard.html?auth=login">Connexion</a>
+      <a class="btn btn-primary" href="dashboard.html?auth=signup">Créer ma boutique</a>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
   </div>
+  <nav class="mobile-menu" id="mobileMenu" aria-label="Menu mobile">
+    <a href="#numerique">Produits numériques</a>
+    <a href="#physique">Produits physiques</a>
+    <a href="#fonctionnement">Comment ça marche</a>
+    <a class="mobile-login" href="dashboard.html?auth=login">Connexion</a>
+    <a href="dashboard.html?auth=signup">Créer ma boutique</a>
+  </nav>
 </header>
 
-<div class="hero">
-  <h1>Découvre les boutiques EtaChop</h1>
-  <p>Des vendeurs de tout le Congo, classés selon les avis de vrais clients.</p>
-  <div style="max-width:420px; margin:22px auto 0; display:flex; gap:8px;">
-    <input type="text" id="searchInput" placeholder="Rechercher un produit…" oninput="handleSearch()"
-      style="flex:1; padding:13px 16px; border-radius:100px; border:none; font-size:0.92rem; font-family:'Poppins',sans-serif;">
+<main>
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow"><span class="eyebrow-dot"></span> La plateforme de vente en ligne</div>
+      <h1>Donne de la valeur à tes idées. <span>Vends avec EtaChop.</span></h1>
+      <p class="hero-copy">E-books, formations, templates ou produits physiques : crée ta boutique en ligne, présente tes offres et retrouve tes commandes au même endroit.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="dashboard.html?auth=signup">Créer ma boutique gratuitement <span aria-hidden="true">→</span></a>
+        <a class="btn btn-outline" href="#numerique">Découvrir EtaChop</a>
+      </div>
+      <div class="hero-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg>
+        Une seule boutique pour tes produits numériques et physiques.
+      </div>
+    </div>
+    <div class="hero-visual" aria-label="Illustration d'un espace de travail pour vendre en ligne">
+      <div class="hero-photo">
+        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1100&q=85" alt="Espace de travail numérique avec ordinateur portable" fetchpriority="high">
+      </div>
+      <div class="float-card one">
+        <span class="float-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M8 8h7M8 12h7M8 16h4"/></svg></span>
+        <span><strong>Produits numériques</strong><small>Guides, cours, ressources…</small></span>
+      </div>
+      <div class="float-card two">
+        <span class="float-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18l-1.5 13h-15z"/><path d="M8 7a4 4 0 0 1 8 0"/></svg></span>
+        <span><strong>Ta boutique en ligne</strong><small>Au même endroit, simplement.</small></span>
+      </div>
+      <div class="hero-caption">Tes idées méritent une vraie vitrine.</div>
+    </div>
+  </div>
+</section>
+
+<div class="trust-strip">
+  <div class="container trust-inner">
+    <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg> E-books & guides</div>
+    <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 7 9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg> Formations</div>
+    <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> Templates & ressources</div>
+    <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18l-2 13H5z"/><path d="M8 7a4 4 0 0 1 8 0"/></svg> Produits physiques</div>
   </div>
 </div>
 
-<div class="wrap">
-  <div id="searchResults" style="display:none;">
-    <div class="section-title">Résultats de recherche</div>
-    <div class="store-grid" id="searchGrid"></div>
+<section class="section" id="numerique">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">Au cœur d'EtaChop</div>
+      <h2>Commence par vendre ce que tu sais créer.</h2>
+      <p>Transforme tes connaissances, tes compétences et tes créations en produits numériques que tes clients peuvent découvrir dans ta boutique.</p>
+    </div>
+    <div class="category-grid">
+      <article class="category-card">
+        <div class="category-image"><img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=700&q=80" alt="Livre ouvert et lecture, illustration des e-books" loading="lazy"></div>
+        <div class="category-body"><h3>E-books & guides</h3><p>Partage tes conseils, méthodes et connaissances dans des livres numériques.</p></div>
+      </article>
+      <article class="category-card">
+        <div class="category-image"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=700&q=80" alt="Formation en ligne sur ordinateur" loading="lazy"></div>
+        <div class="category-body"><h3>Formations en ligne</h3><p>Propose tes cours, ateliers et programmes pour transmettre ton savoir.</p></div>
+      </article>
+      <article class="category-card">
+        <div class="category-image"><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=700&q=80" alt="Création graphique et templates numériques" loading="lazy"></div>
+        <div class="category-body"><h3>Templates & designs</h3><p>Vends tes modèles, visuels, documents et ressources prêts à utiliser.</p></div>
+      </article>
+      <article class="category-card">
+        <div class="category-image"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=700&q=80" alt="Technologie et outils numériques" loading="lazy"></div>
+        <div class="category-body"><h3>Outils & ressources</h3><p>Mets à disposition tes fichiers, outils et autres créations digitales.</p></div>
+      </article>
+    </div>
+    <p class="section-footnote">Images d'illustration : elles présentent les types de produits, pas des annonces de vendeurs.</p>
   </div>
+</section>
 
-  <div id="browseSections">
-  <div id="topSection" style="display:none;">
-    <div class="section-title">⭐ Les mieux notées <span class="badge-top">Avis clients</span></div>
-    <div class="store-grid" id="topGrid"></div>
+<section class="section section-soft" id="physique">
+  <div class="container physical-section">
+    <div class="physical-copy">
+      <div class="section-kicker">Et aussi les produits physiques</div>
+      <h2>Tu as des articles à vendre ? Ils ont leur place ici aussi.</h2>
+      <p>Mode, beauté, accessoires, maison ou technologie : présente tes articles dans ta boutique EtaChop et partage facilement ton lien avec tes clients.</p>
+      <a class="btn btn-primary" href="dashboard.html?auth=signup">Vendre mes produits physiques <span aria-hidden="true">→</span></a>
+    </div>
+    <div>
+      <div class="physical-grid">
+        <div class="physical-card"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=650&q=80" alt="Vêtements et mode" loading="lazy"><span>Mode & accessoires</span></div>
+        <div class="physical-card"><img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=650&q=80" alt="Produits de beauté et soins" loading="lazy"><span>Beauté & soins</span></div>
+        <div class="physical-card"><img src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?auto=format&fit=crop&w=650&q=80" alt="Accessoires et objets du quotidien" loading="lazy"><span>Maison & accessoires</span></div>
+      </div>
+      <p class="section-footnote">Exemples visuels de catégories de produits physiques.</p>
+    </div>
   </div>
+</section>
 
-  <div class="section-title">Toutes les boutiques</div>
-  <div class="store-grid" id="allGrid">
-    <div class="empty">Chargement…</div>
+<section class="section" id="avantages">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">Pourquoi EtaChop ?</div>
+      <h2>Tout ton commerce, au même endroit.</h2>
+      <p>Une présentation claire pour tes clients et un espace pratique pour organiser ton activité.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="feature">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18v14H3z"/><path d="M7 9h10M7 13h6"/></svg></div>
+        <h3>Ta propre boutique</h3><p>Présente ton activité et tes produits dans un espace à ton image.</p>
+      </article>
+      <article class="feature">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+        <h3>Commandes centralisées</h3><p>Retrouve les commandes de tes clients depuis ton espace vendeur.</p>
+      </article>
+      <article class="feature">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="9"/></svg></div>
+        <h3>Deux types de produits</h3><p>Vends des produits numériques et physiques dans la même boutique.</p>
+      </article>
+      <article class="feature">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7h16v-7"/><path d="m12 3 0 11M8 10l4 4 4-4"/></svg></div>
+        <h3>Un lien à partager</h3><p>Partage l'adresse de ta boutique sur WhatsApp et tes réseaux sociaux.</p>
+      </article>
+    </div>
   </div>
-  </div>
+</section>
 
-  <div class="cta-vendor">
-    <h3>Tu veux vendre sur EtaChop ?</h3>
-    <p style="opacity:0.75; font-size:0.88rem;">Crée ta boutique gratuitement en 2 minutes.</p>
-    <a href="dashboard.html">Créer ma boutique →</a>
+<section class="section section-soft" id="fonctionnement">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">Simple et pratique</div>
+      <h2>Ta boutique en quelques étapes.</h2>
+      <p>Tu peux commencer simplement, puis compléter ta boutique au fur et à mesure.</p>
+    </div>
+    <div class="steps">
+      <article class="step"><div class="step-number">01</div><h3>Crée ton compte</h3><p>Inscris-toi sur EtaChop pour ouvrir ton espace vendeur.</p></article>
+      <article class="step"><div class="step-number">02</div><h3>Configure ta boutique</h3><p>Choisis le nom de ta boutique et présente ton activité.</p></article>
+      <article class="step"><div class="step-number">03</div><h3>Ajoute tes produits</h3><p>Publie tes produits numériques, physiques ou les deux.</p></article>
+      <article class="step"><div class="step-number">04</div><h3>Partage ta boutique</h3><p>Envoie ton lien à tes clients et centralise leurs commandes.</p></article>
+    </div>
   </div>
+</section>
 
-  <div style="text-align:center; margin-top:30px; font-size:0.8rem; opacity:0.5;">
-    <a href="suivi.html" style="color:inherit;">Suivre ma commande</a> · <a href="conditions.html" style="color:inherit;">Conditions d'utilisation</a> · <a href="conditions.html" style="color:inherit;">Livraison & Retours</a>
+<section class="final-cta">
+  <div class="container">
+    <div class="cta-panel">
+      <div class="cta-copy"><h2>Prêt à donner une vitrine à tes produits ?</h2><p>Crée ton espace EtaChop et commence à présenter tes créations et tes articles en ligne.</p></div>
+      <a class="btn btn-primary" href="dashboard.html?auth=signup">Créer ma boutique <span aria-hidden="true">→</span></a>
+    </div>
   </div>
-</div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="explore.html"><span class="eta">Eta</span><span class="chop">Chop</span></a>
+        <p>Une vitrine en ligne pour tes produits numériques et physiques. Présente ton activité et retrouve tes commandes au même endroit.</p>
+      </div>
+      <nav class="footer-links" aria-label="Liens utiles">
+        <a href="dashboard.html?auth=login">Connexion</a>
+        <a href="dashboard.html?auth=signup">Créer une boutique</a>
+        <a href="suivi.html">Suivre ma commande</a>
+        <a href="conditions.html">Conditions & politiques</a>
+      </nav>
+    </div>
+    <div class="footer-bottom"><span>© <span id="year"></span> EtaChop. Tous droits réservés.</span><span>La vente en ligne, simplement.</span></div>
+  </div>
+</footer>
 
 <script>
-  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
-
-  let searchTimeout = null;
-  function handleSearch(){
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(runSearch, 350);
-  }
-
-  function productCard(p){
-    const store = p.dp_stores;
-    return `
-      <a class="store-card" href="store.html?s=${store.slug}&p=${p.id}">
-        <img src="${p.image_url}" style="width:100%; aspect-ratio:1; object-fit:cover;" alt="${p.name}">
-        <div class="store-body">
-          <h3>${p.name}</h3>
-          <p style="min-height:auto;">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</p>
-          <div class="store-meta">Chez ${store.name}</div>
-        </div>
-      </a>
-    `;
-  }
-
-  async function runSearch(){
-    const query = document.getElementById('searchInput').value.trim();
-    if(!query){
-      document.getElementById('searchResults').style.display = 'none';
-      document.getElementById('browseSections').style.display = 'block';
-      return;
-    }
-    document.getElementById('searchResults').style.display = 'block';
-    document.getElementById('browseSections').style.display = 'none';
-    const grid = document.getElementById('searchGrid');
-    grid.innerHTML = '<div class="empty">Recherche…</div>';
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?is_active=eq.true&name=ilike.*${encodeURIComponent(query)}*&select=*,dp_stores(name,slug,accent_color)&limit=24`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      });
-      const products = await res.json();
-      if(products.length === 0){
-        grid.innerHTML = `<div class="empty">Aucun produit trouvé pour "${query}".</div>`;
-        return;
-      }
-      grid.innerHTML = products.map(productCard).join('');
-    } catch(err){
-      grid.innerHTML = '<div class="empty">Erreur lors de la recherche.</div>';
-    }
-  }
-
-  function storeCard(s, isTop){
-    const ratingHtml = s.reviewCount > 0
-      ? `<div class="store-rating">${'★'.repeat(Math.round(s.avgRating))}${'☆'.repeat(5-Math.round(s.avgRating))} ${s.avgRating.toFixed(1)} <span class="count">(${s.reviewCount} avis)</span></div>`
-      : `<div class="store-rating" style="color:var(--black); opacity:0.4;">Pas encore d'avis</div>`;
-    return `
-      <a class="store-card ${isTop?'top':''}" href="store.html?s=${s.slug}">
-        ${isTop ? '<div class="rank-tag">⭐ Top boutique</div>' : ''}
-        <div class="store-top" style="background:${s.accent_color || '#E63946'}; display:flex; align-items:center; justify-content:center;">
-          ${s.logo_url ? `<img src="${s.logo_url}" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.7);">` : ''}
-        </div>
-        <div class="store-body">
-          <h3>${s.name}</h3>
-          <p>${s.description || 'Boutique en ligne sur EtaChop.'}</p>
-          ${ratingHtml}
-        </div>
-      </a>
-    `;
-  }
-
-  async function init(){
-    try {
-      const storesRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?is_published=eq.true&order=created_at.desc`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      });
-      const stores = await storesRes.json();
-
-      const reviewsRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_reviews?select=store_id,rating`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      });
-      const reviews = await reviewsRes.json();
-
-      const withRatings = stores.map(s => {
-        const storeReviews = reviews.filter(r => r.store_id === s.id);
-        const avgRating = storeReviews.length > 0 ? storeReviews.reduce((sum,r)=>sum+r.rating,0) / storeReviews.length : 0;
-        return { ...s, avgRating, reviewCount: storeReviews.length };
-      });
-
-      const top = [...withRatings].filter(s => s.reviewCount > 0).sort((a,b) => b.avgRating - a.avgRating || b.reviewCount - a.reviewCount).slice(0, 3);
-      const topIds = new Set(top.map(s => s.id));
-      const rest = withRatings.filter(s => !topIds.has(s.id));
-
-      if(top.length > 0){
-        document.getElementById('topSection').style.display = 'block';
-        document.getElementById('topGrid').innerHTML = top.map(s => storeCard(s, true)).join('');
-      }
-
-      const allGrid = document.getElementById('allGrid');
-      if(withRatings.length === 0){
-        allGrid.innerHTML = '<div class="empty">Aucune boutique pour l\'instant. Sois le premier à en créer une !</div>';
-        return;
-      }
-      allGrid.innerHTML = rest.map(s => storeCard(s, false)).join('') || '<div class="empty">Toutes les boutiques sont dans le classement ci-dessus.</div>';
-    } catch(err){
-      document.getElementById('allGrid').innerHTML = '<div class="empty">Impossible de charger les boutiques.</div>';
-    }
-  }
-
-  init();
+(function(){
+  const toggle = document.getElementById('menuToggle');
+  const menu = document.getElementById('mobileMenu');
+  toggle.addEventListener('click', function(){
+    const open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+  });
+  menu.querySelectorAll('a').forEach(link => link.addEventListener('click', function(){
+    menu.classList.remove('open');
+    toggle.setAttribute('aria-expanded','false');
+  }));
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
 </script>
-
 <script src="assistant.js"></script>
-<script>initEtaAssistant('both');</script>
+<script>if(typeof initEtaAssistant === 'function') initEtaAssistant('both');</script>
 <script src="install-banner.js"></script>
 <script>
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 </script>
 </body>
 </html>
