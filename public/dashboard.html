@@ -54,6 +54,10 @@
   .color-dot{ width:36px; height:36px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:transform .15s ease; }
   .color-dot.selected{ border-color:var(--ink); transform:scale(1.1); }
   .slug-preview{ font-size:0.8rem; opacity:0.55; margin-top:6px; font-family:monospace; }
+  #createStoreScreen .cs-card{ max-width:560px; max-height:calc(100vh - 32px); overflow-y:auto; }
+  #createStoreScreen .field select{ background:#fff; }
+  #createStoreScreen .row2{ align-items:start; }
+  @media(max-width:480px){ #createStoreScreen{ padding:12px; } #createStoreScreen .cs-card{ padding:26px 18px; } }
 
   /* ---------- dashboard ---------- */
   #dashboard{ display:none; }
@@ -125,7 +129,7 @@
 
   /* Tableaux : scroll horizontal propre au lieu d'un écrasement illisible */
   .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .table-scroll table{ min-width:680px; }
+  .table-scroll table{ min-width:520px; }
   select.status-tag{ min-width:150px; }
 
   /* ---------- Corrections mobile (écrans ≤ 480px) ---------- */
@@ -253,13 +257,77 @@
     <div class="sub">Ça prend 1 minute. Tu pourras tout modifier plus tard.</div>
 
     <div class="field">
-      <label>Nom de ta boutique</label>
+      <label>Nom de ta boutique / entreprise</label>
       <input type="text" id="storeName" placeholder="Ex: Boutique Marie" oninput="updateSlugPreview()">
       <div class="slug-preview" id="slugPreview"></div>
     </div>
     <div class="field">
+      <label>Profil d'activité</label>
+      <select id="sellerProfileType" onchange="updateSellerProfileFields()">
+        <option value="classic">Vendeur classique</option>
+        <option value="longrich">Distributeur Longrich</option>
+        <option value="logistics">Partenaire logistique</option>
+      </select>
+      <div style="font-size:.75rem;opacity:.6;margin-top:6px;">Choisis le profil qui correspond réellement à ton activité.</div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Pays d'activité</label>
+        <select id="sellerCountry" onchange="updateSellerCountryHint()">
+          <option value="CG">Congo-Brazzaville</option>
+          <option value="CD">République démocratique du Congo</option>
+          <option value="CM">Cameroun</option>
+          <option value="GA">Gabon</option>
+          <option value="CI">Côte d'Ivoire</option>
+          <option value="SN">Sénégal</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Ville d'activité</label>
+        <input type="text" id="sellerCity" placeholder="Ex: Brazzaville" autocomplete="address-level2">
+      </div>
+    </div>
+    <div class="field">
+      <label>Téléphone professionnel / WhatsApp</label>
+      <input type="tel" id="sellerPhone" placeholder="Ex: +242 06 000 00 00" autocomplete="tel">
+    </div>
+    <div class="field" id="sellerAddressField" style="display:none;">
+      <label>Adresse ou localisation</label>
+      <input type="text" id="sellerAddress" placeholder="Quartier, rue, repère...">
+    </div>
+    <div id="longrichFields" style="display:none;">
+      <div class="field">
+        <label>Numéro / identifiant distributeur Longrich (si disponible)</label>
+        <input type="text" id="longrichMemberId" placeholder="Identifiant de distributeur">
+      </div>
+      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:11px 12px;font-size:.78rem;color:#9A3412;margin-bottom:14px;">
+        Ta demande de référencement comme distributeur sera vérifiée. Le choix de ce profil ne vaut pas validation.
+      </div>
+    </div>
+    <div id="logisticsFields" style="display:none;">
+      <div class="field">
+        <label>Type de service logistique</label>
+        <select id="logisticsType">
+          <option value="courier">Coursier / livraison</option>
+          <option value="warehouse">Entrepôt / stockage</option>
+          <option value="warehouse_delivery">Stockage + livraison</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Zones desservies (séparées par des virgules)</label>
+        <input type="text" id="logisticsAreas" placeholder="Ex: Talangaï, Poto-Poto, Bacongo">
+      </div>
+      <div class="field" id="warehouseCapacityField" style="display:none;">
+        <label>Capacité de stockage approximative (nombre d'articles)</label>
+        <input type="number" id="warehouseCapacity" min="1" placeholder="Ex: 500">
+      </div>
+      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:11px 12px;font-size:.78rem;color:#9A3412;margin-bottom:14px;">
+        Ton dossier sera soumis à validation par EtaChop. Tu ne recevras aucune commande logistique avant approbation.
+      </div>
+    </div>
+    <div class="field">
       <label>Description courte</label>
-      <textarea id="storeDesc" rows="2" placeholder="Ex: Mode et accessoires faits main à Brazzaville"></textarea>
+      <textarea id="storeDesc" rows="2" placeholder="Présente brièvement ton activité"></textarea>
     </div>
     <div class="field">
       <label>Couleur de ta boutique</label>
@@ -412,7 +480,7 @@
         <button class="btn-refresh" onclick="loadOrders()">Actualiser</button>
       </div>
       <div class="panel-body table-scroll" style="padding:0;">
-        <table style="width:100%; min-width:680px; border-collapse:collapse; font-size:0.85rem;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
           <thead>
             <tr style="background:#faf9f7; text-align:left;">
               <th style="padding:10px 16px; font-size:0.7rem; text-transform:uppercase; opacity:0.55;">Client</th>
@@ -1128,79 +1196,18 @@
   }
 
   async function afterLogin(){
-    const authScreen = document.getElementById('authScreen');
-    const createStoreScreen = document.getElementById('createStoreScreen');
-    const dashboard = document.getElementById('dashboard');
-    const authMsg = document.getElementById('authMsg');
-
-    // Ne jamais confondre une erreur de session/API avec une boutique inexistante.
-    dashboard.style.display = 'none';
-    createStoreScreen.style.display = 'none';
-    authScreen.style.display = 'none';
-    authMsg.style.display = 'none';
-
-    const showAuthError = (message) => {
-      authScreen.style.display = 'flex';
-      authMsg.textContent = message;
-      authMsg.className = 'auth-msg err';
-      authMsg.style.display = 'block';
-    };
-
-    if(!session || !session.access_token || !session.user || !session.user.id){
-      showAuthError("Ta session n'est pas valide. Connecte-toi à nouveau.");
-      return;
-    }
-
-    const fetchStores = () => fetch(
-      `${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${encodeURIComponent(session.user.id)}&select=*`,
-      {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      }
-    );
-
-    try {
-      let res = await fetchStores();
-
-      // Si le jeton d'accès a expiré, renouveler la session puis refaire la requête.
-      if(res.status === 401 && session.refresh_token){
-        const refreshed = await refreshSession();
-        if(refreshed) res = await fetchStores();
-      }
-
-      if(res.status === 401){
-        logout();
-        showAuthError("Ta session a expiré. Reconnecte-toi pour accéder à ta boutique.");
-        return;
-      }
-
-      if(!res.ok){
-        const detail = await res.text().catch(() => '');
-        console.error('EtaChop: vérification de la boutique impossible', res.status, detail);
-        throw new Error("EtaChop n'a pas réussi à vérifier ta boutique. Vérifie ta connexion puis réessaie.");
-      }
-
-      const stores = await res.json();
-      if(!Array.isArray(stores)){
-        throw new Error("La réponse du serveur est inattendue. Réessaie dans quelques instants.");
-      }
-
-      if(stores.length > 0){
-        currentStore = stores[0];
-        showDashboard();
-        return;
-      }
-
-      // L'écran de création n'apparaît que si Supabase a répondu correctement
-      // et a confirmé qu'aucune boutique n'est associée à ce compte.
-      currentStore = null;
+    document.getElementById('authScreen').style.display = 'none';
+    await refreshSession(); // toujours repartir avec un token frais
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${session.user.id}&select=*`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
+    });
+    const stores = await res.json();
+    if(stores && stores.length > 0){
+      currentStore = stores[0];
+      showDashboard();
+    } else {
       renderColorPicker();
-      createStoreScreen.style.display = 'flex';
-    } catch(err){
-      console.error('EtaChop afterLogin:', err);
-      showAuthError(err.message || "Impossible de charger ton espace vendeur. Réessaie.");
+      document.getElementById('createStoreScreen').style.display = 'flex';
     }
   }
 
@@ -1261,70 +1268,206 @@
     }, 400);
   }
 
+  // ---------- Profil vendeur et localisation ----------
+  const SELLER_COUNTRY_CURRENCIES = {
+    CG: 'XAF', CM: 'XAF', GA: 'XAF', CD: 'CDF', CI: 'XOF', SN: 'XOF'
+  };
+
+  function updateSellerProfileFields(){
+    const type = document.getElementById('sellerProfileType').value;
+    document.getElementById('longrichFields').style.display = type === 'longrich' ? 'block' : 'none';
+    document.getElementById('logisticsFields').style.display = type === 'logistics' ? 'block' : 'none';
+    document.getElementById('sellerAddressField').style.display = type === 'logistics' ? 'block' : 'none';
+    updateLogisticsTypeFields();
+  }
+
+  function updateLogisticsTypeFields(){
+    const typeEl = document.getElementById('logisticsType');
+    if(!typeEl) return;
+    const type = typeEl.value;
+    document.getElementById('warehouseCapacityField').style.display =
+      (type === 'warehouse' || type === 'warehouse_delivery') ? 'block' : 'none';
+  }
+
+  function updateSellerCountryHint(){
+    const country = document.getElementById('sellerCountry').value;
+    const city = document.getElementById('sellerCity');
+    const examples = {CG:'Brazzaville', CD:'Kinshasa', CM:'Douala', GA:'Libreville', CI:'Abidjan', SN:'Dakar'};
+    city.placeholder = 'Ex: ' + examples[country];
+  }
+
+  async function apiJson(path, options = {}){
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...options,
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      }
+    });
+    const raw = await response.text();
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch(e) { data = raw; }
+    if(!response.ok){
+      const message = (data && (data.message || data.details || data.hint || data.error)) || `Erreur serveur (${response.status})`;
+      throw new Error(message);
+    }
+    return data;
+  }
+
+  async function saveSellerProfile(country, city, address, sellerType, longrichId){
+    const payload = {
+      user_id: session.user.id,
+      seller_type: sellerType,
+      country_code: country,
+      city,
+      address: address || null,
+      longrich_partner_id: longrichId || null,
+      updated_at: new Date().toISOString()
+    };
+    return await apiJson('dp_seller_profiles?on_conflict=user_id', {
+      method: 'POST',
+      headers: {'Prefer':'resolution=merge-duplicates,return=representation'},
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async function savePartnerApplication(profileType, name, country, city, phone, address){
+    if(profileType !== 'longrich' && profileType !== 'logistics') return null;
+
+    const partnerType = profileType === 'longrich'
+      ? 'longrich_stockist'
+      : document.getElementById('logisticsType').value;
+    const areasInput = profileType === 'logistics'
+      ? document.getElementById('logisticsAreas').value.trim()
+      : '';
+    const serviceAreas = areasInput
+      ? areasInput.split(',').map(x => x.trim()).filter(Boolean)
+      : [];
+
+    const payload = {
+      user_id: session.user.id,
+      business_name: name,
+      partner_type: partnerType,
+      country_code: country,
+      city,
+      address: address || null,
+      phone,
+      service_areas: serviceAreas,
+      approval_status: 'pending',
+      is_available: false,
+      updated_at: new Date().toISOString()
+    };
+
+    if(profileType === 'logistics'){
+      const capacity = parseInt(document.getElementById('warehouseCapacity').value, 10);
+      if(Number.isFinite(capacity) && capacity > 0) payload.storage_capacity = capacity;
+    }
+
+    // Une candidature déjà existante est mise à jour plutôt que dupliquée.
+    const existing = await apiJson(`dp_logistics_partners?user_id=eq.${encodeURIComponent(session.user.id)}&select=id,approval_status&limit=1`);
+    if(existing && existing.length){
+      const partner = existing[0];
+      if(partner.approval_status === 'approved') return partner;
+      return await apiJson(`dp_logistics_partners?id=eq.${partner.id}`, {
+        method: 'PATCH',
+        headers: {'Prefer':'return=representation'},
+        body: JSON.stringify(payload)
+      });
+    }
+
+    return await apiJson('dp_logistics_partners', {
+      method: 'POST',
+      headers: {'Prefer':'return=representation'},
+      body: JSON.stringify(payload)
+    });
+  }
+
   async function createStore(){
     const name = document.getElementById('storeName').value.trim();
     const description = document.getElementById('storeDesc').value.trim();
+    const profileType = document.getElementById('sellerProfileType').value;
+    const country = document.getElementById('sellerCountry').value;
+    const city = document.getElementById('sellerCity').value.trim();
+    const phone = document.getElementById('sellerPhone').value.trim();
+    const address = document.getElementById('sellerAddress').value.trim();
+    const longrichId = document.getElementById('longrichMemberId').value.trim();
     const msg = document.getElementById('createStoreMsg');
     const btn = document.getElementById('createStoreBtn');
-    if(!name){
-      msg.textContent = "Donne un nom à ta boutique."; msg.className = "form-msg err"; msg.style.display = "block";
+
+    msg.style.display = 'none';
+    if(!name || !city || !phone){
+      msg.textContent = "Renseigne le nom de ta boutique, le pays, la ville et ton téléphone professionnel.";
+      msg.className = "form-msg err"; msg.style.display = "block";
       return;
     }
-    btn.disabled = true; btn.textContent = "Création…";
+    if(profileType === 'logistics' && !address){
+      msg.textContent = "Indique l'adresse ou la localisation de ton activité logistique.";
+      msg.className = "form-msg err"; msg.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = "Enregistrement…";
     try {
-      await refreshSession(); // s'assure d'avoir un token valide juste avant d'agir
+      const refreshed = await refreshSession();
+      if(!refreshed) throw new Error("Ta session a expiré. Reconnecte-toi avant de continuer.");
+
+      // 1. Enregistrer les informations du vendeur.
+      await saveSellerProfile(
+        country, city, address,
+        profileType === 'longrich' ? 'longrich' : 'classic',
+        longrichId
+      );
+
+      // 2. Enregistrer les candidatures partenaires en attente de validation.
+      if(profileType === 'longrich' || profileType === 'logistics'){
+        await savePartnerApplication(profileType, name, country, city, phone, address);
+      }
+
+      // 3. Créer la boutique avec le pays et la devise correspondante.
       let slug = slugify(name);
-      const check = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?slug=eq.${slug}`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
-      });
-      const existing = await check.json();
-      if(existing.length > 0) slug = slug + '-' + Math.floor(Math.random()*1000);
+      const check = await apiJson(`dp_stores?slug=eq.${encodeURIComponent(slug)}&select=id&limit=1`);
+      if(check && check.length) slug = slug + '-' + Math.floor(Math.random()*9000 + 1000);
 
-      let res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores`, {
+      const storeRows = await apiJson('dp_stores', {
         method: 'POST',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json', 'Prefer': 'return=representation',
-        },
-        body: JSON.stringify({ vendor_id: session.user.id, name, slug, description, accent_color: selectedColor }),
+        headers: {'Prefer':'return=representation'},
+        body: JSON.stringify({
+          vendor_id: session.user.id,
+          name,
+          slug,
+          description,
+          accent_color: selectedColor,
+          country_code: country,
+          currency_code: SELLER_COUNTRY_CURRENCIES[country] || 'XAF'
+        })
       });
-      let data = await res.json();
 
-      // Si le token a quand même expiré pile à ce moment, on rafraîchit et on retente UNE fois
-      if(!res.ok && JSON.stringify(data).toLowerCase().includes('jwt')){
-        await refreshSession();
-        res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json', 'Prefer': 'return=representation',
-          },
-          body: JSON.stringify({ vendor_id: session.user.id, name, slug, description, accent_color: selectedColor }),
-        });
-        data = await res.json();
-      }
-
-      if(!res.ok){
-        const errText = JSON.stringify(data).toLowerCase();
-        if(errText.includes('jwt') || errText.includes('token')){
-          logout();
-          const authMsg = document.getElementById('authMsg');
-          authMsg.textContent = "Ta session a expiré. Reconnecte-toi et réessaie — ça ne se reproduira plus après ça.";
-          authMsg.className = "auth-msg err"; authMsg.style.display = "block";
-          return;
-        }
-        throw new Error(data.message || "Échec de la création");
-      }
-
-      currentStore = data[0];
+      if(!storeRows || !storeRows.length) throw new Error("La boutique n'a pas été renvoyée par le serveur.");
+      currentStore = storeRows[0];
       document.getElementById('createStoreScreen').style.display = 'none';
       showDashboard();
+
+      if(profileType === 'longrich'){
+        alert("Boutique créée. Ta demande de référencement Longrich est enregistrée en attente de vérification par EtaChop.");
+      } else if(profileType === 'logistics'){
+        alert("Boutique créée. Ta candidature comme partenaire logistique est enregistrée en attente de validation. Tu ne peux pas encore recevoir de missions.");
+      } else {
+        alert("Ta boutique EtaChop a été créée avec succès !");
+      }
     } catch(err){
-      msg.textContent = err.message; msg.className = "form-msg err"; msg.style.display = "block";
+      msg.textContent = err.message || "Une erreur est survenue. Vérifie ta connexion et réessaie.";
+      msg.className = "form-msg err"; msg.style.display = "block";
     } finally {
       btn.disabled = false; btn.textContent = "Créer ma boutique";
     }
   }
+
+  const logisticsTypeControl = document.getElementById('logisticsType');
+  if(logisticsTypeControl) logisticsTypeControl.addEventListener('change', updateLogisticsTypeFields);
+  updateSellerProfileFields();
+  updateSellerCountryHint();
 
   // ---------- Dashboard ----------
   function showDashboard(){
@@ -2240,41 +2383,6 @@
     loadDeliveryZones();
   }
 
-  function logisticsEscapeHtml(value){
-    return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[ch]));
-  }
-  function logisticsCountryLabel(code){
-    const labels = {
-      CG:'Congo-Brazzaville', CD:'RDC', CD_USD:'RDC', CM:'Cameroun',
-      GA:'Gabon', BF:'Burkina Faso', BJ:'Bénin', CI:"Côte d’Ivoire",
-      ML:'Mali', NE:'Niger', SN:'Sénégal', TG:'Togo', GH:'Ghana',
-      GN:'Guinée', KE:'Kenya', MW:'Malawi', MZ:'Mozambique',
-      RW:'Rwanda', SL:'Sierra Leone', TZ:'Tanzanie', UG:'Ouganda'
-    };
-    return labels[code] || (code ? String(code) : 'Pays non renseigné');
-  }
-  function logisticsStatusLabel(status){
-    if(!status) return 'Non renseigné';
-    const known = {
-      reserved:'Stock réservé',
-      not_routed:'Livraison à organiser',
-      pending:'En attente de prise en charge',
-      assigned:'Partenaire assigné',
-      accepted:'Mission acceptée',
-      preparing:'Préparation en cours',
-      picked_up:'Colis récupéré',
-      in_transit:'En cours de livraison',
-      shipped:'Expédiée',
-      delivered:'Livrée',
-      completed:'Terminée',
-      failed:'Livraison échouée',
-      cancelled:'Annulée'
-    };
-    return known[String(status).toLowerCase()] || String(status).replace(/[_-]+/g,' ');
-  }
-
   async function loadOrders(){
     const body = document.getElementById('ordersBody');
     body.innerHTML = '<tr><td colspan="4" class="empty">Chargement…</td></tr>';
@@ -2295,27 +2403,13 @@
         body.innerHTML = '<tr><td colspan="4" class="empty">Aucune commande pour l\'instant.</td></tr>';
         return;
       }
-      body.innerHTML = orders.map(o => {
-        const product = logisticsEscapeHtml(o.product_name_snapshot || 'Produit');
-        const variant = o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${logisticsEscapeHtml(o.variant_selection)}</span>` : '';
-        const addressParts = [o.delivery_address, o.delivery_district, o.delivery_city].filter(Boolean).map(logisticsEscapeHtml);
-        const country = logisticsCountryLabel(o.buyer_country_code);
-        const destination = [country, o.delivery_city, o.delivery_district].filter(Boolean).map(logisticsEscapeHtml).join(' · ');
-        const partner = o.delivery_zone ? logisticsEscapeHtml(o.delivery_zone) :
-          (o.seller_partner_id ? `Partenaire assigné (${logisticsEscapeHtml(String(o.seller_partner_id).slice(0,8))}…)` : 'Aucun partenaire enregistré');
-        const logisticsStatus = logisticsStatusLabel(o.logistics_status);
-        return `
+      body.innerHTML = orders.map(o => `
         <tr style="border-top:1px solid var(--line);">
-          <td style="padding:10px 16px;">${logisticsEscapeHtml(o.customer_name)}<br><span style="opacity:0.5; font-size:0.76rem;">${logisticsEscapeHtml(o.customer_phone)}</span><br><span style="opacity:0.4; font-size:0.7rem; font-family:monospace;">${logisticsEscapeHtml(o.tracking_code || '')}</span></td>
-          <td style="padding:10px 16px;">${product}${variant}
-            ${addressParts.length ? `<br><span style="opacity:0.5; font-size:0.72rem;">📍 ${addressParts.join(', ')}</span>` : ''}
-            <br><span style="display:inline-block; margin-top:5px; font-size:0.72rem; color:#555;">Destination : ${destination || 'Non renseignée'}</span>
-            <br><span style="display:inline-block; margin-top:3px; font-size:0.72rem;">Partenaire : <strong>${partner}</strong></span>
-            <br><span style="display:inline-block; margin-top:3px; font-size:0.72rem; color:#555;">Logistique : ${logisticsEscapeHtml(logisticsStatus)}</span>
-          </td>
+          <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span><br><span style="opacity:0.4; font-size:0.7rem; font-family:monospace;">${o.tracking_code || ''}</span></td>
+          <td style="padding:10px 16px;">${o.product_name_snapshot}${o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${o.variant_selection}</span>` : ''}${o.delivery_address ? `<br><span style="opacity:0.5; font-size:0.72rem;">📍 ${o.delivery_address}, ${o.delivery_district}, ${o.delivery_city}</span>` : ''}${o.buyer_country_code ? `<br><span style="opacity:0.62; font-size:0.72rem;">🌍 Destination : ${o.buyer_country_code}</span>` : ''}${o.delivery_zone ? `<br><span style="opacity:0.62; font-size:0.72rem;">🚚 Acheminement : ${o.delivery_zone}</span>` : ''}${o.logistics_status ? `<br><span style="font-size:0.72rem; font-weight:600; color:#027A48;">📦 Logistique : ${o.logistics_status === 'reserved' ? 'Stock réservé' : o.logistics_status === 'not_routed' ? 'À organiser' : o.logistics_status}</span>` : ''}</td>
           <td style="padding:10px 16px; font-weight:700;">${Number(o.amount_fcfa).toLocaleString('fr-FR')} F</td>
           <td style="padding:10px 16px;">
-            <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${logisticsEscapeHtml(o.status)}" style="border:none; cursor:pointer;">
+            <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${o.status}" style="border:none; cursor:pointer;">
               <option value="pending" ${o.status==='pending'?'selected':''}>En attente</option>
               <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmée</option>
               <option value="preparing" ${o.status==='preparing'?'selected':''}>En préparation</option>
@@ -2324,8 +2418,8 @@
               <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Annulée</option>
             </select>
           </td>
-        </tr>`;
-      }).join('');
+        </tr>
+      `).join('');
     } catch(err){
       body.innerHTML = '<tr><td colspan="4" class="empty">Impossible de charger les commandes.</td></tr>';
     }
