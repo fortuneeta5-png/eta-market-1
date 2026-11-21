@@ -179,6 +179,71 @@
   .site-logo-text{ display:inline-block; padding:2px; }
   .site-logo-text img{ height:40px; display:block; }
   @media(min-width:768px){ .site-logo-text img{ height:50px; } }
+
+  /* ---------- Tableau de bord adaptatif : ordinateur + mobile ---------- */
+  @media (min-width: 768px){
+    .bottom-nav{
+      top:72px; bottom:0; left:0; right:auto; width:218px;
+      flex-direction:column; justify-content:flex-start; align-items:stretch;
+      gap:5px; padding:20px 12px; overflow-y:auto; overflow-x:hidden;
+      border-top:0; border-right:1px solid var(--line);
+    }
+    .nav-item{
+      flex:none; width:100%; min-height:46px; flex-direction:row;
+      justify-content:flex-start; align-items:center; gap:12px;
+      padding:10px 14px; border-radius:10px; text-align:left;
+      font-size:.82rem; white-space:nowrap;
+    }
+    .nav-item .nav-icon{width:22px; font-size:1.08rem; text-align:center;}
+    .nav-item.active{background:var(--lavender); color:var(--primary-dark);}
+    #dashboard > header{position:relative; z-index:81;}
+    #dashboard > .wrap{max-width:none; margin-left:218px; padding:30px clamp(22px,3vw,48px) 60px;}
+    #dashboard{padding-bottom:0;}
+    body{padding-bottom:0;}
+  }
+
+  /* ---------- Analytique ---------- */
+  .analytics-heading{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px;}
+  .analytics-heading h2{font-size:1.45rem; margin-bottom:5px;}
+  .analytics-heading p{font-size:.84rem; color:#777;}
+  .analytics-period{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .period-btn{border:1px solid var(--line); background:#fff; color:#555; border-radius:9px; padding:8px 15px; font:600 .78rem 'Poppins',sans-serif; cursor:pointer;}
+  .period-btn.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .analytics-kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .analytics-label{font-size:.78rem; color:#777; font-weight:600; margin-bottom:8px;}
+  .analytics-charts{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px;}
+  .analytics-chart{min-height:215px; padding:14px 16px 18px;}
+  .analytics-chart svg{display:block; width:100%; height:auto; overflow:visible;}
+  .analytics-subtitle{font-size:.76rem; color:#888; margin-top:4px;}
+  .analytics-details{margin-top:18px;}
+  .analytics-footnote{font-size:.74rem; color:#888; line-height:1.6; margin:4px 2px 20px;}
+  .analytics-breakdown-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:.84rem;}
+  .analytics-breakdown-row:last-child{border-bottom:0;}
+  .analytics-breakdown-label{display:flex; align-items:center; gap:9px;}
+  .analytics-dot{width:9px; height:9px; border-radius:50%; flex:none; background:#F59E0B;}
+  .analytics-dot.paid{background:#16A34A;}
+  .analytics-dot.cancel{background:#DC2626;}
+
+  @media (max-width:767px){
+    .analytics-heading h2{font-size:1.25rem;}
+    .analytics-heading p{font-size:.76rem;}
+    .analytics-kpis{grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+    .analytics-kpis .stat-card{padding:14px;}
+    .analytics-kpis .stat-num{font-size:1.18rem; overflow-wrap:anywhere;}
+    .analytics-charts{grid-template-columns:minmax(0,1fr); gap:12px;}
+    .analytics-chart{min-height:185px; padding:10px;}
+    .analytics-details{margin-top:12px;}
+    .period-btn{padding:8px 12px;}
+    .bottom-nav{overflow-x:auto; justify-content:flex-start;}
+    .nav-item{min-width:0; flex:1 0 0; font-size:.59rem; padding-left:2px; padding-right:2px; white-space:nowrap;}
+    .nav-item .nav-icon{font-size:1.05rem;}
+  }
+  @media (min-width:768px) and (max-width:1000px){
+    .bottom-nav{width:190px;}
+    #dashboard > .wrap{margin-left:190px;}
+    .analytics-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+
 </style>
 </head>
 <body>
@@ -374,6 +439,55 @@
         </div>
       </div>
     </div>
+
+
+    <!-- ONGLET ANALYTIQUE -->
+    <div class="tab-panel" data-tab="analytics">
+      <div class="analytics-heading">
+        <div>
+          <h2>Analytique</h2>
+          <p>Les chiffres réels de ta boutique, réunis au même endroit.</p>
+        </div>
+        <button class="btn-refresh" type="button" onclick="loadAnalytics()">Actualiser</button>
+      </div>
+
+      <div class="analytics-period" aria-label="Période des statistiques">
+        <button class="period-btn active" type="button" data-days="7" onclick="setAnalyticsPeriod(7)">7 jours</button>
+        <button class="period-btn" type="button" data-days="30" onclick="setAnalyticsPeriod(30)">30 jours</button>
+        <button class="period-btn" type="button" data-days="90" onclick="setAnalyticsPeriod(90)">90 jours</button>
+      </div>
+
+      <div class="stats-grid analytics-kpis">
+        <div class="stat-card"><div class="analytics-label">Chiffre d'affaires</div><div class="stat-num" id="anRevenue">—</div><div class="stat-lbl">Commandes confirmées</div></div>
+        <div class="stat-card"><div class="analytics-label">Commandes</div><div class="stat-num" id="anOrders">—</div><div class="stat-lbl">Sur la période</div></div>
+        <div class="stat-card"><div class="analytics-label">Pages vues</div><div class="stat-num" id="anViews">—</div><div class="stat-lbl">Visites enregistrées</div></div>
+        <div class="stat-card"><div class="analytics-label">Clients</div><div class="stat-num" id="anCustomers">—</div><div class="stat-lbl">Numéros distincts</div></div>
+      </div>
+
+      <div class="analytics-charts">
+        <section class="panel">
+          <div class="panel-head"><div><h3>Évolution du chiffre d'affaires</h3><p class="analytics-subtitle">Montant des commandes confirmées par jour</p></div></div>
+          <div class="analytics-chart" id="revenueChart"><div class="empty">Chargement des données…</div></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><h3>Trafic de la boutique</h3><p class="analytics-subtitle">Pages vues enregistrées par jour</p></div></div>
+          <div class="analytics-chart" id="viewsChart"><div class="empty">Chargement des données…</div></div>
+        </section>
+      </div>
+
+      <div class="analytics-charts analytics-details">
+        <section class="panel">
+          <div class="panel-head"><h3>État des commandes</h3></div>
+          <div class="panel-body" id="orderBreakdown"><div class="empty">Chargement…</div></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h3>Produits les plus vendus</h3></div>
+          <div id="analyticsTopProducts"><div class="empty">Chargement…</div></div>
+        </section>
+      </div>
+      <p class="analytics-footnote">Les statistiques sont calculées à partir des commandes et des pages vues enregistrées dans EtaChop. Les pages vues ne représentent pas nécessairement des visiteurs uniques.</p>
+    </div>
+    <!-- /ONGLET ANALYTIQUE -->
 
     <!-- ONGLET MENU (boutique, réputation, promo, livraison) -->
     <div class="tab-panel" data-tab="menu">
@@ -769,6 +883,7 @@
     <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">🏠</span>Accueil</button>
     <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">📦</span>Produits</button>
     <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">🧾</span>Ventes</button>
+    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon">▥</span>Analytique</button>
     <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">💰</span>Solde</button>
     <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☰</span>Menu</button>
   </div>
@@ -1505,6 +1620,7 @@
     document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
     document.querySelectorAll(`.tab-panel[data-tab="${tabName}"]`).forEach(el => el.classList.add('active'));
     document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tabName));
+    if(tabName === 'analytics') loadAnalytics();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2281,6 +2397,200 @@
     } catch(err){ document.getElementById('statVisitors').textContent = '—'; }
   }
 
+
+  // ---------- Analytique vendeur : données réelles Supabase ----------
+  let analyticsDays = 7;
+  let analyticsLoading = false;
+  let analyticsRequest = 0;
+
+  function setAnalyticsPeriod(days){
+    analyticsDays = days;
+    document.querySelectorAll('.period-btn').forEach(button => {
+      button.classList.toggle('active', Number(button.dataset.days) === days);
+    });
+    loadAnalytics();
+  }
+
+  function formatAnalyticsMoney(value){
+    return Math.round(Number(value) || 0).toLocaleString('fr-FR') + ' FCFA';
+  }
+
+  function renderAnalyticsChart(elementId, rows, valueKey, lineColor, isMoney){
+    const element = document.getElementById(elementId);
+    if(!element) return;
+    if(!rows.length || rows.every(row => !Number(row[valueKey]))){
+      element.innerHTML = '<div class="empty">Pas encore de données sur cette période.</div>';
+      return;
+    }
+
+    const width = 640, height = 220, left = 52, right = 16, top = 18, bottom = 38;
+    const maxValue = Math.max(1, ...rows.map(row => Number(row[valueKey]) || 0));
+    const plotHeight = height - top - bottom;
+    const plotWidth = width - left - right;
+    const points = rows.map((row, index) => ({
+      x: left + (rows.length === 1 ? plotWidth / 2 : index * plotWidth / (rows.length - 1)),
+      y: top + plotHeight - ((Number(row[valueKey]) || 0) / maxValue) * plotHeight,
+      value: Number(row[valueKey]) || 0,
+      label: row.label
+    }));
+
+    const linePath = points.map((point, index) =>
+      (index === 0 ? 'M' : 'L') + point.x.toFixed(1) + ' ' + point.y.toFixed(1)
+    ).join(' ');
+    const areaPath = linePath + ' L ' + points[points.length - 1].x + ' ' + (height - bottom) +
+      ' L ' + points[0].x + ' ' + (height - bottom) + ' Z';
+
+    const grid = [0, 0.5, 1].map(fraction => {
+      const y = top + plotHeight * fraction;
+      const value = maxValue * (1 - fraction);
+      const label = isMoney ? (value >= 1000 ? Math.round(value / 1000) + 'k' : Math.round(value)) : Math.round(value);
+      return '<line x1="' + left + '" y1="' + y + '" x2="' + (width-right) + '" y2="' + y +
+        '" stroke="#ECEFF1" stroke-dasharray="4 4"/><text x="' + (left-9) + '" y="' + (y+4) +
+        '" text-anchor="end" fill="#9299A1" font-size="10">' + label + '</text>';
+    }).join('');
+
+    const pointMarks = points.map(point =>
+      '<circle cx="' + point.x + '" cy="' + point.y + '" r="3.5" fill="' + lineColor +
+      '"><title>' + point.label + ' : ' +
+      (isMoney ? formatAnalyticsMoney(point.value) : point.value) + '</title></circle>'
+    ).join('');
+
+    const labelIndexes = [...new Set([0, Math.floor((points.length - 1) / 2), points.length - 1])];
+    const xLabels = labelIndexes.map(index => {
+      const point = points[index];
+      return '<text x="' + point.x + '" y="' + (height-10) +
+        '" text-anchor="middle" fill="#9299A1" font-size="10">' + point.label + '</text>';
+    }).join('');
+
+    element.innerHTML = '<svg viewBox="0 0 ' + width + ' ' + height +
+      '" role="img" aria-label="Graphique statistique">' + grid +
+      '<path d="' + areaPath + '" fill="' + lineColor + '" opacity=".09"/>' +
+      '<path d="' + linePath + '" fill="none" stroke="' + lineColor +
+      '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+      pointMarks + xLabels + '</svg>';
+  }
+
+  async function loadAnalytics(){
+    if(!currentStore || !session || !session.access_token) return;
+    const requestId = ++analyticsRequest;
+    analyticsLoading = true;
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - analyticsDays + 1);
+    startDate.setHours(0, 0, 0, 0);
+    const since = encodeURIComponent(startDate.toISOString());
+    const headers = {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + session.access_token
+    };
+
+    try{
+      const ordersUrl = `${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&created_at=gte.${since}&select=amount_fcfa,status,customer_phone,product_id,product_name_snapshot,created_at&order=created_at.asc&limit=10000`;
+      const viewsUrl = `${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${encodeURIComponent(currentStore.id)}&created_at=gte.${since}&select=created_at&order=created_at.asc&limit=10000`;
+
+      const responses = await Promise.all([
+        fetch(ordersUrl, { headers }),
+        fetch(viewsUrl, { headers })
+      ]);
+      if(responses.some(response => !response.ok)){
+        throw new Error('Impossible de lire les données analytiques.');
+      }
+
+      const [orders, pageviews] = await Promise.all(responses.map(response => response.json()));
+      if(requestId !== analyticsRequest) return;
+
+      const paidOrders = orders.filter(order => PAID_STATUSES.includes(order.status));
+      const totalRevenue = paidOrders.reduce((sum, order) => sum + Number(order.amount_fcfa || 0), 0);
+      const customers = new Set(orders.map(order => order.customer_phone).filter(Boolean));
+
+      document.getElementById('anRevenue').textContent = formatAnalyticsMoney(totalRevenue);
+      document.getElementById('anOrders').textContent = orders.length.toLocaleString('fr-FR');
+      document.getElementById('anViews').textContent = pageviews.length.toLocaleString('fr-FR');
+      document.getElementById('anCustomers').textContent = customers.size.toLocaleString('fr-FR');
+
+      const dailyRows = [];
+      for(let dayIndex = 0; dayIndex < analyticsDays; dayIndex++){
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + dayIndex);
+        const key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
+        dailyRows.push({
+          key,
+          label: date.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit' }),
+          revenue: 0,
+          views: 0
+        });
+      }
+
+      const byDate = Object.fromEntries(dailyRows.map(row => [row.key, row]));
+      const dateKey = value => {
+        const date = new Date(value);
+        return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
+      };
+
+      paidOrders.forEach(order => {
+        const row = byDate[dateKey(order.created_at)];
+        if(row) row.revenue += Number(order.amount_fcfa || 0);
+      });
+      pageviews.forEach(view => {
+        const row = byDate[dateKey(view.created_at)];
+        if(row) row.views += 1;
+      });
+
+      renderAnalyticsChart('revenueChart', dailyRows, 'revenue', '#E63946', true);
+      renderAnalyticsChart('viewsChart', dailyRows, 'views', '#64748B', false);
+
+      const statusRows = [
+        ['Confirmées / en cours', paidOrders.length, 'paid'],
+        ['En attente', orders.filter(order => order.status === 'pending').length, ''],
+        ['Annulées', orders.filter(order => order.status === 'cancelled').length, 'cancel']
+      ];
+      document.getElementById('orderBreakdown').innerHTML = statusRows.map(row =>
+        '<div class="analytics-breakdown-row"><span class="analytics-breakdown-label"><i class="analytics-dot ' +
+        row[2] + '"></i>' + row[0] + '</span><strong>' + row[1] + '</strong></div>'
+      ).join('') + '<div class="analytics-breakdown-row"><span>Total des commandes</span><strong>' +
+        orders.length + '</strong></div>';
+
+      const productTotals = {};
+      paidOrders.forEach(order => {
+        const productKey = order.product_id || order.product_name_snapshot || 'unknown';
+        if(!productTotals[productKey]){
+          productTotals[productKey] = {
+            name: order.product_name_snapshot || 'Produit sans nom',
+            quantity: 0,
+            revenue: 0
+          };
+        }
+        productTotals[productKey].quantity += 1;
+        productTotals[productKey].revenue += Number(order.amount_fcfa || 0);
+      });
+
+      const topProducts = Object.values(productTotals).sort((a,b) => b.quantity-a.quantity).slice(0,5);
+      const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+      }[character]));
+
+      document.getElementById('analyticsTopProducts').innerHTML = topProducts.length
+        ? topProducts.map(product =>
+          '<div class="top-product-row"><div style="flex:1;min-width:0"><div class="tp-name">' +
+          escapeHtml(product.name) + '</div><div class="tp-qty">' + product.quantity +
+          ' vente(s)</div></div><div class="tp-revenue">' + formatAnalyticsMoney(product.revenue) +
+          '</div></div>'
+        ).join('')
+        : '<div class="empty">Aucune vente confirmée sur cette période.</div>';
+
+    }catch(error){
+      if(requestId === analyticsRequest){
+        ['revenueChart','viewsChart','orderBreakdown','analyticsTopProducts'].forEach(id => {
+          const element = document.getElementById(id);
+          if(element) element.innerHTML = '<div class="empty">Les statistiques ne sont pas disponibles pour le moment. Réessaie dans quelques instants.</div>';
+        });
+      }
+      console.error('EtaChop analytics:', error);
+    }finally{
+      if(requestId === analyticsRequest) analyticsLoading = false;
+    }
+  }
+
   // ---------- Codes promo ----------
   async function loadPromoCodes(){
     try {
@@ -2474,13 +2784,8 @@
   }
 
   // ---------- Init ----------
-  // Les liens depuis l'accueil peuvent demander explicitement l'onglet de connexion ou d'inscription.
-  // Une session existante garde la priorité et continue vers le tableau de bord / la création de boutique.
-  const requestedAuthMode = new URLSearchParams(window.location.search).get('auth');
   if(session && session.access_token){
     afterLogin();
-  } else {
-    switchTab(requestedAuthMode === 'signup' ? 'signup' : 'login');
   }
 </script>
 
