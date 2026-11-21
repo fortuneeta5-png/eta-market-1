@@ -6,28 +6,65 @@
 <meta name="theme-color" content="#ffffff">
 <title>Créer un compte — EtaChop</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#fff;font-family:Arial,Helvetica,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#fff;font-family:Arial,Helvetica,sans-serif}
 iframe{display:block;width:100%;height:100%;height:100dvh;border:0}
 </style>
 </head>
 <body>
-<iframe id="vendorAuth" title="Inscription à EtaChop" src="dashboard.html" allow="clipboard-read; clipboard-write"></iframe>
+<iframe id="vendorAuth" title="Créer un compte EtaChop" src="dashboard.html"></iframe>
 <script>
 (function(){
-  const frame=document.getElementById('vendorAuth');
-  let attempts=0;
-  function selectSignup(){
-    attempts++;
-    try{
-      const w=frame.contentWindow;
-      if(w && typeof w.switchTab==='function'){
-        w.switchTab('signup');
-        return;
+  const frame = document.getElementById('vendorAuth');
+  let waitingForSubmit = true;
+  let observer = null;
+
+  function showRequestedAuthScreen(){
+    if (!waitingForSubmit) return false;
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) return false;
+      const auth = doc.getElementById('authScreen');
+      const create = doc.getElementById('createStoreScreen');
+      const dashboard = doc.getElementById('dashboard');
+      const tab = doc.getElementById('tabSignup');
+      const submit = doc.getElementById('authBtn');
+      if (!auth || !create || !dashboard || !tab || !submit) return false;
+
+      if (dashboard.style.display !== 'none') dashboard.style.display = 'none';
+      if (create.style.display !== 'none') create.style.display = 'none';
+      if (auth.style.display !== 'flex') auth.style.display = 'flex';
+      if (!tab.classList.contains('active')) tab.click();
+
+      if (!submit.dataset.routeGuarded) {
+        submit.dataset.routeGuarded = '1';
+        submit.addEventListener('click', function(){
+          waitingForSubmit = false;
+          if (observer) observer.disconnect();
+        }, true);
       }
-    }catch(e){}
-    if(attempts<30) setTimeout(selectSignup,150);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
-  frame.addEventListener('load',function(){attempts=0;selectSignup();});
+
+  frame.addEventListener('load', function(){
+    showRequestedAuthScreen();
+    try {
+      const doc = frame.contentDocument;
+      if (doc && window.MutationObserver) {
+        observer = new MutationObserver(showRequestedAuthScreen);
+        ['authScreen','createStoreScreen','dashboard'].forEach(function(id){
+          const el = doc.getElementById(id);
+          if (el) observer.observe(el, {attributes:true, attributeFilter:['style']});
+        });
+      }
+    } catch (error) {}
+    setTimeout(showRequestedAuthScreen, 250);
+    setTimeout(showRequestedAuthScreen, 900);
+    setTimeout(showRequestedAuthScreen, 1800);
+  });
 })();
 </script>
 </body>
