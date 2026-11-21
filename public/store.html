@@ -236,7 +236,29 @@
     // Pas de ?s=... dans le lien : on regarde si on est sur nomboutique.etachop.com
     slug = hostParts[0];
   }
-  const productId = params.get('p');
+  // Les identifiants UUID sont encodés en Base64 URL-safe pour obtenir
+  // des liens produits plus courts (22 caractères au lieu de 36).
+  function encodeProductId(id){
+    const value = String(id || '');
+    const hex = value.replace(/-/g, '');
+    if(!/^[0-9a-fA-F]{32}$/.test(hex)) return value;
+    const bytes = new Uint8Array(hex.match(/.{2}/g).map(part => parseInt(part, 16)));
+    let binary = '';
+    bytes.forEach(byte => binary += String.fromCharCode(byte));
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
+  function decodeProductId(value){
+    const token = String(value || '');
+    if(!/^[A-Za-z0-9_-]{22}$/.test(token)) return token;
+    try{
+      const base64 = token.replace(/-/g, '+').replace(/_/g, '/') + '==';
+      const binary = atob(base64);
+      if(binary.length !== 16) return token;
+      const hex = Array.from(binary, ch => ch.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+      return [hex.slice(0,8), hex.slice(8,12), hex.slice(12,16), hex.slice(16,20), hex.slice(20)].join('-');
+    }catch(e){ return token; }
+  }
+  const productId = decodeProductId(params.get('p'));
   let currentStore = null;
   let currentProduct = null;
 
@@ -820,7 +842,7 @@
       return;
     }
     grid.innerHTML = products.map(p => `
-      <a class="card" href="${onVendorSubdomain ? '/' + p.id : '?s=' + slug + '&p=' + p.id}">
+      <a class="card" href="${onVendorSubdomain ? '/?p=' + encodeURIComponent(encodeProductId(p.id)) : '?s=' + encodeURIComponent(slug) + '&p=' + encodeURIComponent(encodeProductId(p.id))}">
         <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}"></div>
         <div class="card-body">
           <h3>${p.name}</h3>
