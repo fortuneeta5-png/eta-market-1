@@ -1301,18 +1301,74 @@
   }
 
   async function afterLogin(){
-    document.getElementById('authScreen').style.display = 'none';
-    await refreshSession(); // toujours repartir avec un token frais
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${session.user.id}&select=*`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
-    });
-    const stores = await res.json();
-    if(stores && stores.length > 0){
-      currentStore = stores[0];
-      showDashboard();
-    } else {
-      renderColorPicker();
-      document.getElementById('createStoreScreen').style.display = 'flex';
+    const authScreen = document.getElementById('authScreen');
+    const createScreen = document.getElementById('createStoreScreen');
+    const authMsg = document.getElementById('authMsg');
+
+    // Ne jamais afficher le formulaire de création tant que la recherche
+    // de boutique n'a pas abouti correctement.
+    authScreen.style.display = 'none';
+    createScreen.style.display = 'none';
+
+    try {
+      if(!session || !session.access_token || !session.user || !session.user.id){
+        throw new Error("Session invalide. Reconnecte-toi.");
+      }
+
+      // Renouveler le token si possible. Si le renouvellement échoue,
+      // on vérifie quand même le token actuel au lieu de conclure
+      // qu'aucune boutique n'existe.
+      await refreshSession();
+
+      const fetchStores = () => fetch(
+        `${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${encodeURIComponent(session.user.id)}&select=*&limit=1`,
+        {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        }
+      );
+
+      let res = await fetchStores();
+
+      // Si le token a expiré, tenter un renouvellement puis une seule reprise.
+      if(res.status === 401 && await refreshSession()){
+        res = await fetchStores();
+      }
+
+      if(!res.ok){
+        const details = await res.text().catch(() => '');
+        console.error('Erreur récupération boutique:', res.status, details);
+        throw new Error(
+          res.status === 401 || res.status === 403
+            ? "La session ne permet pas de récupérer ta boutique. Reconnecte-toi."
+            : "Impossible de vérifier ta boutique pour le moment. Réessaie dans quelques instants."
+        );
+      }
+
+      const stores = await res.json();
+      if(!Array.isArray(stores)){
+        console.error('Réponse inattendue lors de la récupération des boutiques:', stores);
+        throw new Error("La réponse du serveur est inattendue. Réessaie dans quelques instants.");
+      }
+
+      if(stores.length > 0){
+        currentStore = stores[0];
+        createScreen.style.display = 'none';
+        showDashboard();
+      } else {
+        currentStore = null;
+        renderColorPicker();
+        createScreen.style.display = 'flex';
+      }
+    } catch(err){
+      console.error('afterLogin:', err);
+      createScreen.style.display = 'none';
+      authScreen.style.display = 'flex';
+      authMsg.textContent = err.message || "Connexion impossible. Réessaie.";
+      authMsg.className = "auth-msg err";
+      authMsg.style.display = "block";
     }
   }
 
