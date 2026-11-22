@@ -220,18 +220,21 @@
 @media(min-width:768px) and (max-width:1024px){#dashboard .dash-sidebar{width:205px}#dashboard .wrap{margin-left:205px;padding:25px 22px 60px}}
 
 
-  /* Navigation : icônes SVG cohérentes, nettes et accessibles */
-  #dashboard .nav-icon{display:inline-flex;align-items:center;justify-content:center;flex:none}
-  #dashboard .nav-icon svg{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  #dashboard .dash-sidebar .nav-item .nav-icon svg{width:19px;height:19px}
-  #dashboard .bottom-nav .nav-item .nav-icon svg{width:22px;height:22px;stroke-width:1.9}
-  #dashboard .bottom-nav .nav-item:active{transform:scale(.96)}
-  #dashboard #withdrawCountry,#dashboard #withdrawNetwork{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:#27312e;font:500 .92rem 'Poppins',sans-serif}
-  #dashboard #withdrawCountry:focus,#dashboard #withdrawNetwork:focus{outline:2px solid var(--primary);outline-offset:1px}
-  #dashboard .withdraw-phone-wrap{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
-  #dashboard .withdraw-phone-prefix{display:flex;align-items:center;padding:0 14px;background:#f2f5f4;border-right:1px solid var(--line);font-weight:700;color:#424b48;white-space:nowrap}
-  #dashboard #withdrawMomoNumber{min-width:0;flex:1;border:0;border-radius:0}
-  #dashboard .withdraw-hint{font-size:.74rem;color:#7b8582;margin-top:6px;line-height:1.5}
+  /* EtaChop custom selects and international phone fields */
+  .eta-phone-wrap{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .eta-phone-prefix{display:flex;align-items:center;padding:0 14px;background:#f4f5fb;border-right:1px solid var(--line);font-weight:800;color:var(--primary);white-space:nowrap}
+  .eta-phone-wrap input{min-width:0;flex:1;border:0!important;border-radius:0!important;background:#fff!important}
+  .eta-field-hint{font-size:.74rem;color:#7b8582;margin-top:6px;line-height:1.45}
+  .eta-select-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;clip-path:inset(50%)!important}
+  .eta-select{position:relative;width:100%}
+  .eta-select-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:#252536;font:500 .92rem 'Poppins',sans-serif;text-align:left;min-height:48px}
+  .eta-select-trigger:focus{outline:2px solid var(--primary);outline-offset:1px}
+  .eta-select-chevron{width:9px;height:9px;border-right:2px solid #73738a;border-bottom:2px solid #73738a;transform:rotate(45deg);margin:0 4px 4px 0;flex:none}
+  .eta-select-menu{display:none;position:absolute;z-index:120;left:0;right:0;top:calc(100% + 6px);max-height:240px;overflow:auto;background:#fff;border:1px solid #e7e7ef;border-radius:14px;box-shadow:0 14px 36px rgba(30,25,70,.16);padding:6px}
+  .eta-select.open .eta-select-menu{display:block}
+  .eta-select-option{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px;border:0;border-radius:9px;background:#fff;color:#28283a;text-align:left;font:500 .88rem 'Poppins',sans-serif}
+  .eta-select-option[aria-selected="true"]{background:#f0efff;color:var(--primary);font-weight:700}
+  .eta-select-check{color:var(--primary);font-weight:900}
 
 </style>
 </head>
@@ -315,15 +318,7 @@
       <input type="text" id="storeName" placeholder="Ex: Boutique Marie" oninput="updateSlugPreview()">
       <div class="slug-preview" id="slugPreview"></div>
     </div>
-    <div class="field">
-      <label>Profil d'activité</label>
-      <select id="sellerProfileType" onchange="updateSellerProfileFields()">
-        <option value="classic">Vendeur classique</option>
-        <option value="longrich">Distributeur Longrich</option>
-        <option value="logistics">Partenaire logistique</option>
-      </select>
-      <div style="font-size:.75rem;opacity:.6;margin-top:6px;">Choisis le profil qui correspond réellement à ton activité.</div>
-    </div>
+    <input type="hidden" id="sellerProfileType" value="classic">
     <div class="row2">
       <div class="field">
         <label>Pays d'activité</label>
@@ -343,7 +338,11 @@
     </div>
     <div class="field">
       <label>Téléphone professionnel / WhatsApp</label>
-      <input type="tel" id="sellerPhone" placeholder="Ex: +242 06 000 00 00" autocomplete="tel">
+      <div class="eta-phone-wrap">
+        <span id="sellerPhoneDial" class="eta-phone-prefix">+242</span>
+        <input type="tel" id="sellerPhone" inputmode="tel" placeholder="06 XXX XX XX" autocomplete="tel-national">
+      </div>
+      <div class="eta-field-hint" id="sellerPhoneHint">Indicatif du Congo-Brazzaville</div>
     </div>
     <div class="field" id="sellerAddressField" style="display:none;">
       <label>Adresse ou localisation</label>
@@ -405,13 +404,13 @@
   </header>
   <aside class="dash-sidebar" aria-label="Navigation du tableau de bord">
     <div class="sidebar-caption">Espace vendeur</div>
-    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
-    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
-    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8v8H8z"/></svg></span>Produits</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/></svg></span>Analytiques</button>
-    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1"/></svg></span>Revenus &amp; solde</button>
-    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>Ma boutique &amp; outils</button>
-    <div class="sidebar-bottom"><div class="sidebar-caption">Compte</div><button class="nav-item" onclick="logout()"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M13 4h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/></svg></span>Déconnexion</button></div>
+    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">⌂</span>Accueil</button>
+    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">▤</span>Ventes</button>
+    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">▣</span>Produits</button>
+    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon">▥</span>Analytiques</button>
+    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">◉</span>Revenus &amp; solde</button>
+    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☰</span>Ma boutique &amp; outils</button>
+    <div class="sidebar-bottom"><div class="sidebar-caption">Compte</div><button class="nav-item" onclick="logout()"><span class="nav-icon">↪</span>Déconnexion</button></div>
   </aside>
   <div class="wrap">
 
@@ -810,37 +809,45 @@
 
       <div class="panel" style="margin-bottom:20px;">
         <div class="panel-head"><h3>Demander un retrait</h3></div>
-        <div class="panel-body">
+        <div class="panel-body" id="withdrawFormBody">
           <div class="field">
-            <label for="withdrawCountry">1. Choisir le pays</label>
-            <select id="withdrawCountry" onchange="updateWithdrawalNetworks()">
-              <option value="CG">🇨🇬 Congo-Brazzaville (+242)</option>
-              <option value="CD">🇨🇩 RD Congo (+243)</option>
-              <option value="CM">🇨🇲 Cameroun (+237)</option>
-              <option value="GA">🇬🇦 Gabon (+241)</option>
-              <option value="CI">🇨🇮 Côte d’Ivoire (+225)</option>
-              <option value="SN">🇸🇳 Sénégal (+221)</option>
+            <label>1. Pays de retrait</label>
+            <select id="withdrawCountry" aria-label="Pays de retrait">
+              <option value="CG">🇨🇬 Congo-Brazzaville</option>
+              <option value="CD">🇨🇩 République démocratique du Congo</option>
+              <option value="CM">🇨🇲 Cameroun</option>
+              <option value="GA">🇬🇦 Gabon</option>
+              <option value="CI">🇨🇮 Côte d’Ivoire</option>
+              <option value="SN">🇸🇳 Sénégal</option>
+            </select>
+          </div>
+          <div class="field" id="withdrawCurrencyField" style="display:none;">
+            <label>2. Devise de réception</label>
+            <select id="withdrawCurrency" aria-label="Devise de réception">
+              <option value="CDF">Franc congolais (CDF)</option>
+              <option value="USD">Dollar américain (USD)</option>
             </select>
           </div>
           <div class="field">
-            <label for="withdrawNetwork">2. Choisir le réseau Mobile Money</label>
-            <select id="withdrawNetwork"></select>
-            <div id="withdrawNetworkHint" class="withdraw-hint">Choisis le réseau sur lequel tu souhaites recevoir ton retrait.</div>
+            <label id="withdrawNetworkLabel">2. Réseau Mobile Money</label>
+            <select id="withdrawNetwork" aria-label="Réseau Mobile Money"></select>
+            <div class="eta-field-hint" id="withdrawNetworkHint"></div>
           </div>
           <div class="field">
-            <label for="withdrawMomoNumber">3. Numéro du compte Mobile Money</label>
-            <div class="withdraw-phone-wrap">
-              <span id="withdrawDialCode" class="withdraw-phone-prefix">+242</span>
-              <input type="tel" id="withdrawMomoNumber" inputmode="numeric" autocomplete="tel-national" placeholder="06 XXX XX XX" aria-label="Numéro Mobile Money">
+            <label>Numéro du compte Mobile Money</label>
+            <div class="eta-phone-wrap">
+              <span id="withdrawDialCode" class="eta-phone-prefix">+242</span>
+              <input type="tel" id="withdrawMomoNumber" inputmode="tel" autocomplete="tel-national" placeholder="06 XXX XX XX">
             </div>
-            <div id="withdrawPhoneHint" class="withdraw-hint">Indicatif du Congo-Brazzaville : +242.</div>
+            <div class="eta-field-hint" id="withdrawPhoneHint"></div>
           </div>
           <div class="field">
-            <label for="withdrawAmount">4. Montant à retirer (FCFA)</label>
-            <input type="number" id="withdrawAmount" inputmode="numeric" min="1" placeholder="Ex : 10000" oninput="checkWithdrawAmount()">
+            <label id="withdrawAmountLabel">Montant à recevoir (FCFA)</label>
+            <input type="number" id="withdrawAmount" inputmode="decimal" min="1" step="any" placeholder="Ex. 10 000" oninput="checkWithdrawAmount()">
+            <div class="eta-field-hint" id="withdrawFxHint">Le solde EtaChop reste comptabilisé en FCFA.</div>
           </div>
           <button class="btn btn-primary" id="withdrawBtn" style="width:100%;" onclick="requestWithdrawal()">Demander mon retrait</button>
-          <div class="form-msg" id="withdrawMsg"></div>
+          <div class="form-msg" id="withdrawMsg" role="status" aria-live="polite"></div>
         </div>
       </div>
 
@@ -863,12 +870,12 @@
 
   <!-- Navigation mobile -->
   <div class="bottom-nav" aria-label="Navigation mobile">
-    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
-    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8v8H8z"/></svg></span>Produits</button>
-    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/></svg></span>Stats</button>
-    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1"/></svg></span>Solde</button>
-    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>Menu</button>
+    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">⌂</span>Accueil</button>
+    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">▣</span>Produits</button>
+    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">▤</span>Ventes</button>
+    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon">▥</span>Stats</button>
+    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">◉</span>Solde</button>
+    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☰</span>Menu</button>
   </div>
 </div>
 
@@ -924,7 +931,7 @@
 <script>
   const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
-  const STORE_URL_BASE = 'https://www.etachop.com/store.html';
+  const STORE_URL_BASE = window.location.origin + window.location.pathname.replace('dashboard.html', 'store.html');
 
   const COLORS = ["#4F46E5","#E63946","#059669","#EA580C","#DB2777","#0891B2","#7C3AED","#14121F"];
 
@@ -1366,6 +1373,144 @@
     }, 400);
   }
 
+
+  // ---------- Paramètres pays et composants de sélection EtaChop ----------
+  const ETA_COUNTRIES = {
+    CG:{name:'Congo-Brazzaville',flag:'🇨🇬',dial:'+242',hint:'06 XXX XX XX',digits:9,currency:'XAF',currencyLabel:'FCFA',city:'Brazzaville',networks:[['mtn_momo','MTN MoMo'],['airtel_money','Airtel Money']]},
+    CD:{name:'République démocratique du Congo',flag:'🇨🇩',dial:'+243',hint:'081 XXX XX XX',digits:9,currency:'CDF',currencyLabel:'Franc congolais',city:'Kinshasa',networks:[['mpesa','M-Pesa'],['airtel_money','Airtel Money'],['orange_money','Orange Money'],['afrimoney','Afrimoney']]},
+    CM:{name:'Cameroun',flag:'🇨🇲',dial:'+237',hint:'6XX XX XX XX',digits:9,currency:'XAF',currencyLabel:'FCFA',city:'Douala',networks:[['mtn_momo','MTN MoMo'],['orange_money','Orange Money']]},
+    GA:{name:'Gabon',flag:'🇬🇦',dial:'+241',hint:'0X XX XX XX',digits:8,currency:'XAF',currencyLabel:'FCFA',city:'Libreville',networks:[['airtel_money','Airtel Money'],['moov_money','Moov Money']]},
+    CI:{name:'Côte d’Ivoire',flag:'🇨🇮',dial:'+225',hint:'07 XX XX XX XX',digits:10,currency:'XOF',currencyLabel:'FCFA (XOF)',city:'Abidjan',networks:[['orange_money','Orange Money'],['mtn_momo','MTN MoMo'],['moov_money','Moov Money'],['wave','Wave']]},
+    SN:{name:'Sénégal',flag:'🇸🇳',dial:'+221',hint:'7X XXX XX XX',digits:9,currency:'XOF',currencyLabel:'FCFA (XOF)',city:'Dakar',networks:[['orange_money','Orange Money'],['wave','Wave'],['free_money','Free Money']]}
+  };
+  const ETA_CURRENCY_NAMES = {XAF:'FCFA',XOF:'FCFA (XOF)',CDF:'Franc congolais (CDF)',USD:'Dollar américain (USD)'};
+  let etaWithdrawRate = 1;
+  let etaWithdrawRateReady = true;
+
+  function etaEnhanceSelect(id){
+    const select = document.getElementById(id);
+    if(!select || select.dataset.etaEnhanced) return;
+    select.dataset.etaEnhanced = '1';
+    select.classList.add('eta-select-native');
+    const wrap = document.createElement('div');
+    wrap.className = 'eta-select';
+    wrap.dataset.for = id;
+    const trigger = document.createElement('button');
+    trigger.type = 'button'; trigger.className = 'eta-select-trigger';
+    trigger.innerHTML = '<span class="eta-select-value"></span><span class="eta-select-chevron"></span>';
+    const menu = document.createElement('div'); menu.className = 'eta-select-menu';
+    wrap.append(trigger, menu);
+    select.parentNode.insertBefore(wrap, select.nextSibling);
+    trigger.addEventListener('click', () => {
+      document.querySelectorAll('.eta-select.open').forEach(x => { if(x !== wrap) x.classList.remove('open'); });
+      wrap.classList.toggle('open');
+    });
+    document.addEventListener('click', e => { if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
+    select.addEventListener('change', () => etaRefreshSelect(id));
+    etaRefreshSelect(id);
+  }
+  function etaRefreshSelect(id){
+    const select = document.getElementById(id), wrap = document.querySelector(`.eta-select[data-for="${id}"]`);
+    if(!select || !wrap) return;
+    const value = select.options[select.selectedIndex]?.textContent || 'Choisir';
+    wrap.querySelector('.eta-select-value').textContent = value;
+    const menu = wrap.querySelector('.eta-select-menu');
+    menu.innerHTML = '';
+    [...select.options].forEach(opt => {
+      const item = document.createElement('button');
+      item.type='button'; item.className='eta-select-option';
+      item.setAttribute('aria-selected', opt.value === select.value ? 'true':'false');
+      const label = document.createElement('span'); label.textContent = opt.textContent;
+      const check = document.createElement('span'); check.className='eta-select-check'; check.textContent = opt.value === select.value ? '✓':'';
+      item.append(label,check);
+      item.addEventListener('click', () => {
+        select.value = opt.value;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+        wrap.classList.remove('open');
+      });
+      menu.appendChild(item);
+    });
+  }
+  function etaPhoneDigits(raw, country){
+    let digits = String(raw || '').replace(/\D/g,'');
+    const dial = country.dial.replace('+','');
+    if(digits.startsWith(dial)) digits = digits.slice(dial.length);
+    if(digits.length === country.digits + 1 && digits.startsWith('0')) digits = digits.slice(1);
+    return digits;
+  }
+  function countryCodeNeedsTrunkZero(country){ return country.dial === '+242' || country.dial === '+241' || country.dial === '+225'; }
+  function etaFormatLocalPhone(raw, country){
+    let digits = etaPhoneDigits(raw,country);
+    if(country.dial === '+242' && digits.length === 8) return digits;
+    return digits;
+  }
+  function etaUpdateSellerCountry(){
+    const code = document.getElementById('sellerCountry')?.value || 'CG';
+    const c = ETA_COUNTRIES[code] || ETA_COUNTRIES.CG;
+    document.getElementById('sellerPhoneDial').textContent = c.dial;
+    document.getElementById('sellerPhone').placeholder = c.hint;
+    document.getElementById('sellerCity').placeholder = 'Ex. ' + c.city;
+    document.getElementById('sellerPhoneHint').textContent = 'Indicatif : ' + c.dial + ' — ' + c.name;
+  }
+  async function etaGetFxRate(currency){
+    if(currency === 'XAF' || currency === 'XOF') return 1;
+    const response = await fetch('https://open.er-api.com/v6/latest/XAF',{cache:'no-store'});
+    if(!response.ok) throw new Error('Taux de change indisponible');
+    const data = await response.json();
+    const rate = Number(data?.rates?.[currency]);
+    if(!Number.isFinite(rate) || rate <= 0) throw new Error('Taux de change indisponible');
+    return rate;
+  }
+  function etaFormatMoney(value,currency){
+    const n = Number(value);
+    return n.toLocaleString('fr-FR',{maximumFractionDigits:currency==='USD'?2:0}) + ' ' + (ETA_CURRENCY_NAMES[currency] || currency);
+  }
+  async function etaUpdateWithdrawCountry(){
+    const code = document.getElementById('withdrawCountry').value;
+    const c = ETA_COUNTRIES[code] || ETA_COUNTRIES.CG;
+    const currencyField = document.getElementById('withdrawCurrencyField');
+    const currencySelect = document.getElementById('withdrawCurrency');
+    currencyField.style.display = code === 'CD' ? 'block' : 'none';
+    if(code !== 'CD') currencySelect.value = c.currency;
+    document.getElementById('withdrawDialCode').textContent = c.dial;
+    document.getElementById('withdrawMomoNumber').placeholder = c.hint;
+    document.getElementById('withdrawPhoneHint').textContent = `Indicatif : ${c.dial} — ${c.name}. Saisis le numéro local.`;
+    const network = document.getElementById('withdrawNetwork');
+    network.innerHTML = c.networks.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+    document.getElementById('withdrawNetworkHint').textContent = 'Moyens disponibles pour ' + c.name + '.';
+    document.getElementById('withdrawNetworkLabel').textContent = (code==='CD'?'3.':'2.') + ' Réseau Mobile Money';
+    etaRefreshSelect('withdrawNetwork');
+    await etaUpdateWithdrawCurrency();
+  }
+  async function etaUpdateWithdrawCurrency(){
+    const countryCode = document.getElementById('withdrawCountry').value;
+    const c = ETA_COUNTRIES[countryCode] || ETA_COUNTRIES.CG;
+    const currency = countryCode === 'CD' ? document.getElementById('withdrawCurrency').value : c.currency;
+    document.getElementById('withdrawAmountLabel').textContent = 'Montant à recevoir (' + (ETA_CURRENCY_NAMES[currency] || currency) + ')';
+    const input = document.getElementById('withdrawAmount');
+    input.value = '';
+    const hint = document.getElementById('withdrawFxHint');
+    etaWithdrawRateReady = false;
+    hint.textContent = 'Récupération du taux de change…';
+    try{
+      etaWithdrawRate = await etaGetFxRate(currency);
+      etaWithdrawRateReady = true;
+      hint.textContent = currency === 'XAF' || currency === 'XOF'
+        ? '1 ' + currency + ' = 1 FCFA de solde. Ton solde reste comptabilisé en FCFA.'
+        : 'Taux indicatif actualisé : 1 FCFA = ' + etaWithdrawRate.toLocaleString('fr-FR',{maximumFractionDigits:6}) + ' ' + currency + '. Le débit du solde sera calculé en FCFA.';
+    }catch(e){
+      hint.textContent = 'Taux indisponible pour le moment. Réessaie avant de demander le retrait.';
+    }
+    checkWithdrawAmount();
+  }
+  function etaGetWithdrawFcfa(){
+    const countryCode = document.getElementById('withdrawCountry').value;
+    const c = ETA_COUNTRIES[countryCode] || ETA_COUNTRIES.CG;
+    const currency = countryCode === 'CD' ? document.getElementById('withdrawCurrency').value : c.currency;
+    const localAmount = Number(document.getElementById('withdrawAmount').value);
+    return {currency,localAmount,amountFcfa:Math.ceil(localAmount / etaWithdrawRate),rate:etaWithdrawRate};
+  }
+
   // ---------- Profil vendeur et localisation ----------
   const SELLER_COUNTRY_CURRENCIES = {
     CG: 'XAF', CM: 'XAF', GA: 'XAF', CD: 'CDF', CI: 'XOF', SN: 'XOF'
@@ -1388,10 +1533,7 @@
   }
 
   function updateSellerCountryHint(){
-    const country = document.getElementById('sellerCountry').value;
-    const city = document.getElementById('sellerCity');
-    const examples = {CG:'Brazzaville', CD:'Kinshasa', CM:'Douala', GA:'Libreville', CI:'Abidjan', SN:'Dakar'};
-    city.placeholder = 'Ex: ' + examples[country];
+    etaUpdateSellerCountry();
   }
 
   async function apiJson(path, options = {}){
@@ -1414,7 +1556,7 @@
     return data;
   }
 
-  async function saveSellerProfile(country, city, address, sellerType, longrichId){
+  async function saveSellerProfile(country, city, address, sellerType, longrichId, businessPhone){
     const payload = {
       user_id: session.user.id,
       seller_type: sellerType,
@@ -1422,6 +1564,7 @@
       city,
       address: address || null,
       longrich_partner_id: longrichId || null,
+      business_phone: businessPhone || null,
       updated_at: new Date().toISOString()
     };
     return await apiJson('dp_seller_profiles?on_conflict=user_id', {
@@ -1485,10 +1628,12 @@
   async function createStore(){
     const name = document.getElementById('storeName').value.trim();
     const description = document.getElementById('storeDesc').value.trim();
-    const profileType = document.getElementById('sellerProfileType').value;
+    const profileType = 'classic';
     const country = document.getElementById('sellerCountry').value;
     const city = document.getElementById('sellerCity').value.trim();
-    const phone = document.getElementById('sellerPhone').value.trim();
+    const selectedCountry = ETA_COUNTRIES[country] || ETA_COUNTRIES.CG;
+    const localPhone = etaFormatLocalPhone(document.getElementById('sellerPhone').value.trim(), selectedCountry);
+    const phone = selectedCountry.dial + localPhone;
     const address = document.getElementById('sellerAddress').value.trim();
     const longrichId = document.getElementById('longrichMemberId').value.trim();
     const msg = document.getElementById('createStoreMsg');
@@ -1515,7 +1660,7 @@
       await saveSellerProfile(
         country, city, address,
         profileType === 'longrich' ? 'longrich' : 'classic',
-        longrichId
+        longrichId, phone
       );
 
       // 2. Enregistrer les candidatures partenaires en attente de validation.
@@ -1566,6 +1711,13 @@
   if(logisticsTypeControl) logisticsTypeControl.addEventListener('change', updateLogisticsTypeFields);
   updateSellerProfileFields();
   updateSellerCountryHint();
+  etaEnhanceSelect('sellerCountry');
+  etaEnhanceSelect('withdrawCountry');
+  etaEnhanceSelect('withdrawCurrency');
+  etaEnhanceSelect('withdrawNetwork');
+  document.getElementById('withdrawCountry').addEventListener('change', etaUpdateWithdrawCountry);
+  document.getElementById('withdrawCurrency').addEventListener('change', etaUpdateWithdrawCurrency);
+  etaUpdateWithdrawCountry();
 
   // ---------- Dashboard ----------
   function showDashboard(){
@@ -1690,107 +1842,78 @@
   }
 
   let currentAvailableBalance = 0;
-  // Initialise le pays et les réseaux proposés dès le chargement de l'espace vendeur.
-  document.addEventListener('DOMContentLoaded', () => {
-    if(document.getElementById('withdrawCountry')) updateWithdrawalNetworks();
-  });
   const WITHDRAWAL_STATUS_LABEL = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
   const WITHDRAWAL_STATUS_COLOR = { pending: '#92400E', approved: '#065F46', rejected: '#991B1B' };
   const WITHDRAWAL_STATUS_BG = { pending: '#FEF3C7', approved: '#D1FAE5', rejected: '#FEE2E2' };
 
-  // Pays, indicatifs et réseaux proposés pour les retraits.
-  // La disponibilité réelle du paiement dépend des accords et API opérateurs.
-  const WITHDRAWAL_COUNTRIES = {
-    CG:{dial:'+242',name:'Congo-Brazzaville',localDigits:8,placeholder:'06 XXX XX XX',networks:[['mtn_momo','MTN MoMo'],['airtel_money','Airtel Money']]},
-    CD:{dial:'+243',name:'RD Congo',localDigits:9,placeholder:'081 XXX XX XX',networks:[['mpesa','M-Pesa'],['airtel_money','Airtel Money'],['orange_money','Orange Money'],['afrimoney','Afrimoney']]},
-    CM:{dial:'+237',name:'Cameroun',localDigits:9,placeholder:'6XX XX XX XX',networks:[['mtn_momo','MTN MoMo'],['orange_money','Orange Money']]},
-    GA:{dial:'+241',name:'Gabon',localDigits:7,placeholder:'0X XX XX XX',networks:[['airtel_money','Airtel Money'],['moov_money','Moov Money']]},
-    CI:{dial:'+225',name:'Côte d’Ivoire',localDigits:10,placeholder:'07 XX XX XX XX',networks:[['orange_money','Orange Money'],['mtn_momo','MTN MoMo'],['moov_money','Moov Money'],['wave','Wave']]},
-    SN:{dial:'+221',name:'Sénégal',localDigits:9,placeholder:'7X XXX XX XX',networks:[['orange_money','Orange Money'],['wave','Wave'],['free_money','Free Money']]}
-  };
-
-  function updateWithdrawalNetworks(){
-    const country = WITHDRAWAL_COUNTRIES[document.getElementById('withdrawCountry').value];
-    const select = document.getElementById('withdrawNetwork');
-    document.getElementById('withdrawDialCode').textContent = country.dial;
-    document.getElementById('withdrawMomoNumber').placeholder = country.placeholder;
-    document.getElementById('withdrawPhoneHint').textContent =
-      `Indicatif : ${country.dial} — ${country.name}. Saisis le numéro national.`;
-    select.innerHTML = country.networks.map(([value,label]) =>
-      `<option value="${value}">${label}</option>`).join('');
-    document.getElementById('withdrawNetworkHint').textContent =
-      `Moyens proposés pour ${country.name}.`;
-  }
 
   function checkWithdrawAmount(){
-    const amount = parseInt(document.getElementById('withdrawAmount').value, 10);
     const btn = document.getElementById('withdrawBtn');
     const msg = document.getElementById('withdrawMsg');
-    if(amount > 0 && amount > currentAvailableBalance){
+    if(!btn || !msg) return;
+    const {amountFcfa,localAmount} = etaGetWithdrawFcfa();
+    if(!etaWithdrawRateReady){
       btn.disabled = true;
-      msg.textContent = "Solde insuffisant pour effectuer un retrait."; msg.className = "form-msg err"; msg.style.display = "block";
+      msg.textContent = 'Le taux de change doit être disponible avant le retrait.';
+      msg.className = 'form-msg err'; msg.style.display = 'block';
+    } else if(localAmount > 0 && amountFcfa > currentAvailableBalance){
+      btn.disabled = true;
+      msg.textContent = 'Solde insuffisant. Le retrait nécessiterait environ ' + amountFcfa.toLocaleString('fr-FR') + ' FCFA.';
+      msg.className = 'form-msg err'; msg.style.display = 'block';
     } else {
       btn.disabled = false;
-      msg.style.display = "none";
+      msg.style.display = 'none';
     }
   }
 
   async function requestWithdrawal(){
     const countryCode = document.getElementById('withdrawCountry').value;
-    const country = WITHDRAWAL_COUNTRIES[countryCode];
+    const country = ETA_COUNTRIES[countryCode];
     const networkCode = document.getElementById('withdrawNetwork').value;
     const network = country.networks.find(item => item[0] === networkCode);
-    let localNumber = document.getElementById('withdrawMomoNumber').value.replace(/\\D/g, '');
-    const amount = parseInt(document.getElementById('withdrawAmount').value, 10);
+    const localNumber = etaPhoneDigits(document.getElementById('withdrawMomoNumber').value,country);
+    const {currency,localAmount,amountFcfa,rate} = etaGetWithdrawFcfa();
     const msg = document.getElementById('withdrawMsg');
     const btn = document.getElementById('withdrawBtn');
 
-    // Accepte le numéro national avec ou sans le zéro initial.
-    if(localNumber.startsWith(country.dial.slice(1))) localNumber = localNumber.slice(country.dial.length - 1);
-    if(localNumber.length === country.localDigits + 1 && localNumber.startsWith('0')) localNumber = localNumber.slice(1);
-
-    if(!network || localNumber.length !== country.localDigits || !amount || amount <= 0){
-      msg.textContent = "Vérifie le pays, le réseau, le numéro de téléphone et le montant.";
-      msg.className = "form-msg err"; msg.style.display = "block";
-      return;
+    if(!network || localNumber.length !== country.digits || !localAmount || localAmount <= 0 || !etaWithdrawRateReady){
+      msg.textContent = 'Vérifie le pays, le réseau, le numéro et le montant.';
+      msg.className = 'form-msg err'; msg.style.display = 'block'; return;
     }
-    if(amount > currentAvailableBalance){
-      msg.textContent = "Solde insuffisant pour effectuer un retrait."; msg.className = "form-msg err"; msg.style.display = "block";
-      return;
+    if(amountFcfa > Number(currentAvailableBalance ?? 0)){
+      msg.textContent = 'Solde insuffisant pour ce montant.';
+      msg.className = 'form-msg err'; msg.style.display = 'block'; return;
     }
-
-    const momoNumber = country.dial + localNumber;
-    btn.disabled = true; btn.textContent = "Envoi…";
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
-          store_id: currentStore.id,
-          momo_number: momoNumber,
-          amount_fcfa: amount,
-          country_code: countryCode,
-          network_code: networkCode,
-          operator_name: network[1]
-        }),
+    btn.disabled = true; btn.textContent = 'Envoi…';
+    try{
+      const fullNumber = country.dial + localNumber;
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests`,{
+        method:'POST',
+        headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({
+          store_id:currentStore.id,
+          momo_number:fullNumber,
+          amount_fcfa:amountFcfa,
+          country_code:countryCode,
+          network_code:networkCode,
+          operator_name:network[1],
+          payout_currency:currency,
+          payout_amount:localAmount,
+          fx_rate:rate
+        })
       });
-      if(!res.ok){
-        const detail = await res.text();
-        throw new Error(detail || 'withdrawal_failed');
-      }
-      msg.textContent = "✅ Demande envoyée ! Elle sera traitée sous peu."; msg.className = "form-msg ok"; msg.style.display = "block";
-      document.getElementById('withdrawMomoNumber').value = '';
-      document.getElementById('withdrawAmount').value = '';
+      if(!res.ok) throw new Error(await res.text());
+      msg.textContent = 'Demande envoyée : ' + etaFormatMoney(localAmount,currency) + ' (débit estimé : ' + amountFcfa.toLocaleString('fr-FR') + ' FCFA).';
+      msg.className='form-msg ok'; msg.style.display='block';
+      document.getElementById('withdrawMomoNumber').value='';
+      document.getElementById('withdrawAmount').value='';
       loadBalance();
-    } catch(err){
-      console.error('Erreur demande de retrait :', err);
-      msg.textContent = "Erreur lors de l'envoi. Vérifie ta connexion et réessaie."; msg.className = "form-msg err"; msg.style.display = "block";
-    } finally {
-      btn.disabled = false; btn.textContent = "Demander mon retrait";
-      checkWithdrawAmount();
+    }catch(err){
+      console.error(err);
+      msg.textContent='Erreur lors de l’envoi. Vérifie ta connexion et réessaie.';
+      msg.className='form-msg err'; msg.style.display='block';
+    }finally{
+      btn.disabled=false; btn.textContent='Demander mon retrait'; checkWithdrawAmount();
     }
   }
 
@@ -1808,8 +1931,9 @@
       el.innerHTML = withdrawals.map(w => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--line); font-size:0.85rem;">
           <div>
-            <div style="font-weight:700;">${Number(w.amount_fcfa).toLocaleString('fr-FR')} FCFA</div>
-            <div style="opacity:0.62; font-size:0.76rem;">${w.operator_name || 'Mobile Money'} · ${w.momo_number} — ${new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
+            <div style="font-weight:700;">${w.payout_amount != null ? etaFormatMoney(w.payout_amount,w.payout_currency || 'XAF') : Number(w.amount_fcfa).toLocaleString('fr-FR') + ' FCFA'}</div>
+            <div style="opacity:0.58;font-size:0.72rem;">Débit du solde : ${Number(w.amount_fcfa).toLocaleString('fr-FR')} FCFA</div>
+            <div style="opacity:0.5; font-size:0.76rem;">${w.operator_name || ''} ${w.momo_number} — ${new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
           </div>
           <span style="padding:4px 10px; border-radius:100px; font-size:0.7rem; font-weight:700; background:${WITHDRAWAL_STATUS_BG[w.status]}; color:${WITHDRAWAL_STATUS_COLOR[w.status]};">${WITHDRAWAL_STATUS_LABEL[w.status]}</span>
         </div>
@@ -1891,7 +2015,7 @@
   }
 
   function copyStoreLink(){
-    const link = `${STORE_URL_BASE}?s=${encodeURIComponent(currentStore.slug)}`;
+    const link = `https://${currentStore.slug}.etachop.com`;
     navigator.clipboard.writeText(link).then(()=>{
       const btn = event.target;
       const old = btn.textContent;
@@ -2187,7 +2311,7 @@
       const productData = await insertRes.json();
       if(!insertRes.ok) throw new Error(productData.message || "Échec de la publication");
 
-      const productLink = `${STORE_URL_BASE}?s=${encodeURIComponent(currentStore.slug)}&p=${encodeURIComponent(productData[0].id)}`;
+      const productLink = `https://${currentStore.slug}.etachop.com/${productData[0].id}`;
       msg.innerHTML = `✅ Produit publié !<br><span style="font-family:monospace; font-size:0.78rem; word-break:break-all;">${productLink}</span>`;
       msg.className = "form-msg ok"; msg.style.display = "block";
 
@@ -2255,7 +2379,7 @@
   }
 
   function copyProductLink(id){
-    const link = `${STORE_URL_BASE}?s=${encodeURIComponent(currentStore.slug)}&p=${encodeURIComponent(id)}`;
+    const link = `${STORE_URL_BASE}?s=${currentStore.slug}&p=${id}`;
     navigator.clipboard.writeText(link).then(()=>{
       alert("Lien copié !\n" + link);
     });
