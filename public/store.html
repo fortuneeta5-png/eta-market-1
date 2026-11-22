@@ -118,7 +118,7 @@
 
 <!-- checkout modal -->
 <div id="checkoutOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,18,31,0.5); z-index:90; align-items:center; justify-content:center; padding:20px;">
-  <div style="background:#fff; border-radius:18px; padding:26px; max-width:380px; width:100%; max-height:88vh; overflow-y:auto;">
+  <div style="background:#fff; border-radius:22px; padding:22px; max-width:440px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 22px 70px rgba(0,0,0,.22);">
     <div id="checkoutForm">
       <h3 style="font-size:1.15rem; margin-bottom:6px;">Finaliser la commande</h3>
       <p style="font-size:0.85rem; opacity:0.6; margin-bottom:18px;">Tu recevras une demande de paiement sur ton téléphone à valider avec ton code secret.</p>
@@ -126,9 +126,19 @@
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton nom</label>
         <input type="text" id="custName" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
       </div>
+      <div style="margin-bottom:16px;">
+        <label for="custPhone" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:700;">Téléphone pour le paiement</label>
+        <div style="display:flex; align-items:center; gap:10px; padding:0 13px; border:1.5px solid var(--line); border-radius:12px; background:#fff;">
+          <span id="phoneCountryPrefix" style="font-weight:800; color:var(--accent); white-space:nowrap;">+242</span>
+          <span style="width:1px; height:25px; background:var(--line);"></span>
+          <input type="tel" id="custPhone" inputmode="tel" autocomplete="tel-national" placeholder="06 XXX XX XX" style="min-width:0; flex:1; padding:14px 0; border:0; outline:none; font-size:1rem; background:transparent;">
+        </div>
+        <div id="phoneCountryHint" style="font-size:0.72rem; opacity:0.58; margin-top:5px;">Indicatif du Congo-Brazzaville</div>
+      </div>
       <div style="margin-bottom:18px;">
-        <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Ton numéro de téléphone</label>
-        <input type="tel" id="custPhone" placeholder="06 XXX XX XX" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
+        <label for="custEmail" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:700;">Adresse e-mail <span style="font-weight:400; opacity:.6;">(facultatif)</span></label>
+        <input type="email" id="custEmail" autocomplete="email" placeholder="exemple@email.com" style="width:100%; padding:13px 14px; border-radius:12px; border:1.5px solid var(--line); font-size:0.95rem; background:#fff;">
+        <div style="font-size:0.72rem; opacity:0.58; margin-top:5px;">Pour recevoir les informations de ta commande.</div>
       </div>
       <div id="deliveryAddressBlock" style="border-top:1px solid var(--line); margin:16px 0 14px; padding-top:14px;">
         <div style="font-weight:700; font-size:0.85rem; margin-bottom:10px;">Adresse de livraison</div>
@@ -236,29 +246,7 @@
     // Pas de ?s=... dans le lien : on regarde si on est sur nomboutique.etachop.com
     slug = hostParts[0];
   }
-  // Les identifiants UUID sont encodés en Base64 URL-safe pour obtenir
-  // des liens produits plus courts (22 caractères au lieu de 36).
-  function encodeProductId(id){
-    const value = String(id || '');
-    const hex = value.replace(/-/g, '');
-    if(!/^[0-9a-fA-F]{32}$/.test(hex)) return value;
-    const bytes = new Uint8Array(hex.match(/.{2}/g).map(part => parseInt(part, 16)));
-    let binary = '';
-    bytes.forEach(byte => binary += String.fromCharCode(byte));
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-  }
-  function decodeProductId(value){
-    const token = String(value || '');
-    if(!/^[A-Za-z0-9_-]{22}$/.test(token)) return token;
-    try{
-      const base64 = token.replace(/-/g, '+').replace(/_/g, '/') + '==';
-      const binary = atob(base64);
-      if(binary.length !== 16) return token;
-      const hex = Array.from(binary, ch => ch.charCodeAt(0).toString(16).padStart(2, '0')).join('');
-      return [hex.slice(0,8), hex.slice(8,12), hex.slice(12,16), hex.slice(16,20), hex.slice(20)].join('-');
-    }catch(e){ return token; }
-  }
-  const productId = decodeProductId(params.get('p'));
+  const productId = params.get('p');
   let currentStore = null;
   let currentProduct = null;
 
@@ -288,6 +276,44 @@
     TZ:{name:'Tanzanie',currency:'TZS',networks:[['airtel_tz','Airtel Money'],['ezypesa_tz','EzyPesa'],['halopesa_tz','HaloPesa'],['mpesa_tz','M-Pesa'],['tigo_tz','Tigo Pesa'],['ttcl_tz','TTCL Pesa']]},
     UG:{name:'Ouganda',currency:'UGX',networks:[['airtel_ug','Airtel Money'],['mtn_ug','MTN MoMo']]}
   };
+
+  const BUYER_PHONE_META = {
+    CG:{dial:'+242',sample:'06 XXX XX XX',city:'Ville (ex. Brazzaville)',district:'Quartier (ex. Bacongo)'},
+    CM:{dial:'+237',sample:'6XX XX XX XX',city:'Ville (ex. Douala)',district:'Quartier (ex. Akwa)'},
+    GA:{dial:'+241',sample:'XX XX XX XX',city:'Ville (ex. Libreville)',district:'Quartier (ex. Glass)'},
+    CD:{dial:'+243',sample:'8XX XXX XXX',city:'Ville (ex. Kinshasa)',district:'Commune / quartier (ex. Gombe)'},
+    CD_USD:{dial:'+243',sample:'8XX XXX XXX',city:'Ville (ex. Kinshasa)',district:'Commune / quartier (ex. Gombe)'},
+    BF:{dial:'+226',sample:'XX XX XX XX',city:'Ville (ex. Ouagadougou)',district:'Secteur / quartier'},
+    BJ:{dial:'+229',sample:'XX XX XX XX',city:'Ville (ex. Cotonou)',district:'Quartier'},
+    CI:{dial:'+225',sample:'XX XX XX XX',city:'Ville (ex. Abidjan)',district:'Commune / quartier (ex. Cocody)'},
+    ML:{dial:'+223',sample:'XX XX XX XX',city:'Ville (ex. Bamako)',district:'Commune / quartier'},
+    NE:{dial:'+227',sample:'XX XX XX XX',city:'Ville (ex. Niamey)',district:'Quartier'},
+    SN:{dial:'+221',sample:'XX XXX XX XX',city:'Ville (ex. Dakar)',district:'Commune / quartier'},
+    TG:{dial:'+228',sample:'XX XX XX XX',city:'Ville (ex. Lomé)',district:'Quartier'},
+    GH:{dial:'+233',sample:'XX XXX XXXX',city:'City (e.g. Accra)',district:'Area / neighbourhood'},
+    GN:{dial:'+224',sample:'XXX XX XX XX',city:'Ville (ex. Conakry)',district:'Quartier'},
+    KE:{dial:'+254',sample:'7XX XXX XXX',city:'City (e.g. Nairobi)',district:'Estate / neighbourhood'},
+    MW:{dial:'+265',sample:'XXX XX XX XX',city:'City (e.g. Lilongwe)',district:'Area / neighbourhood'},
+    MZ:{dial:'+258',sample:'8X XXX XXXX',city:'Cidade (ex. Maputo)',district:'Bairro'},
+    RW:{dial:'+250',sample:'7XX XXX XXX',city:'Ville (ex. Kigali)',district:'Quartier'},
+    SL:{dial:'+232',sample:'XX XXXXXX',city:'City (e.g. Freetown)',district:'Area / neighbourhood'},
+    TZ:{dial:'+255',sample:'7XX XXX XXX',city:'City (e.g. Dar es Salaam)',district:'Ward / neighbourhood'},
+    UG:{dial:'+256',sample:'7XX XXX XXX',city:'City (e.g. Kampala)',district:'Division / neighbourhood'}
+  };
+  function updateCheckoutCountryFields(){
+    const meta = BUYER_PHONE_META[buyerCountryCode] || BUYER_PHONE_META.CG;
+    const prefix = document.getElementById('phoneCountryPrefix');
+    const hint = document.getElementById('phoneCountryHint');
+    const phone = document.getElementById('custPhone');
+    const city = document.getElementById('custCity');
+    const district = document.getElementById('custDistrict');
+    if(prefix) prefix.textContent = meta.dial;
+    if(hint) hint.textContent = `Indicatif de ${BUYER_COUNTRIES[buyerCountryCode]?.name || 'ton pays'}`;
+    if(phone) phone.placeholder = meta.sample;
+    if(city) city.placeholder = meta.city;
+    if(district) district.placeholder = meta.district;
+  }
+
   let buyerCountryCode = 'CG';
   let buyerCurrency = 'XAF';
   let selectedNetwork = '';
@@ -345,6 +371,7 @@
   async function onBuyerCountryChange(){
     buyerCountryCode = document.getElementById('buyerCountry').value;
     deliveryQuote = null;
+    updateCheckoutCountryFields();
     renderBuyerNetworks();
     await loadBuyerRate();
     if(document.getElementById('checkoutOverlay').style.display === 'flex') refreshDeliveryQuote();
@@ -360,6 +387,7 @@
     }catch(e){ /* Le client peut sélectionner son pays manuellement. */ }
     const countrySelect = document.getElementById('buyerCountry');
     if(countrySelect) countrySelect.value = buyerCountryCode;
+    updateCheckoutCountryFields();
     renderBuyerNetworks();
     await loadBuyerRate();
   }
@@ -643,12 +671,15 @@
     document.getElementById('checkoutOverlay').style.display = 'none';
     document.getElementById('custName').value = '';
     document.getElementById('custPhone').value = '';
+    const emailField = document.getElementById('custEmail');
+    if(emailField) emailField.value = '';
   }
 
 
   async function submitOrder(){
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
+    const email = document.getElementById('custEmail').value.trim();
     const address = document.getElementById('custAddress').value.trim();
     const city = document.getElementById('custCity').value.trim();
     const district = document.getElementById('custDistrict').value.trim();
@@ -656,6 +687,11 @@
     const btn = document.getElementById('confirmOrderBtn');
     if(!name || !phone){
       msg.textContent = "Merci de remplir ton nom et ton numéro."; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      msg.textContent = "Vérifie le format de ton adresse e-mail."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
@@ -706,6 +742,7 @@
           p_variant_selection: variantText,
           p_delivery_address: address, p_delivery_city: city, p_delivery_district: district,
           p_buyer_country: buyerCountryCode === 'CD_USD' ? 'CD' : buyerCountryCode,
+          p_customer_email: email || null,
         }),
       });
       if(!res.ok){
@@ -842,7 +879,7 @@
       return;
     }
     grid.innerHTML = products.map(p => `
-      <a class="card" href="${onVendorSubdomain ? '/?p=' + encodeURIComponent(encodeProductId(p.id)) : '?s=' + encodeURIComponent(slug) + '&p=' + encodeURIComponent(encodeProductId(p.id))}">
+      <a class="card" href="${onVendorSubdomain ? '/' + p.id : '?s=' + slug + '&p=' + p.id}">
         <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}"></div>
         <div class="card-body">
           <h3>${p.name}</h3>
