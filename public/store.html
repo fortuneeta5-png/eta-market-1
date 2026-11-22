@@ -989,5 +989,72 @@
 <script>
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
+<script>
+(function(){
+  const style=document.createElement('style');
+  style.textContent=`
+  .eta-native-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:-9999px!important}
+  .eta-select-wrap{position:relative;width:100%;}
+  .eta-select-trigger{width:100%;min-height:52px;padding:13px 46px 13px 15px;border:1.5px solid var(--line,#e5e7eb);border-radius:13px;background:#fff;color:var(--text,#171717);font:inherit;font-size:.95rem;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;box-shadow:0 2px 7px rgba(20,20,40,.035);transition:border-color .18s,box-shadow .18s;}
+  .eta-select-trigger:focus-visible,.eta-select-trigger[aria-expanded=true]{outline:none;border-color:var(--accent,#3730a3);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#3730a3) 13%,transparent)}
+  .eta-select-chevron{width:18px;height:18px;flex:none;color:var(--accent,#3730a3);transition:transform .18s}
+  .eta-select-trigger[aria-expanded=true] .eta-select-chevron{transform:rotate(180deg)}
+  .eta-select-panel{position:fixed;z-index:10050;background:#fff;color:#20212a;border:1px solid #e8e8ef;border-radius:16px;box-shadow:0 16px 48px rgba(20,20,40,.18);padding:7px;max-height:min( min(52vh,360px), calc(100vh - 32px));overflow:auto;overscroll-behavior:contain;display:none}
+  .eta-select-panel.open{display:block;animation:etaSelectIn .14s ease-out}
+  .eta-select-option{width:100%;border:0;background:transparent;color:#242433;text-align:left;padding:13px 12px;border-radius:10px;font:inherit;font-size:.94rem;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
+  .eta-select-option:active{background:#f2f1ff}
+  .eta-select-option[aria-selected=true]{background:color-mix(in srgb,var(--accent,#3730a3) 9%,white);color:var(--accent,#3730a3);font-weight:700}
+  .eta-select-check{font-weight:900;font-size:1.05rem}
+  @keyframes etaSelectIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  `;
+  document.head.appendChild(style);
+  let active=null;
+  function close(){if(!active)return;active.panel.classList.remove('open');active.trigger.setAttribute('aria-expanded','false');active=null;}
+  function sync(item){
+    const s=item.select, selected=s.options[s.selectedIndex];
+    item.label.textContent=selected?selected.textContent.trim():'Choisir…';
+    item.panel.innerHTML='';
+    Array.from(s.options).forEach((o,i)=>{
+      const b=document.createElement('button');b.type='button';b.className='eta-select-option';b.setAttribute('role','option');b.setAttribute('aria-selected',String(i===s.selectedIndex));
+      const t=document.createElement('span');t.textContent=o.textContent.trim();b.appendChild(t);
+      if(i===s.selectedIndex){const c=document.createElement('span');c.className='eta-select-check';c.textContent='✓';b.appendChild(c)}
+      b.addEventListener('click',()=>{s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));sync(item);close();item.trigger.focus()});
+      item.panel.appendChild(b);
+    });
+  }
+  function position(item){
+    const r=item.trigger.getBoundingClientRect(),gap=7,maxH=Math.min(window.innerHeight*.52,360),below=window.innerHeight-r.bottom-16,above=r.top-16;
+    const useBelow=below>=Math.min(180,above)||below>=above;
+    const h=Math.min(maxH,Math.max(120,useBelow?below:above));
+    item.panel.style.left=Math.max(12,Math.min(r.left,window.innerWidth-r.width-12))+'px';
+    item.panel.style.width=Math.min(r.width,window.innerWidth-24)+'px';
+    item.panel.style.maxHeight=h+'px';
+    item.panel.style.top=(useBelow?Math.min(window.innerHeight-h-12,r.bottom+gap):Math.max(12,r.top-h-gap))+'px';
+  }
+  function enhance(s){
+    if(s.dataset.etaEnhanced)return;s.dataset.etaEnhanced='1';
+    s.classList.add('eta-native-select');
+    const wrap=document.createElement('div');wrap.className='eta-select-wrap';s.parentNode.insertBefore(wrap,s);wrap.appendChild(s);
+    const trigger=document.createElement('button');trigger.type='button';trigger.className='eta-select-trigger';trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');
+    const label=document.createElement('span');label.style.minWidth='0';label.style.overflow='hidden';label.style.textOverflow='ellipsis';label.style.whiteSpace='nowrap';
+    const arrow=document.createElementNS('http://www.w3.org/2000/svg','svg');arrow.setAttribute('viewBox','0 0 24 24');arrow.setAttribute('fill','none');arrow.setAttribute('stroke','currentColor');arrow.setAttribute('stroke-width','2');arrow.setAttribute('stroke-linecap','round');arrow.setAttribute('stroke-linejoin','round');arrow.classList.add('eta-select-chevron');
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','m6 9 6 6 6-6');arrow.appendChild(path);
+    trigger.append(label,arrow);wrap.appendChild(trigger);
+    const panel=document.createElement('div');panel.className='eta-select-panel';panel.setAttribute('role','listbox');document.body.appendChild(panel);
+    const item={select:s,trigger,label,panel};sync(item);
+    trigger.addEventListener('click',()=>{if(active?.select===s){close();return}close();active=item;sync(item);position(item);panel.classList.add('open');trigger.setAttribute('aria-expanded','true')});
+    s.addEventListener('change',()=>sync(item));
+    new MutationObserver(()=>sync(item)).observe(s,{childList:true,subtree:true,characterData:true});
+    window.addEventListener('resize',()=>{if(active===item)position(item)});
+    window.addEventListener('scroll',()=>{if(active===item)position(item)},true);
+  }
+  document.addEventListener('click',e=>{if(active&&!active.panel.contains(e.target)&&!active.trigger.contains(e.target))close()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  function init(){document.querySelectorAll('select').forEach(enhance)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+  new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
+})();
+
+</script>
 </body>
 </html>
