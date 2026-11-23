@@ -971,7 +971,8 @@
 
 
   // ---------- Auth ----------
-  let authMode = 'login';
+  const requestedAuthMode = new URLSearchParams(window.location.search).get('auth');
+  let authMode = requestedAuthMode === 'signup' ? 'signup' : 'login';
   function togglePasswordVisibility(inputId, btnEl){
     const input = document.getElementById(inputId);
     if(input.type === 'password'){
@@ -1359,6 +1360,7 @@
         showDashboard();
       } else {
         currentStore = null;
+        restoreStoreDraft();
         renderColorPicker();
         createScreen.style.display = 'flex';
       }
@@ -1370,6 +1372,73 @@
       authMsg.className = "auth-msg err";
       authMsg.style.display = "block";
     }
+  }
+
+  // ---------- Brouillon de création de boutique ----------
+  // Le brouillon est conservé par compte sur cet appareil.
+  function getStoreDraftKey(){
+    const userId = session && session.user && session.user.id ? session.user.id : 'guest';
+    return 'etaStoreDraft:' + userId;
+  }
+
+  function saveStoreDraft(){
+    try {
+      const ids = [
+        'storeName', 'storeDesc', 'sellerCountry', 'sellerCity', 'sellerPhone',
+        'sellerAddress', 'longrichMemberId', 'logisticsType', 'logisticsAreas',
+        'warehouseCapacity', 'sellerProfileType'
+      ];
+      const draft = {};
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) draft[id] = el.value;
+      });
+      draft.selectedColor = selectedColor;
+      localStorage.setItem(getStoreDraftKey(), JSON.stringify(draft));
+    } catch(err) {
+      console.warn('Impossible de sauvegarder le brouillon de boutique:', err);
+    }
+  }
+
+  function restoreStoreDraft(){
+    try {
+      const raw = localStorage.getItem(getStoreDraftKey());
+      if(!raw) return;
+      const draft = JSON.parse(raw);
+      if(!draft || typeof draft !== 'object') return;
+
+      Object.keys(draft).forEach(id => {
+        if(id === 'selectedColor') return;
+        const el = document.getElementById(id);
+        if(el && draft[id] !== undefined && draft[id] !== null) el.value = draft[id];
+      });
+      if(COLORS.includes(draft.selectedColor)) selectedColor = draft.selectedColor;
+
+      updateSellerCountryHint();
+      updateSellerProfileFields();
+      updateSlugPreview();
+      renderColorPicker();
+      ['sellerCountry', 'logisticsType'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.dispatchEvent(new Event('change', {bubbles:true}));
+      });
+    } catch(err) {
+      console.warn('Impossible de restaurer le brouillon de boutique:', err);
+    }
+  }
+
+  function setupStoreDraftPersistence(){
+    const ids = [
+      'storeName', 'storeDesc', 'sellerCountry', 'sellerCity', 'sellerPhone',
+      'sellerAddress', 'longrichMemberId', 'logisticsType', 'logisticsAreas',
+      'warehouseCapacity', 'sellerProfileType'
+    ];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('input', saveStoreDraft);
+      el.addEventListener('change', saveStoreDraft);
+    });
   }
 
   // ---------- Create store ----------
@@ -1745,6 +1814,7 @@
 
       if(!storeRows || !storeRows.length) throw new Error("La boutique n'a pas été renvoyée par le serveur.");
       currentStore = storeRows[0];
+      try { localStorage.removeItem(getStoreDraftKey()); } catch(err) {}
       document.getElementById('createStoreScreen').style.display = 'none';
       showDashboard();
 
@@ -2843,8 +2913,30 @@
   }
 
   // ---------- Init ----------
-  if(session && session.access_token){
+  // Les liens de la page d'accueil transmettent ?auth=login ou ?auth=signup.
+  // Une demande explicite de connexion affiche toujours le formulaire de connexion.
+  // Une inscription avec une session existante reprend directement l'onboarding.
+  setupStoreDraftPersistence();
+
+  if(requestedAuthMode === 'login'){
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('createStoreScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+    switchTab('login');
+  } else if(requestedAuthMode === 'signup'){
+    if(session && session.access_token){
+      afterLogin();
+    } else {
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('createStoreScreen').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
+      switchTab('signup');
+    }
+  } else if(session && session.access_token){
     afterLogin();
+  } else {
+    document.getElementById('authScreen').style.display = 'flex';
+    switchTab('login');
   }
 </script>
 
