@@ -236,6 +236,99 @@
   .eta-select-option[aria-selected="true"]{background:#f0efff;color:var(--primary);font-weight:700}
   .eta-select-check{color:var(--primary);font-weight:900}
 
+
+  /* Tableau de bord desktop inspiré des espaces créateurs modernes */
+  #dashboard .dashboard-welcome{position:relative;display:flex;align-items:center;justify-content:space-between;overflow:hidden;min-height:220px;padding:30px 36px;margin:2px 0 22px;border-radius:20px;background:linear-gradient(115deg,#172b3b 0%,#26495a 58%,#426f6a 100%);color:#fff;box-shadow:0 16px 38px rgba(25,54,65,.13)}
+  #dashboard .welcome-copy{position:relative;z-index:2;max-width:620px}
+  #dashboard .welcome-eyebrow{display:inline-block;font-size:10px;letter-spacing:2px;font-weight:800;color:#a9d5cc;margin-bottom:12px}
+  #dashboard .dashboard-welcome h2{font:600 clamp(25px,2.7vw,36px) Georgia,serif;letter-spacing:-.6px;color:#fff;margin-bottom:8px}
+  #dashboard .dashboard-welcome p{font-size:13px;line-height:1.7;color:rgba(255,255,255,.76);max-width:530px}
+  #dashboard .welcome-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  #dashboard .welcome-action{border:0;border-radius:10px;padding:11px 15px;font:600 11px Poppins;cursor:pointer}
+  #dashboard .welcome-action.primary{background:#fff;color:#1c3945}
+  #dashboard .welcome-action.secondary{background:rgba(255,255,255,.13);color:#fff;border:1px solid rgba(255,255,255,.2)}
+  #dashboard .welcome-art{position:absolute;right:6%;top:0;width:260px;height:100%;display:grid;place-items:center;opacity:.95}
+  #dashboard .art-orbit{position:absolute;width:210px;height:210px;border:1px solid rgba(255,255,255,.18);border-radius:50%;box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025)}
+  #dashboard .art-bag{width:104px;height:112px;display:grid;place-items:center;border-radius:22px 22px 28px 28px;background:linear-gradient(145deg,#fff,#c8e4db);color:#244a50;font:900 44px Montserrat;box-shadow:0 22px 42px rgba(0,0,0,.2);transform:rotate(-8deg)}
+  #dashboard .art-bag:before{content:'';position:absolute;width:42px;height:28px;top:-16px;border:7px solid #d7eee5;border-bottom:0;border-radius:22px 22px 0 0}
+  #dashboard .art-spark{position:absolute;color:#d5f4df;font-size:28px}.art-spark.one{right:28px;top:38px}.art-spark.two{left:12px;bottom:34px}
+  #dashboard .community-card{display:flex;align-items:center;gap:16px;padding:20px 22px;margin:20px 0 4px;border-radius:16px;text-decoration:none;color:#1e302d;background:linear-gradient(105deg,#e9f8ef,#f5fbf7);border:1px solid #d9eee1;transition:transform .18s,box-shadow .18s}
+  #dashboard .community-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(28,110,66,.1)}
+  #dashboard .community-icon{width:46px;height:46px;flex:none;display:grid;place-items:center;border-radius:14px;background:#20a45b;color:#fff}
+  #dashboard .community-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  #dashboard .community-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+  #dashboard .community-copy strong{font-size:13px}.community-copy small{font-size:11px;color:#6f8177;line-height:1.5}
+  #dashboard .community-cta{margin-left:auto;white-space:nowrap;font-size:11px;font-weight:700;color:#13834a}
+  #dashboard .nav-icon svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  #dashboard .settings-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}
+  #dashboard .settings-heading h2{font:500 30px Georgia,serif;color:#17231f;margin:5px 0}
+  #dashboard .settings-heading p{font-size:12px;color:#87918c}
+  #dashboard .settings-kicker{font-size:9px;letter-spacing:1.6px;color:#a0aaa5;font-weight:800}
+  #dashboard .settings-section-title{font:500 21px Georgia,serif;margin:24px 0 12px}
+  #dashboard .developer-intro{display:flex;align-items:center;gap:15px;background:#f1f5f4;border:1px solid #e6ece9;padding:18px;border-radius:14px;margin-bottom:15px}
+  #dashboard .developer-symbol{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;background:#e1e8ff;color:#5367b1;flex:none}
+  #dashboard .developer-symbol svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #dashboard .developer-intro strong{font-size:13px}.developer-intro p{font-size:11px;color:#78827d;margin-top:4px;line-height:1.5}
+  #dashboard .developer-status,.sandbox-pill,.doc-version{margin-left:auto;font-size:9px;font-weight:800;padding:6px 9px;border-radius:30px;background:#dcfce7;color:#15803d;white-space:nowrap}
+  #dashboard .developer-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+  #dashboard .developer-tile{position:relative;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-height:142px;padding:17px;border:1px solid #e8eeeb;border-radius:14px;background:#fff;cursor:pointer;transition:.16s}
+  #dashboard .developer-tile:hover,#dashboard .developer-tile.selected{border-color:#c9d9d2;box-shadow:0 8px 22px rgba(27,61,49,.06);background:#fcfefd}
+  #dashboard .dev-tile-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;font-size:20px;font-weight:700}
+  #dashboard .dev-tile-icon.key{background:#fce8eb;color:#bd4351}.dev-tile-icon.docs{background:#e8edff;color:#5269b5}.dev-tile-icon.hook{background:#e4f6ec;color:#2b9560}.dev-tile-icon.sand{background:#fff5d8;color:#ae8527}
+  #dashboard .developer-tile b{font-size:12px;color:#28342f}.developer-tile small{font-size:10px;color:#8a9590;line-height:1.45;max-width:190px}
+  #dashboard .tile-arrow{position:absolute;right:14px;top:18px;color:#a4afaa}
+  #dashboard .developer-panel{display:none;background:#fff;border:1px solid #e8eeeb;border-radius:15px;padding:22px;margin-bottom:22px}
+  #dashboard .developer-panel.active{display:block}
+  #dashboard .dev-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  #dashboard .dev-panel-head h3{font:500 22px Georgia,serif;color:#202c27}.dev-panel-head p{font-size:11px;color:#8b9691;margin-top:5px}
+  #dashboard .dev-panel-head .btn{font-size:11px;padding:10px 13px;white-space:nowrap}
+  #dashboard .api-warning{padding:12px 14px;background:#fff8e8;border:1px solid #f7e6b9;color:#8a6420;border-radius:10px;font-size:10px;margin-bottom:14px}
+  #dashboard .api-secret-notice{padding:14px;background:#effaf2;border:1px solid #cdebd4;border-radius:10px;margin-bottom:14px;font-size:11px;overflow-wrap:anywhere}
+  #dashboard .api-secret-notice code{display:block;padding:10px;background:#fff;border-radius:7px;margin:8px 0;font-size:11px}
+  #dashboard .dev-list{display:flex;flex-direction:column;gap:9px}
+  #dashboard .dev-item{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #edf1ef;border-radius:10px}
+  #dashboard .dev-item-main{flex:1;min-width:0}.dev-item-main strong{display:block;font-size:11px}.dev-item-main small{display:block;color:#89938e;font-size:9px;margin-top:4px}
+  #dashboard .key-prefix{font:11px monospace;color:#52645b;background:#f3f6f4;padding:6px 8px;border-radius:6px}
+  #dashboard .api-base{display:flex;align-items:center;gap:12px;padding:13px;background:#f5f7f6;border:1px solid #e8eeeb;border-radius:10px;margin:12px 0 18px}
+  #dashboard .api-base small{font-size:8px;letter-spacing:1px;color:#929d97;font-weight:800}
+  #dashboard .api-base code{font:10px monospace;flex:1;overflow-wrap:anywhere;color:#34453d}
+  #dashboard .api-base button,.api-code button{border:0;border-radius:7px;background:#e7eeea;color:#3c5a4b;padding:7px 10px;font-size:9px;font-weight:700;cursor:pointer}
+  #dashboard .doc-subtitle{font-size:12px;margin:20px 0 9px}.doc-paragraph,.doc-note{font-size:10px;color:#7d8983;line-height:1.7}
+  #dashboard .api-code{position:relative;white-space:pre-wrap;overflow-wrap:anywhere;background:#17231f;color:#d9eee2;padding:16px;border-radius:10px;font-size:10px;line-height:1.8;margin:8px 0}
+  #dashboard .api-code button{position:absolute;right:8px;top:8px;background:#30463b;color:#fff}
+  #dashboard .endpoint-row{display:grid;grid-template-columns:48px minmax(100px,150px) 1fr;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid #eef1ef}
+  #dashboard .method{font:800 8px Poppins;padding:5px 7px;border-radius:5px;text-align:center}.method.get{background:#e5f5eb;color:#16814a}
+  #dashboard .endpoint-row code{font:10px monospace}.endpoint-row small{font-size:10px;color:#87918c}
+  #dashboard .webhook-form{display:grid;grid-template-columns:1fr 1.4fr auto auto;gap:10px;align-items:end;margin-bottom:15px}
+  #dashboard .webhook-form .field{margin:0}.webhook-form label{font-size:9px}.webhook-form input{font-size:11px;padding:11px}
+  #dashboard .webhook-form .btn{font-size:10px;padding:11px 12px;white-space:nowrap}
+  #dashboard .sandbox-info{background:#f3f7ff;border:1px solid #dce6ff;padding:16px;border-radius:11px;margin:12px 0}
+  #dashboard .sandbox-info strong{font-size:12px;color:#344d8c}.sandbox-info p{font-size:10px;color:#7180a4;line-height:1.7;margin-top:5px}
+  #dashboard .sandbox-info code{font-family:monospace;color:#405caa}
+  @media(max-width:767px){
+    #dashboard .dashboard-welcome{min-height:205px;padding:22px 19px;border-radius:16px;margin:0 0 17px}
+    #dashboard .dashboard-welcome h2{font-size:25px}.dashboard-welcome p{max-width:78%;font-size:11px}
+    #dashboard .welcome-art{right:-82px;width:190px;opacity:.38}.welcome-actions{gap:7px!important}
+    #dashboard .welcome-action{font-size:9px;padding:10px 11px}
+    #dashboard .community-card{padding:15px 13px;gap:10px;align-items:flex-start}
+    #dashboard .community-icon{width:38px;height:38px}.community-copy strong{font-size:11px}.community-copy small{font-size:9px}
+    #dashboard .community-cta{display:none}
+    #dashboard .developer-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    #dashboard .developer-tile{min-height:125px;padding:12px}.developer-tile b{font-size:11px}
+    #dashboard .developer-intro{align-items:flex-start;padding:13px}.developer-status{display:none}
+    #dashboard .developer-panel{padding:14px}.dev-panel-head{align-items:flex-start}
+    #dashboard .dev-panel-head h3{font-size:19px}.dev-panel-head p{max-width:240px}
+    #dashboard .dev-panel-head .btn{font-size:9px;padding:9px}
+    #dashboard .webhook-form{grid-template-columns:1fr 1fr}
+    #dashboard .webhook-form .field{grid-column:span 2}
+    #dashboard .api-base{align-items:flex-start;flex-wrap:wrap}.api-base code{min-width:100%}
+    #dashboard .endpoint-row{grid-template-columns:42px 100px 1fr;gap:7px}.endpoint-row small{font-size:9px}
+    #dashboard .bottom-nav{overflow-x:auto;justify-content:flex-start}
+    #dashboard .bottom-nav .nav-item{flex:0 0 58px;min-width:58px}
+    #dashboard .bottom-nav .nav-item .nav-icon svg{width:19px;height:19px}
+  }
+  @media(min-width:768px) and (max-width:1100px){#dashboard .developer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 </style>
 </head>
 <body>
@@ -404,21 +497,30 @@
   </header>
   <aside class="dash-sidebar" aria-label="Navigation du tableau de bord">
     <div class="sidebar-caption">Espace vendeur</div>
-    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">⌂</span>Accueil</button>
-    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">▤</span>Ventes</button>
-    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">▣</span>Produits</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon">▥</span>Analytiques</button>
-    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">◉</span>Revenus &amp; solde</button>
-    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☰</span>Ma boutique &amp; outils</button>
+    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
+    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
+    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg></span>Produits</button>
+    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg></span>Analytiques</button>
+    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.8-1-3-1-1.8 0-3 .9-3 2.2s1.2 2 3 2.3 3 .9 3 2.3-1.2 2.3-3.2 2.3c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span>Revenus &amp; solde</button>
+    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☷</span>Ma boutique &amp; outils</button>
+    <button class="nav-item" data-tab="settings" onclick="goToTab('settings')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 3.1-.2-.1a1.7 1.7 0 0 0-1.9.2l-.2.1h-3.6l-.1-.2a1.7 1.7 0 0 0-1.5-1.1 1.7 1.7 0 0 0-1.5 1.1l-.1.2H5.3l-.1-.2a1.7 1.7 0 0 0-1.5-1.1l-.2.1-1.8-3.1.1-.1A1.7 1.7 0 0 0 2 14.1V10a1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-3.1.2.1a1.7 1.7 0 0 0 1.9-.2l.2-.1h3.6l.1.2a1.7 1.7 0 0 0 1.5 1.1 1.7 1.7 0 0 0 1.5-1.1l.1-.2h3.6l.1.2a1.7 1.7 0 0 0 1.5 1.1l.2-.1 1.8 3.1-.1.1a1.7 1.7 0 0 0-.3 1.9z"/></svg></span>Paramètres</button>
     <div class="sidebar-bottom"><div class="sidebar-caption">Compte</div><button class="nav-item" onclick="logout()"><span class="nav-icon">↪</span>Déconnexion</button></div>
   </aside>
   <div class="wrap">
 
     <!-- ONGLET ACCUEIL -->
     <div class="tab-panel active" data-tab="home">
-      <div class="greeting-block">
-        <h2 id="greetingTitle">Bonjour !</h2>
-        <p id="greetingSub"></p>
+      <div class="dashboard-welcome">
+        <div class="welcome-copy">
+          <span class="welcome-eyebrow">TON ESPACE ETAChOP</span>
+          <h2 id="greetingTitle">Bonjour !</h2>
+          <p id="greetingSub"></p>
+          <div class="welcome-actions">
+            <button class="welcome-action primary" onclick="goToTab('products')">＋ Ajouter un produit</button>
+            <button class="welcome-action secondary" onclick="goToTab('analytics')">Voir mes performances <span>↗</span></button>
+          </div>
+        </div>
+        <div class="welcome-art" aria-hidden="true"><div class="art-orbit"></div><div class="art-bag">E</div><span class="art-spark one">✦</span><span class="art-spark two">✧</span></div>
       </div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-num" id="statTotalRevenue">—</div><div class="stat-lbl">Revenu total</div></div>
@@ -435,6 +537,11 @@
           <div class="empty">Chargement…</div>
         </div>
       </div>
+      <a class="community-card" href="https://whatsapp.com/channel/0029VbDjEQ89hXF7jnHGfH3T" target="_blank" rel="noopener noreferrer">
+        <span class="community-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20l.9-4.7a8.5 8.5 0 1 1 16.6-3.6Z"/><path d="M8.5 8.5c.3 2.2 2.8 4.7 5 5l1.1-1.1 2 1c-.2 1.3-1.2 2.1-2.5 2.1-3.6-.3-7.3-4-7.6-7.6 0-1.3.8-2.3 2.1-2.5l1 2z"/></svg></span>
+        <span class="community-copy"><strong>Rejoins la communauté EtaChop</strong><small>Conseils, nouveautés et astuces pour développer ton activité.</small></span>
+        <span class="community-cta">Rejoindre le canal <b>↗</b></span>
+      </a>
     </div>
 
     <!-- ONGLET ANALYTIQUES : données réelles issues des commandes -->
@@ -866,16 +973,82 @@
       </div>
     </div>
 
+    <!-- PARAMÈTRES ET ESPACE DÉVELOPPEUR -->
+    <div class="tab-panel" data-tab="settings">
+      <div class="settings-heading">
+        <div><span class="settings-kicker">ESPACE DE CONFIGURATION</span><h2>Paramètres</h2><p>Gère ton compte, ta boutique et tes intégrations.</p></div>
+      </div>
+      <div class="settings-section-title">Développeur</div>
+      <div class="developer-intro">
+        <div class="developer-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg></div>
+        <div><strong>Construis avec l’API EtaChop</strong><p>Connecte tes applications, synchronise tes produits et consulte tes commandes depuis tes propres outils.</p></div>
+        <span class="developer-status">API disponible</span>
+      </div>
+      <div class="developer-grid">
+        <button class="developer-tile selected" onclick="showDeveloperSection('keys',this)"><span class="dev-tile-icon key">⌘</span><b>Clés API</b><small>Créer et révoquer les clés d’accès</small><span class="tile-arrow">→</span></button>
+        <button class="developer-tile" onclick="showDeveloperSection('docs',this)"><span class="dev-tile-icon docs">⌁</span><b>Documentation</b><small>Endpoints, authentification et exemples</small><span class="tile-arrow">→</span></button>
+        <button class="developer-tile" onclick="showDeveloperSection('webhooks',this)"><span class="dev-tile-icon hook">↗</span><b>Webhooks</b><small>Recevoir les événements de ta boutique</small><span class="tile-arrow">→</span></button>
+        <button class="developer-tile" onclick="showDeveloperSection('sandbox',this)"><span class="dev-tile-icon sand">◈</span><b>Sandbox</b><small>Tester tes appels sans toucher aux ventes réelles</small><span class="tile-arrow">→</span></button>
+      </div>
+
+      <section class="developer-panel active" id="dev-keys">
+        <div class="dev-panel-head"><div><h3>Clés API</h3><p>Une clé par application. La clé complète est affichée une seule fois.</p></div><button class="btn btn-primary" onclick="createEtaApiKey()">＋ Nouvelle clé</button></div>
+        <div class="api-warning">Ne partage jamais une clé API. En cas de fuite, révoque-la immédiatement et crée-en une nouvelle.</div>
+        <div id="etaApiKeyNotice" class="api-secret-notice" style="display:none;"></div>
+        <div id="etaApiKeysList" class="dev-list"><div class="empty">Chargement des clés…</div></div>
+      </section>
+
+      <section class="developer-panel" id="dev-docs">
+        <div class="dev-panel-head"><div><h3>Documentation API EtaChop</h3><p>Version 1 · Base URL et premiers endpoints disponibles</p></div><span class="doc-version">v1</span></div>
+        <div class="api-base"><small>BASE URL</small><code id="etaApiBaseUrl"></code><button onclick="copyEtaText(document.getElementById('etaApiBaseUrl').textContent)">Copier</button></div>
+        <h4 class="doc-subtitle">Authentification</h4><p class="doc-paragraph">Ajoute ta clé API dans l’en-tête Authorization de chaque requête.</p>
+        <pre class="api-code"><code>Authorization: Bearer ETA_VOTRE_CLE_API
+apikey: CLE_PUBLIQUE_ETACHOP
+Content-Type: application/json</code><button onclick="copyEtaText('Authorization: Bearer ETA_VOTRE_CLE_API')">Copier</button></pre>
+        <h4 class="doc-subtitle">Endpoints disponibles</h4>
+        <div class="endpoint-row"><span class="method get">GET</span><code>/store</code><small>Informations de ta boutique</small></div>
+        <div class="endpoint-row"><span class="method get">GET</span><code>/products</code><small>Liste des produits actifs (100 max.)</small></div>
+        <div class="endpoint-row"><span class="method get">GET</span><code>/orders</code><small>Commandes de ta boutique (100 max.)</small></div>
+        <h4 class="doc-subtitle">Exemple JavaScript</h4>
+        <pre class="api-code"><code>const response = await fetch("API_BASE_URL/products", {
+  headers: { Authorization: "Bearer ETA_VOTRE_CLE_API", apikey: "CLE_PUBLIQUE_ETACHOP" }
+});
+const result = await response.json();</code><button onclick="copyEtaText('const response = await fetch(API_BASE_URL + \'/products\', { headers: { Authorization: \'Bearer ETA_VOTRE_CLE_API\' } });')">Copier</button></pre>
+        <p class="doc-note">Les commandes et les produits retournés sont limités à la boutique liée à la clé. Les opérations d’écriture et les paiements API ne sont pas encore ouverts dans cette version.</p>
+      </section>
+
+      <section class="developer-panel" id="dev-webhooks">
+        <div class="dev-panel-head"><div><h3>Webhooks</h3><p>Déclare une URL HTTPS pour recevoir les événements EtaChop.</p></div></div>
+        <div class="webhook-form">
+          <div class="field"><label>Nom du webhook</label><input id="etaWebhookLabel" placeholder="Ex. Mon application"></div>
+          <div class="field"><label>URL HTTPS de réception</label><input id="etaWebhookUrl" type="url" placeholder="https://mon-site.com/webhooks/etachop"></div>
+          <button class="btn btn-primary" onclick="createEtaWebhook()">Enregistrer le webhook</button>
+          <button class="btn btn-ghost" onclick="testEtaWebhook()">Envoyer un test</button>
+          <div id="etaWebhookNotice" class="form-msg" role="status"></div>
+        </div>
+        <div id="etaWebhooksList" class="dev-list"><div class="empty">Chargement des webhooks…</div></div>
+        <p class="doc-note">Événements disponibles dans cette première version : order.created et order.updated. L’envoi automatique des événements de production sera activé après raccordement des déclencheurs métier.</p>
+      </section>
+
+      <section class="developer-panel" id="dev-sandbox">
+        <div class="dev-panel-head"><div><h3>Environnement Sandbox</h3><p>Un espace de test isolé pour valider tes intégrations.</p></div><span class="sandbox-pill">TEST</span></div>
+        <div class="sandbox-info"><strong>Mode test activé</strong><p>Crée une clé « Sandbox » depuis l’onglet Clés API. Elle porte le préfixe <code>eta_test_</code>. Les réponses Sandbox utilisent des exemples fictifs. Elles ne lisent ni ne modifient tes commandes réelles et ne déclenchent aucun paiement.</p></div>
+        <div class="api-base"><small>ENDPOINT DE TEST</small><code id="etaSandboxUrl"></code><button onclick="copyEtaText(document.getElementById('etaSandboxUrl').textContent)">Copier</button></div>
+        <button class="btn btn-ghost" onclick="showDeveloperSection('keys',document.querySelector('.developer-tile'))">Créer une clé Sandbox</button>
+      </section>
+    </div>
+
   </div>
 
   <!-- Navigation mobile -->
   <div class="bottom-nav" aria-label="Navigation mobile">
-    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon">⌂</span>Accueil</button>
-    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon">▣</span>Produits</button>
-    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon">▤</span>Ventes</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon">▥</span>Stats</button>
-    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon">◉</span>Solde</button>
-    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☰</span>Menu</button>
+    <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
+    <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg></span>Produits</button>
+    <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
+    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg></span>Stats</button>
+    <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.8-1-3-1-1.8 0-3 .9-3 2.2s1.2 2 3 2.3 3 .9 3 2.3-1.2 2.3-3.2 2.3c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span>Solde</button>
+    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>Menu</button>
+    <button class="nav-item" data-tab="settings" onclick="goToTab('settings')"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7.5 7.5 0 0 0 0-3l2-1.5-2-3.5-2.4 1a7.5 7.5 0 0 0-2.6-1.5L13.5 2h-4L9 5a7.5 7.5 0 0 0-2.6 1.5L4 5.5 2 9l2 1.5a7.5 7.5 0 0 0 0 3L2 15l2 3.5 2.4-1A7.5 7.5 0 0 0 9 19l.5 3h4l.5-3a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.5z"/></svg></span>Réglages</button>
   </div>
 </div>
 
@@ -1882,6 +2055,7 @@
     document.querySelectorAll(`.tab-panel[data-tab="${tabName}"]`).forEach(el => el.classList.add('active'));
     document.querySelectorAll('.nav-item[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === tabName));
     if(tabName === 'analytics') loadAnalytics();
+    if(tabName === 'settings') { initEtaDeveloperPanel(); showDeveloperSection('keys', document.querySelector('.developer-tile')); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2910,6 +3084,104 @@
     } catch(err){
       alert("Erreur lors de la mise à jour.");
     }
+  }
+
+
+  // ---------- Console développeur EtaChop ----------
+  const ETA_API_FUNCTION = `${SUPABASE_URL}/functions/v1/etachop-api`;
+  function etaDeveloperRequest(path, method='GET', payload=null){
+    const endpoint = method === 'GET'
+      ? `${ETA_API_FUNCTION}/${path}?store_id=${encodeURIComponent(currentStore.id)}`
+      : `${ETA_API_FUNCTION}/${path}`;
+    return fetch(endpoint, {
+      method,
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${session.access_token}`},
+      body:payload ? JSON.stringify({...payload,store_id:currentStore.id}) : (method==='GET'?undefined:JSON.stringify({store_id:currentStore.id}))
+    }).then(async response=>{
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.message||data.error||`Erreur ${response.status}`);
+      return data;
+    });
+  }
+  function copyEtaText(value){
+    if(!value) return;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(value).then(()=>alert('Copié dans le presse-papiers.')).catch(()=>alert(value));
+    }else{window.prompt('Copie ce texte :',value);}
+  }
+  function showDeveloperSection(name,button){
+    document.querySelectorAll('.developer-panel').forEach(el=>el.classList.remove('active'));
+    const panel=document.getElementById(`dev-${name}`);
+    if(panel) panel.classList.add('active');
+    document.querySelectorAll('.developer-tile').forEach(el=>el.classList.remove('selected'));
+    if(button) button.classList.add('selected');
+    if(name==='keys') loadEtaApiKeys();
+    if(name==='webhooks') loadEtaWebhooks();
+  }
+  function renderEtaKeys(keys){
+    const target=document.getElementById('etaApiKeysList');
+    if(!keys.length){target.innerHTML='<div class="empty">Aucune clé API pour le moment. Crée ta première clé pour connecter une application.</div>';return;}
+    target.innerHTML=keys.map(k=>`<div class="dev-item"><div class="dev-item-main"><strong>${escapeHtml(k.label)}</strong><small>${k.environment==='live'?'Production':'Sandbox'} · Créée le ${new Date(k.created_at).toLocaleDateString('fr-FR')} · ${k.revoked_at?'Révoquée':(k.last_used_at?'Utilisée récemment':'Jamais utilisée')}</small></div><code class="key-prefix">${escapeHtml(k.key_prefix)}…</code>${k.revoked_at?'<span class="status-tag pending">Révoquée</span>':`<button class="btn btn-danger" onclick="revokeEtaApiKey('${k.id}')">Révoquer</button>`}</div>`).join('');
+  }
+  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  async function loadEtaApiKeys(){
+    const target=document.getElementById('etaApiKeysList'); if(!target||!currentStore)return;
+    target.innerHTML='<div class="empty">Chargement…</div>';
+    try{const data=await etaDeveloperRequest('keys');renderEtaKeys(data.keys||[]);}
+    catch(e){target.innerHTML=`<div class="empty">${escapeHtml(e.message)}</div>`;}
+  }
+  async function createEtaApiKey(){
+    const label=window.prompt('Nom de cette clé (ex. Application mobile)');if(!label)return;
+    const environment=window.confirm('Créer une clé de PRODUCTION ?\\nChoisis Annuler pour créer une clé Sandbox.')?'live':'sandbox';
+    try{
+      const data=await etaDeveloperRequest('keys','POST',{label,environment});
+      const box=document.getElementById('etaApiKeyNotice');
+      box.style.display='block';box.innerHTML=`<strong>Ta nouvelle clé ${environment==='live'?'Production':'Sandbox'} — copie-la maintenant</strong><code>${escapeHtml(data.secret)}</code><button class="btn btn-primary" onclick="copyEtaText('${data.secret}')">Copier la clé</button><p>${escapeHtml(data.warning)}</p>`;
+      loadEtaApiKeys();
+    }catch(e){alert(e.message);}
+  }
+  async function revokeEtaApiKey(id){
+    if(!confirm('Révoquer cette clé ? Les applications qui l’utilisent perdront immédiatement leur accès.'))return;
+    try{await etaDeveloperRequest(`keys?id=${encodeURIComponent(id)}`,'DELETE');loadEtaApiKeys();}
+    catch(e){alert(e.message);}
+  }
+  async function loadEtaWebhooks(){
+    const target=document.getElementById('etaWebhooksList');if(!target||!currentStore)return;
+    target.innerHTML='<div class="empty">Chargement…</div>';
+    try{
+      const data=await etaDeveloperRequest('webhooks');
+      target.innerHTML=(data.webhooks||[]).length?(data.webhooks||[]).map(w=>`<div class="dev-item"><div class="dev-item-main"><strong>${escapeHtml(w.label)}</strong><small>${escapeHtml(w.target_url)} · ${escapeHtml((w.events||[]).join(', '))}</small></div><span class="status-tag ${w.is_active?'confirmed':'pending'}">${w.is_active?'Actif':'Inactif'}</span><button class="btn btn-danger" onclick="deleteEtaWebhook('${w.id}')">Supprimer</button></div>`).join(''):'<div class="empty">Aucun webhook configuré.</div>';
+    }catch(e){target.innerHTML=`<div class="empty">${escapeHtml(e.message)}</div>`;}
+  }
+  async function createEtaWebhook(){
+    const label=document.getElementById('etaWebhookLabel').value.trim();
+    const target_url=document.getElementById('etaWebhookUrl').value.trim();
+    const notice=document.getElementById('etaWebhookNotice');
+    try{
+      const data=await etaDeveloperRequest('webhooks','POST',{label,target_url});
+      notice.className='form-msg ok';notice.style.display='block';notice.innerHTML=`Webhook créé. Secret de signature à conserver : <code>${escapeHtml(data.signing_secret)}</code>`;
+      loadEtaWebhooks();
+    }catch(e){notice.className='form-msg err';notice.style.display='block';notice.textContent=e.message;}
+  }
+  async function deleteEtaWebhook(id){
+    if(!confirm('Supprimer ce webhook ?'))return;
+    try{await etaDeveloperRequest(`webhooks?id=${encodeURIComponent(id)}`,'DELETE');loadEtaWebhooks();}
+    catch(e){alert(e.message);}
+  }
+  async function testEtaWebhook(){
+    const target_url=document.getElementById('etaWebhookUrl').value.trim();
+    const notice=document.getElementById('etaWebhookNotice');
+    try{
+      const data=await etaDeveloperRequest('webhooks/test','POST',{target_url});
+      notice.className='form-msg '+(data.delivered?'ok':'err');notice.style.display='block';
+      notice.textContent=data.delivered?`Test envoyé avec succès (HTTP ${data.status}).`:`Le serveur distant a répondu HTTP ${data.status}.`;
+    }catch(e){notice.className='form-msg err';notice.style.display='block';notice.textContent=e.message;}
+  }
+  function initEtaDeveloperPanel(){
+    const base=document.getElementById('etaApiBaseUrl');
+    const sandbox=document.getElementById('etaSandboxUrl');
+    if(base)base.textContent=ETA_API_FUNCTION;
+    if(sandbox)sandbox.textContent=ETA_API_FUNCTION;
   }
 
   // ---------- Init ----------
