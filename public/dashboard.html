@@ -306,6 +306,7 @@
   #dashboard .sandbox-info strong{font-size:12px;color:#344d8c}.sandbox-info p{font-size:10px;color:#7180a4;line-height:1.7;margin-top:5px}
   #dashboard .sandbox-info code{font-family:monospace;color:#405caa}
   @media(max-width:767px){
+    #dashboard .dash-sidebar .nav-item[data-tab="api"]{display:none}
     #dashboard .dashboard-welcome{min-height:205px;padding:22px 19px;border-radius:16px;margin:0 0 17px}
     #dashboard .dashboard-welcome h2{font-size:25px}.dashboard-welcome p{max-width:78%;font-size:11px}
     #dashboard .welcome-art{right:-82px;width:190px;opacity:.38}.welcome-actions{gap:7px!important}
@@ -537,6 +538,7 @@
     <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
     <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg></span>Produits</button>
     <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.8-1-3-1-1.8 0-3 .9-3 2.2s1.2 2 3 2.3 3 .9 3 2.3-1.2 2.3-3.2 2.3c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span>Revenus &amp; solde</button>
+    <button class="nav-item" data-tab="api" onclick="goToTab('api')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8 4 12l4 4M16 8l4 4-4 4M14 5l-4 14"/></svg></span>Clé API</button>
     <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☷</span>Ma boutique &amp; outils</button>
     <div class="sidebar-bottom"><div class="sidebar-caption">Compte</div><button class="nav-item" onclick="logout()"><span class="nav-icon">↪</span>Déconnexion</button></div>
   </aside>
@@ -569,6 +571,7 @@
               <div class="audience-kpi"><strong id="visitsMonth">—</strong><span>Visites ce mois</span></div>
               <div class="audience-kpi"><strong id="visitsYear">—</strong><span>Visites cette année</span></div>
               <div class="audience-kpi"><strong id="visitsTotal">—</strong><span>Total des visites</span></div>
+              <div class="audience-kpi"><strong id="uniqueVisitorsTotal">—</strong><span>Visiteurs identifiés</span></div>
             </div>
             <div class="audience-chart-head">
               <strong>Évolution des visites</strong>
@@ -581,7 +584,7 @@
             </div>
             <div id="audienceChartWrap" class="chart-wrap"><div class="analytics-empty">Chargement des visites…</div></div>
             <div class="audience-country-note" id="audienceCountries">
-              Les pays d’origine ne sont pas encore collectés par le système de suivi actuel.
+              Répartition géographique calculée à partir des pays réellement enregistrés.
             </div>
             <p class="audience-footnote">Une visite correspond à un enregistrement dans dp_pageviews. Elle ne représente pas nécessairement un visiteur unique.</p>
           </div>
@@ -619,8 +622,18 @@
       <div class="panel"><div class="panel-head"><h3>Activité récente</h3><button class="btn-refresh" onclick="loadAnalytics()">Actualiser</button></div><div class="panel-body" id="analyticsSummary"><div class="empty">Chargement…</div></div></div>
     </div>
 
+
+    <div class="tab-panel" data-tab="api">
+      <div class="greeting-block"><h2>Clés API</h2><p>Gère séparément les clés qui connectent tes applications à EtaChop.</p></div>
+      <div id="apiKeysPanelMount"></div>
+    </div>
     <!-- ONGLET MENU (boutique, réputation, promo, livraison) -->
     <div class="tab-panel" data-tab="menu">
+
+      <div class="menu-shortcuts" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-ghost" type="button" onclick="goToTab('api')">⌘ Clé API</button>
+        <button class="btn btn-ghost" type="button" onclick="goToTab('menu')">Ma boutique &amp; outils</button>
+      </div>
     <div class="store-banner" id="storeBanner">
       <div style="display:flex; align-items:center; gap:14px;">
         <img id="bannerLogo" style="display:none; width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.5);">
@@ -709,11 +722,18 @@
     </div>
     <!-- /ONGLET MENU (suite plus bas : promo, livraison) -->
 
+
+<div id="orderDetailsOverlay" role="dialog" aria-modal="true" aria-labelledby="orderDetailsTitle" style="display:none;position:fixed;inset:0;background:rgba(20,18,31,.58);z-index:120;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:18px;padding:22px;width:min(560px,100%);max-height:88vh;overflow:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;"><h3 id="orderDetailsTitle">Détails de la commande</h3><button class="btn btn-ghost" type="button" onclick="closeOrderDetails()">Fermer</button></div>
+    <div id="orderDetailsBody"></div>
+  </div>
+</div>
     <!-- ONGLET VENTES -->
     <div class="tab-panel" data-tab="sales">
     <div class="greeting-block"><h2>Ventes</h2><p>Commandes et performances commerciales de ta boutique.</p></div>
     <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="stat-num" id="statOrders">—</div><div class="stat-lbl">Commandes</div></div>
+      <div class="stat-card"><div class="stat-num" id="statOrders">—</div><div class="stat-lbl">Commandes visibles</div></div>
       <div class="stat-card"><div class="stat-num" id="statConfirmed">—</div><div class="stat-lbl">Confirmées</div></div>
       <div class="stat-card"><div class="stat-num" id="statPending">—</div><div class="stat-lbl">En attente</div></div>
       <div class="stat-card"><div class="stat-num" id="statCancelled">—</div><div class="stat-lbl">Annulées</div></div>
@@ -721,7 +741,7 @@
       <div class="stat-card"><div class="stat-num" id="statRevenue">—</div><div class="stat-lbl">Revenu confirmé</div></div>
     </div>
 
-    <p class="sales-note" id="ordersVisibilityNote">Attention : la politique RLS actuelle de dp_orders ne permet au vendeur de lire que les commandes associées à un paiement approuvé. Les commandes en attente et annulées ne peuvent donc pas être comptabilisées avant l’ajustement sécurisé de cette politique.</p>
+    <p class="sales-note" id="ordersVisibilityNote">Sélectionne une commande pour consulter les coordonnées du client et les informations de paiement disponibles.</p>
     <div class="panel">
       <div class="panel-head">
         <h3>Toutes les commandes accessibles</h3>
@@ -804,6 +824,17 @@
             <div id="digitalFileName" style="display:none; font-size:0.82rem; font-weight:600;"></div>
             <input type="file" id="digitalFileInput" onchange="previewDigitalFile(event)">
           </label>
+        </div>
+
+        <div class="panel" style="padding:14px;border:1px solid var(--line);border-radius:12px;margin:8px 0 16px;">
+          <h4 style="margin-bottom:12px;">Offre promotionnelle (facultatif)</h4>
+          <div class="row2">
+            <div class="field"><label>Prix promotionnel (FCFA)</label><input type="number" id="pPromoPrice" min="0" placeholder="Ex. 2500"></div>
+            <div class="field"><label>Quantité limitée de l’offre</label><input type="number" id="pOfferLimit" min="1" placeholder="Ex. 10"></div>
+          </div>
+          <div class="field"><label>Texte du bouton d’action</label><select id="pCtaLabel"><option>Acheter maintenant</option><option>Profitez de l’offre</option><option>Commander maintenant</option><option>S’inscrire maintenant</option><option>Rejoindre la formation</option><option>Télécharger maintenant</option><option>Réserver ma place</option><option>Obtenir maintenant</option><option>Je profite de l’offre</option></select></div>
+          <div class="field"><label>Fin de l’offre (facultatif)</label><input type="datetime-local" id="pOfferExpiresAt"></div>
+          <small style="color:#777;line-height:1.5;display:block;">Le prix normal reste le prix principal. Le prix promotionnel, la date de fin et la quantité limitée seront enregistrés avec le produit.</small>
         </div>
         <div class="field">
           <label>Description</label>
@@ -2070,10 +2101,11 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   function goToTab(tabName){
     document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
     document.querySelectorAll(`.tab-panel[data-tab="${tabName}"]`).forEach(el => el.classList.add('active'));
-    document.querySelectorAll('.nav-item[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === tabName));
+    document.querySelectorAll('.nav-item[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === tabName || (tabName === 'api' && el.dataset.tab === 'menu' && !!el.closest('.bottom-nav'))));
     if(tabName === 'sales') { loadOrders(); loadAnalytics(); }
     if(tabName === 'home') loadStats();
-    if(tabName === 'menu') { initEtaDeveloperPanel(); showDeveloperSection('keys', document.querySelector('.developer-tile')); }
+    if(tabName === 'menu') { initEtaDeveloperPanel(); }
+    if(tabName === 'api') { initEtaDeveloperPanel(); loadEtaApiKeys(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2155,9 +2187,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     } catch(err){
       console.error('loadBalance:',err);
       const history=document.getElementById('payoutsHistory');
-      if(history) history.innerHTML=`<div class="empty">Impossible de charger le solde. ${escapeHtml(err.message||'')}<br><button class="btn btn-ghost" onclick="loadBalance()">Réessayer</button></div>`;
+      if(history) history.innerHTML=`<div class="empty">Données momentanément indisponibles pour afficher le solde.<br><button class="btn btn-ghost" onclick="loadBalance()">Actualiser</button></div>`;
       const trend=document.getElementById('balanceTrendWrap');
-      if(trend) trend.innerHTML=`<div class="chart-empty-error">Données financières indisponibles.<br><small>${escapeHtml(err.message||'')}</small><br><button class="btn btn-ghost" onclick="loadBalance()">Réessayer</button></div>`;
+      if(trend) trend.innerHTML=`<div class="chart-empty-error">Données momentanément indisponibles pour afficher les informations financières.<br><button class="btn btn-ghost" onclick="loadBalance()">Actualiser</button></div>`;
     }
   }
 
@@ -2308,7 +2340,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const revenue7d = paidOrders.filter(o => new Date(o.created_at) >= sevenDaysAgo).reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
 
-      const uniqueCustomers = new Set(orders.map(o => o.customer_phone).filter(Boolean)).size;
+      const uniqueCustomers = new Set(orders.map(o => o.customer_phone)).size;
 
       document.getElementById('statTotalRevenue').textContent = totalRevenue.toLocaleString('fr-FR') + ' F';
       document.getElementById('statRevenue7d').textContent = revenue7d.toLocaleString('fr-FR') + ' F';
@@ -2358,9 +2390,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       }).join('');
     } catch(err){
       console.error('loadHomeStats:',err);
-      document.getElementById('topProductsBody').innerHTML = `<div class="empty">Impossible de charger les statistiques. ${escapeHtml(err.message||'')}<br><button class="btn btn-ghost" onclick="loadHomeStats()">Réessayer</button></div>`;
+      document.getElementById('topProductsBody').innerHTML = `<div class="empty">Données insuffisantes pour afficher les produits les plus vendus.<br><button class="btn btn-ghost" onclick="loadHomeStats()">Actualiser</button></div>`;
       const recent=document.getElementById('homeRecentOrders');
-      if(recent)recent.innerHTML=`<div class="empty">Impossible de charger les commandes. <button class="btn btn-ghost" onclick="loadHomeStats()">Réessayer</button></div>`;
+      if(recent)recent.innerHTML=`<div class="empty">Commandes momentanément indisponibles.<br><button class="btn btn-ghost" onclick="loadHomeStats()">Actualiser</button></div>`;
     }
   }
 
@@ -2607,12 +2639,25 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     const price = selectedProductType === 'digital' ? document.getElementById('pPriceDigital').value : document.getElementById('pPrice').value;
     const stock = document.getElementById('pStock').value;
     const description = document.getElementById('pDesc').value.trim();
+    const promoRaw = document.getElementById('pPromoPrice')?.value || '';
+    const promoPrice = promoRaw === '' ? null : parseInt(promoRaw,10);
+    const offerLimitRaw = document.getElementById('pOfferLimit')?.value || '';
+    const offerLimit = offerLimitRaw === '' ? null : parseInt(offerLimitRaw,10);
+    const ctaLabel = document.getElementById('pCtaLabel')?.value || 'Acheter maintenant';
+    const expiresRaw = document.getElementById('pOfferExpiresAt')?.value || '';
+    const offerExpiresAt = expiresRaw ? new Date(expiresRaw).toISOString() : null;
     const msg = document.getElementById('formMsg');
     const btn = document.getElementById('publishBtn');
 
     if(!name || !price || !selectedImageFile){
       msg.textContent = "Remplis le nom, le prix et ajoute une photo."; msg.className = "form-msg err"; msg.style.display = "block";
       return;
+    }
+    if(promoPrice !== null && (!Number.isFinite(promoPrice) || promoPrice < 0 || promoPrice >= parseInt(price,10))){
+      msg.textContent = "Le prix promotionnel doit être inférieur au prix normal."; msg.className = "form-msg err"; msg.style.display = "block"; return;
+    }
+    if(offerLimit !== null && (!Number.isInteger(offerLimit) || offerLimit < 1)){
+      msg.textContent = "La quantité limitée doit être supérieure à zéro."; msg.className = "form-msg err"; msg.style.display = "block"; return;
     }
     if(selectedProductType === 'digital' && !selectedDigitalFile){
       msg.textContent = "Ajoute le fichier à livrer pour ce produit numérique."; msg.className = "form-msg err"; msg.style.display = "block";
@@ -2673,6 +2718,8 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
           stock_quantity: selectedProductType === 'digital' ? 999999 : (stock ? parseInt(stock,10) : 999),
           image_url: imageUrl, extra_image_urls: extraUrls,
           product_type: selectedProductType, file_url: digitalFileUrl,
+          promo_price_fcfa: promoPrice, cta_label: ctaLabel,
+          offer_expires_at: offerExpiresAt, offer_limit: offerLimit, offer_sold_count: 0,
         }),
       });
       const productData = await insertRes.json();
@@ -2687,6 +2734,10 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('pPriceDigital').value = '';
       document.getElementById('pStock').value = '';
       document.getElementById('pDesc').value = '';
+      if(document.getElementById('pPromoPrice')) document.getElementById('pPromoPrice').value='';
+      if(document.getElementById('pOfferLimit')) document.getElementById('pOfferLimit').value='';
+      if(document.getElementById('pOfferExpiresAt')) document.getElementById('pOfferExpiresAt').value='';
+      if(document.getElementById('pCtaLabel')) document.getElementById('pCtaLabel').value='Acheter maintenant';
       document.getElementById('imagePreview').style.display = 'none';
       document.getElementById('uploadPlaceholder').style.display = 'block';
       document.getElementById('imageInput').value = '';
@@ -2970,8 +3021,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       renderAnalyticsChart();
     }catch(err){
       console.error('loadAnalytics:',err);
-      const message = escapeHtml(err.message || 'Erreur inconnue');
-      const errorHtml = `<div class="chart-empty-error">Impossible de charger les analytiques.<br><small>${message}</small><br><button class="btn btn-ghost" onclick="loadAnalytics()">Réessayer</button></div>`;
+      const errorHtml = `<div class="chart-empty-error">Données momentanément indisponibles pour afficher les statistiques commerciales.<br><button class="btn btn-ghost" onclick="loadAnalytics()">Actualiser</button></div>`;
       chart.innerHTML = errorHtml;
       if(ordersChart) ordersChart.innerHTML = errorHtml;
       const summary = document.getElementById('analyticsSummary');
@@ -3059,12 +3109,16 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     renderAudienceChart();
   }
 
+  function countryDisplayName(code){
+    try{return new Intl.DisplayNames(['fr'],{type:'region'}).of(code)||code;}catch(_){return code;}
+  }
+
   async function loadStats(){
     const chart=document.getElementById('audienceChartWrap');
     if(!chart || !currentStore || !session) return;
     chart.innerHTML='<div class="analytics-empty">Chargement des visites réelles…</div>';
     try{
-      const rows=await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${encodeURIComponent(currentStore.id)}&select=created_at&order=created_at.asc`);
+      const rows=await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${encodeURIComponent(currentStore.id)}&select=created_at,country_code,visitor_id&order=created_at.asc`);
       audiencePageviewsCache=rows;
       const now=new Date();
       const todayStart=new Date(now);todayStart.setHours(0,0,0,0);
@@ -3077,10 +3131,20 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('visitsYear').textContent=countFrom(yearStart).toLocaleString('fr-FR');
       document.getElementById('visitsTotal').textContent=rows.length.toLocaleString('fr-FR');
       renderAudienceChart();
+      const countryTarget=document.getElementById('audienceCountries');
+      if(countryTarget){
+        const byCountry={};
+        rows.forEach(v=>{const code=String(v.country_code||'').trim().toUpperCase();if(code)byCountry[code]=(byCountry[code]||0)+1;});
+        const ranked=Object.entries(byCountry).sort((a,b)=>b[1]-a[1]).slice(0,8);
+        const total=ranked.reduce((n,x)=>n+x[1],0);
+        countryTarget.innerHTML=ranked.length?`<strong>Pays des visiteurs</strong><div class="audience-country-list">${ranked.map(([code,count])=>`<div class="audience-country-row"><span>${escapeHtml(countryDisplayName(code))}</span><b>${count.toLocaleString('fr-FR')}</b><small>${rows.length?Math.round(count/rows.length*100):0}%</small></div>`).join('')}</div>`:'Les pays des visiteurs seront affichés dès que le système de suivi les aura collectés.';
+      }
+      const unique=rows.filter(v=>v.visitor_id).map(v=>v.visitor_id);
+      const uniqueEl=document.getElementById('uniqueVisitorsTotal');
+      if(uniqueEl) uniqueEl.textContent=unique.length?new Set(unique).size.toLocaleString('fr-FR'):'—';
     }catch(err){
       console.error('loadStats:',err);
-      const message=escapeHtml(err.message||'Erreur inconnue');
-      chart.innerHTML=`<div class="chart-empty-error">Impossible de charger les visites.<br><small>${message}</small><br><button class="btn btn-ghost" onclick="loadStats()">Réessayer</button></div>`;
+      chart.innerHTML=`<div class="chart-empty-error">Données momentanément indisponibles pour afficher l’audience.<br><button class="btn btn-ghost" onclick="loadStats()">Actualiser</button></div>`;
       ['visitsToday','visitsMonth','visitsYear','visitsTotal'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
     }
   }
@@ -3223,12 +3287,24 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     loadDeliveryZones();
   }
 
+  let currentOrdersCache=[];
+  function closeOrderDetails(){const el=document.getElementById('orderDetailsOverlay');if(el)el.style.display='none';}
+  function showOrderDetails(orderId){
+    const o=currentOrdersCache.find(x=>x.id===orderId);if(!o)return;
+    const pay=Array.isArray(o.dp_payments)?o.dp_payments[0]:(o.dp_payments||{});
+    const fields=[['Client',o.customer_name],['E-mail',o.customer_email],['Téléphone',o.customer_phone],['Pays',o.buyer_country_code||pay.country_code],['Adresse',[o.delivery_address,o.delivery_district,o.delivery_city].filter(Boolean).join(', ')],['Produit',o.product_name_snapshot],['Montant',`${Number(o.amount_fcfa||0).toLocaleString('fr-FR')} FCFA`],['Statut commande',o.status],['Statut paiement',pay.status],['Mode de paiement',pay.provider],['Opérateur',pay.operator||pay.network_code],['Référence transaction',pay.transaction_id||pay.external_reference],['Date',o.created_at?new Date(o.created_at).toLocaleString('fr-FR'):'']];
+    const target=document.getElementById('orderDetailsBody');
+    target.innerHTML=fields.filter(([,v])=>v!==null&&v!==undefined&&String(v).trim()!=='').map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #eee;font-size:.88rem;"><span style="color:#777">${escapeHtml(k)}</span><strong style="text-align:right;overflow-wrap:anywhere">${escapeHtml(v)}</strong></div>`).join('')||'<p>Informations indisponibles.</p>';
+    document.getElementById('orderDetailsOverlay').style.display='flex';
+  }
+
   async function loadOrders(){
     const body=document.getElementById('ordersBody');
     if(!body||!currentStore||!session)return;
     body.innerHTML='<tr><td colspan="4" class="empty">Chargement…</td></tr>';
     try{
-      const orders=await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&select=id,customer_name,customer_phone,product_name_snapshot,amount_fcfa,status,created_at,variant_selection,delivery_address,delivery_district,delivery_city,buyer_country_code,delivery_zone,logistics_status,tracking_code&order=created_at.desc`);
+      const orders=await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&select=id,customer_name,customer_email,customer_phone,product_name_snapshot,amount_fcfa,status,created_at,variant_selection,delivery_address,delivery_district,delivery_city,buyer_country_code,delivery_zone,logistics_status,tracking_code,dp_payments(provider,status,country_code,network_code,transaction_id,external_reference,operator)&order=created_at.desc`);
+      currentOrdersCache=orders;
       const confirmed=orders.filter(o=>PAID_STATUSES.includes(o.status));
       const revenue=confirmed.reduce((sum,o)=>sum+(Number(o.amount_fcfa)||0),0);
       const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
@@ -3243,7 +3319,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         return;
       }
       body.innerHTML=orders.map(o=>`
-        <tr style="border-top:1px solid var(--line);">
+        <tr style="border-top:1px solid var(--line);cursor:pointer;" onclick="showOrderDetails('${o.id}')" title="Afficher les détails de cette commande">
           <td style="padding:10px 16px;">${escapeHtml(o.customer_name||'Client')}<br><span style="opacity:0.5;font-size:0.76rem;">${escapeHtml(o.customer_phone||'')}</span><br><span style="opacity:0.4;font-size:0.7rem;font-family:monospace;">${escapeHtml(o.tracking_code||'')}</span></td>
           <td style="padding:10px 16px;">${escapeHtml(o.product_name_snapshot||'Produit')}${o.variant_selection?`<br><span style="opacity:0.55;font-size:0.76rem;">${escapeHtml(o.variant_selection)}</span>`:''}${o.delivery_address?`<br><span style="opacity:0.5;font-size:0.72rem;">${escapeHtml([o.delivery_address,o.delivery_district,o.delivery_city].filter(Boolean).join(', '))}</span>`:''}${o.buyer_country_code?`<br><span style="opacity:0.62;font-size:0.72rem;">Destination : ${escapeHtml(o.buyer_country_code)}</span>`:''}${o.delivery_zone?`<br><span style="opacity:0.62;font-size:0.72rem;">Livraison : ${escapeHtml(o.delivery_zone)}</span>`:''}${o.logistics_status?`<br><span style="font-size:0.72rem;font-weight:600;color:#027A48;">Logistique : ${escapeHtml(o.logistics_status)}</span>`:''}</td>
           <td style="padding:10px 16px;font-weight:700;white-space:nowrap;">${(Number(o.amount_fcfa)||0).toLocaleString('fr-FR')} F</td>
@@ -3258,7 +3334,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         </tr>`).join('');
     }catch(err){
       console.error('loadOrders:',err);
-      body.innerHTML=`<tr><td colspan="4" class="empty">Impossible de charger les commandes.<br><small>${escapeHtml(err.message||'Erreur inconnue')}</small><br><button class="btn btn-ghost" onclick="loadOrders()">Réessayer</button></td></tr>`;
+      body.innerHTML=`<tr><td colspan="4" class="empty">Commandes momentanément indisponibles.<br><button class="btn btn-ghost" onclick="loadOrders()">Actualiser</button></td></tr>`;
     }
   }
 
@@ -3418,6 +3494,10 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   // Une demande explicite de connexion affiche toujours le formulaire de connexion.
   // Une inscription avec une session existante reprend directement l'onboarding.
   setupStoreDraftPersistence();
+  const apiKeysPanel=document.getElementById('dev-keys');
+  const apiKeysMount=document.getElementById('apiKeysPanelMount');
+  if(apiKeysPanel && apiKeysMount){apiKeysPanel.classList.add('active');apiKeysMount.appendChild(apiKeysPanel);}
+  const oldApiTile=document.querySelector('[data-api-tile="true"]');if(oldApiTile)oldApiTile.remove();
 
   if(requestedAuthMode === 'login'){
     document.getElementById('dashboard').style.display = 'none';
