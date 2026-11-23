@@ -337,6 +337,34 @@
   #dashboard .community-icon svg{width:27px;height:27px;display:block}
   @media(max-width:420px){#dashboard .bottom-nav .nav-item{font-size:8px;gap:3px;padding-left:0;padding-right:0}#dashboard .bottom-nav .nav-item .nav-icon svg{width:18px;height:18px}}
 
+  /* ---------- Audience, navigation et états de chargement ---------- */
+  #dashboard .audience-section{margin:0 0 20px}
+  #dashboard .audience-subtitle{font-size:10px;color:#87918c;margin-top:4px}
+  #dashboard .audience-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  #dashboard .audience-kpi{padding:14px;border:1px solid #edf0ef;border-radius:12px;background:#fbfcfb;min-width:0}
+  #dashboard .audience-kpi strong{display:block;font:700 22px 'Poppins',sans-serif;color:#1c2924;overflow-wrap:anywhere}
+  #dashboard .audience-kpi span{display:block;font-size:10px;color:#87918c;margin-top:4px}
+  #dashboard .audience-chart-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 0 4px}
+  #dashboard .audience-chart-head>strong{font-size:12px}
+  #dashboard .audience-country-note{margin-top:12px;padding:12px 14px;border-radius:10px;background:#f7f8f8;color:#77817d;font-size:11px;line-height:1.6}
+  #dashboard .audience-footnote{font-size:10px;color:#9aa29f;margin-top:9px;line-height:1.5}
+  #dashboard .chart-empty-error{padding:25px 14px;text-align:center;color:#9b444b;font-size:12px;line-height:1.6}
+  #dashboard .chart-empty-error button{margin-top:10px}
+  #dashboard .sales-note{font-size:11px;color:#8b9491;line-height:1.6;margin:0 0 12px}
+  @media(max-width:767px){
+    #dashboard .audience-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    #dashboard .audience-kpi{padding:12px}
+    #dashboard .audience-kpi strong{font-size:19px}
+    #dashboard .audience-chart-head{align-items:flex-start}
+    #dashboard .audience-chart-head .chart-toolbar{width:100%}
+    #dashboard .audience-chart-head .chart-range{flex:1;padding:7px 5px}
+    #dashboard .bottom-nav .nav-item{min-height:48px}
+    #dashboard .bottom-nav .nav-item .nav-icon svg{width:20px;height:20px}
+  }
+  @media(min-width:768px){
+    #dashboard .bottom-nav{display:none!important}
+    #dashboard .wrap{padding-bottom:50px}
+  }
 </style>
 </head>
 <body>
@@ -508,10 +536,8 @@
     <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
     <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
     <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg></span>Produits</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg></span>Analytiques</button>
     <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.8-1-3-1-1.8 0-3 .9-3 2.2s1.2 2 3 2.3 3 .9 3 2.3-1.2 2.3-3.2 2.3c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span>Revenus &amp; solde</button>
     <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☷</span>Ma boutique &amp; outils</button>
-    <button class="nav-item" data-tab="settings" onclick="goToTab('settings')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 3 3"/></svg></span>Clés API</button>
     <div class="sidebar-bottom"><div class="sidebar-caption">Compte</div><button class="nav-item" onclick="logout()"><span class="nav-icon">↪</span>Déconnexion</button></div>
   </aside>
   <div class="wrap">
@@ -531,11 +557,45 @@
         <button class="btn btn-primary" onclick="goToTab('products')">+ Ajouter un produit</button>
         <button class="btn btn-ghost" onclick="goToTab('menu'); setTimeout(()=>document.getElementById('promoCodeInput')?.scrollIntoView({behavior:'smooth'}), 100);">🏷️ Créer une promo</button>
       </div>
+      <section class="audience-section" aria-labelledby="audienceTitle">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h3 id="audienceTitle">Audience de la boutique</h3><p class="audience-subtitle">Visites enregistrées sur ta boutique</p></div>
+            <button class="btn-refresh" type="button" onclick="loadStats()">Actualiser</button>
+          </div>
+          <div class="panel-body">
+            <div class="audience-kpis">
+              <div class="audience-kpi"><strong id="visitsToday">—</strong><span>Visites aujourd’hui</span></div>
+              <div class="audience-kpi"><strong id="visitsMonth">—</strong><span>Visites ce mois</span></div>
+              <div class="audience-kpi"><strong id="visitsYear">—</strong><span>Visites cette année</span></div>
+              <div class="audience-kpi"><strong id="visitsTotal">—</strong><span>Total des visites</span></div>
+            </div>
+            <div class="audience-chart-head">
+              <strong>Évolution des visites</strong>
+              <div class="chart-toolbar">
+                <button class="chart-range active" data-audience-days="7" onclick="setAudienceRange(7,this)">7 j</button>
+                <button class="chart-range" data-audience-days="30" onclick="setAudienceRange(30,this)">30 j</button>
+                <button class="chart-range" data-audience-days="90" onclick="setAudienceRange(90,this)">90 j</button>
+                <button class="chart-range" data-audience-days="365" onclick="setAudienceRange(365,this)">12 mois</button>
+              </div>
+            </div>
+            <div id="audienceChartWrap" class="chart-wrap"><div class="analytics-empty">Chargement des visites…</div></div>
+            <div class="audience-country-note" id="audienceCountries">
+              Les pays d’origine ne sont pas encore collectés par le système de suivi actuel.
+            </div>
+            <p class="audience-footnote">Une visite correspond à un enregistrement dans dp_pageviews. Elle ne représente pas nécessairement un visiteur unique.</p>
+          </div>
+        </div>
+      </section>
       <div class="panel">
         <div class="panel-head"><h3>Produits les plus vendus</h3></div>
         <div id="topProductsBody">
           <div class="empty">Chargement…</div>
         </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Commandes récentes</h3><button class="btn-refresh" type="button" onclick="loadHomeStats()">Actualiser</button></div>
+        <div id="homeRecentOrders"><div class="empty">Chargement…</div></div>
       </div>
       <a class="community-card" href="https://whatsapp.com/channel/0029VbDjEQ89hXF7jnHGfH3T" target="_blank" rel="noopener noreferrer">
         <span class="community-icon" aria-label="WhatsApp"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path fill="currentColor" d="M16 3.2A12.6 12.6 0 0 0 5.2 22.3L3.5 28.7l6.6-1.7A12.7 12.7 0 1 0 16 3.2Zm0 22.9c-2 0-3.9-.5-5.6-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.1 10.1 0 1 1 16 26.1Z"/><path fill="currentColor" d="M22 18.2c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.6-.9-.8-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.7-1-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.4 5.3 4.7.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.4Z"/></svg></span>
@@ -545,17 +605,18 @@
     </div>
 
     <!-- ONGLET ANALYTIQUES : données réelles issues des commandes -->
-    <div class="tab-panel" data-tab="analytics">
-      <div class="greeting-block"><h2>Analytiques</h2><p>Évolution de tes ventes à partir des commandes enregistrées sur EtaChop.</p></div>
+    <div class="tab-panel" data-tab="sales">
+      <div class="greeting-block"><h2>Analyse commerciale</h2><p>Évolution du chiffre d’affaires et du volume de commandes confirmées.</p></div>
       <div class="analytics-kpis">
         <div class="analytics-kpi"><div class="kpi-value" id="analyticsRevenue">—</div><div class="kpi-label">Chiffre d'affaires confirmé</div></div>
         <div class="analytics-kpi"><div class="kpi-value" id="analyticsOrders">—</div><div class="kpi-label">Commandes confirmées</div></div>
         <div class="analytics-kpi"><div class="kpi-value" id="analyticsAverage">—</div><div class="kpi-label">Panier moyen</div></div>
       </div>
       <div class="panel"><div class="panel-head"><div><h3>Évolution du chiffre d'affaires</h3><div class="chart-legend">Ventes confirmées</div></div><div class="chart-toolbar">
-        <button class="chart-range active" data-days="7" onclick="setAnalyticsRange(7,this)">7 j</button><button class="chart-range" data-days="30" onclick="setAnalyticsRange(30,this)">30 j</button><button class="chart-range" data-days="90" onclick="setAnalyticsRange(90,this)">90 j</button>
+        <button class="chart-range active" data-days="7" onclick="setAnalyticsRange(7,this)">7 j</button><button class="chart-range" data-days="30" onclick="setAnalyticsRange(30,this)">30 j</button><button class="chart-range" data-days="90" onclick="setAnalyticsRange(90,this)">90 j</button><button class="chart-range" data-days="365" onclick="setAnalyticsRange(365,this)">12 mois</button>
       </div></div><div class="chart-wrap" id="analyticsChartWrap"><div class="analytics-empty">Chargement des données réelles…</div></div></div>
-      <div class="panel"><div class="panel-head"><h3>Activité récente</h3></div><div class="panel-body" id="analyticsSummary"><div class="empty">Chargement…</div></div></div>
+      <div class="panel"><div class="panel-head"><h3>Nombre de commandes par période</h3></div><div class="chart-wrap" id="ordersChartWrap"><div class="analytics-empty">Chargement des données réelles…</div></div></div>
+      <div class="panel"><div class="panel-head"><h3>Activité récente</h3><button class="btn-refresh" onclick="loadAnalytics()">Actualiser</button></div><div class="panel-body" id="analyticsSummary"><div class="empty">Chargement…</div></div></div>
     </div>
 
     <!-- ONGLET MENU (boutique, réputation, promo, livraison) -->
@@ -650,16 +711,20 @@
 
     <!-- ONGLET VENTES -->
     <div class="tab-panel" data-tab="sales">
+    <div class="greeting-block"><h2>Ventes</h2><p>Commandes et performances commerciales de ta boutique.</p></div>
     <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="stat-num" id="statVisitors">—</div><div class="stat-lbl">Visiteurs</div></div>
       <div class="stat-card"><div class="stat-num" id="statOrders">—</div><div class="stat-lbl">Commandes</div></div>
       <div class="stat-card"><div class="stat-num" id="statConfirmed">—</div><div class="stat-lbl">Confirmées</div></div>
+      <div class="stat-card"><div class="stat-num" id="statPending">—</div><div class="stat-lbl">En attente</div></div>
+      <div class="stat-card"><div class="stat-num" id="statCancelled">—</div><div class="stat-lbl">Annulées</div></div>
+      <div class="stat-card"><div class="stat-num" id="statDelivered">—</div><div class="stat-lbl">Livrées</div></div>
       <div class="stat-card"><div class="stat-num" id="statRevenue">—</div><div class="stat-lbl">Revenu confirmé</div></div>
     </div>
 
+    <p class="sales-note" id="ordersVisibilityNote">Attention : la politique RLS actuelle de dp_orders ne permet au vendeur de lire que les commandes associées à un paiement approuvé. Les commandes en attente et annulées ne peuvent donc pas être comptabilisées avant l’ajustement sécurisé de cette politique.</p>
     <div class="panel">
       <div class="panel-head">
-        <h3>Commandes récentes</h3>
+        <h3>Toutes les commandes accessibles</h3>
         <button class="btn-refresh" onclick="loadOrders()">Actualiser</button>
       </div>
       <div class="panel-body table-scroll" style="padding:0;">
@@ -854,11 +919,19 @@
       </div>
       <div class="panel" style="margin-bottom:20px;">
         <div class="panel-body" style="text-align:center; padding:26px 20px;">
-          <div style="font-size:0.8rem; opacity:0.6; margin-bottom:6px;">Solde disponible</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-size:0.8rem;opacity:0.6;margin-bottom:6px;">Solde disponible <button class="btn-refresh" type="button" onclick="loadBalance()">Actualiser</button></div>
           <div id="statBalanceOwed" style="font-size:2.2rem; font-weight:800; color:var(--primary); font-family:'Montserrat',sans-serif;">—</div>
         </div>
       </div>
 
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-head"><div><h3>Évolution des revenus confirmés</h3><div class="chart-legend">Part vendeur après commission</div></div><div class="chart-toolbar">
+          <button class="chart-range active" data-balance-days="30" onclick="setBalanceRange(30,this)">30 j</button>
+          <button class="chart-range" data-balance-days="90" onclick="setBalanceRange(90,this)">90 j</button>
+          <button class="chart-range" data-balance-days="365" onclick="setBalanceRange(365,this)">12 mois</button>
+        </div></div>
+        <div class="chart-wrap" id="balanceTrendWrap"><div class="analytics-empty">Chargement des revenus…</div></div>
+      </div>
       <div class="panel" style="margin-bottom:20px;">
         <div class="panel-head"><h3>Demander un retrait</h3></div>
         <div class="panel-body" id="withdrawFormBody">
@@ -919,7 +992,7 @@
     </div>
 
     <!-- PARAMÈTRES ET ESPACE DÉVELOPPEUR -->
-    <div class="tab-panel" data-tab="settings">
+    <div class="tab-panel" data-tab="menu">
       <div class="settings-heading">
         <div><span class="settings-kicker">ESPACE DÉVELOPPEUR</span><h2>Clés API</h2><p>Connecte tes applications et gère tes intégrations EtaChop.</p></div>
       </div>
@@ -990,10 +1063,8 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
     <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg></span>Produits</button>
     <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg></span>Stats</button>
     <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.8-1-3-1-1.8 0-3 .9-3 2.2s1.2 2 3 2.3 3 .9 3 2.3-1.2 2.3-3.2 2.3c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span>Solde</button>
-    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>Menu</button>
-    <button class="nav-item" data-tab="settings" onclick="goToTab('settings')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 3 3"/></svg></span>Clés API</button>
+    <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>Menu</button>
   </div>
 </div>
 
@@ -1984,6 +2055,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     loadProducts().then(() => loadHomeStats());
     loadStats();
     loadOrders();
+    loadAnalytics();
     loadPromoCodes();
     loadDeliveryZones();
     loadBalance();
@@ -1999,8 +2071,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
     document.querySelectorAll(`.tab-panel[data-tab="${tabName}"]`).forEach(el => el.classList.add('active'));
     document.querySelectorAll('.nav-item[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === tabName));
-    if(tabName === 'analytics') loadAnalytics();
-    if(tabName === 'settings') { initEtaDeveloperPanel(); showDeveloperSection('keys', document.querySelector('.developer-tile')); }
+    if(tabName === 'sales') { loadOrders(); loadAnalytics(); }
+    if(tabName === 'home') loadStats();
+    if(tabName === 'menu') { initEtaDeveloperPanel(); showDeveloperSection('keys', document.querySelector('.developer-tile')); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2029,10 +2102,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   // ---------- Solde vendeur ----------
   async function loadBalance(){
     try {
-      const ordersRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${currentStore.id}&select=amount_fcfa,status`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
-      });
-      const orders = await ordersRes.json();
+      const orders = await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&select=amount_fcfa,status,created_at&order=created_at.asc`);
       const totalSales = orders.filter(o => PAID_STATUSES.includes(o.status)).reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
       const vendorShare = Math.round(totalSales * 0.9); // EtaChop garde 10% de commission
 
@@ -2042,22 +2112,22 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         const payoutsRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_payouts?store_id=eq.${currentStore.id}&order=created_at.desc`, {
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
         });
-        if(payoutsRes.ok){
-          payouts = await payoutsRes.json();
-          totalPaidOut = payouts.reduce((sum,p) => sum + Number(p.amount_fcfa), 0);
-        }
-      } catch(e){ /* silencieux */ }
+        if(!payoutsRes.ok) throw new Error(`Reversements : HTTP ${payoutsRes.status}`);
+        payouts = await payoutsRes.json();
+        if(!Array.isArray(payouts)) throw new Error('Réponse des reversements invalide.');
+        totalPaidOut = payouts.reduce((sum,p) => sum + Number(p.amount_fcfa), 0);
+      } catch(e){ throw e; }
 
       let pendingWithdrawals = 0;
       try {
         const pendingRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests?store_id=eq.${currentStore.id}&status=eq.pending&select=amount_fcfa`, {
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
         });
-        if(pendingRes.ok){
-          const pending = await pendingRes.json();
-          pendingWithdrawals = pending.reduce((sum,p) => sum + Number(p.amount_fcfa), 0);
-        }
-      } catch(e){ /* silencieux */ }
+        if(!pendingRes.ok) throw new Error(`Retraits en attente : HTTP ${pendingRes.status}`);
+        const pending = await pendingRes.json();
+        if(!Array.isArray(pending)) throw new Error('Réponse des retraits en attente invalide.');
+        pendingWithdrawals = pending.reduce((sum,p) => sum + Number(p.amount_fcfa), 0);
+      } catch(e){ throw e; }
 
       currentAvailableBalance = vendorShare - totalPaidOut - pendingWithdrawals;
 
@@ -2080,13 +2150,49 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
           </div>
         `).join('');
       }
+      renderBalanceTrend(orders);
       loadWithdrawals();
     } catch(err){
-      document.getElementById('payoutsHistory').innerHTML = '<div class="empty">Impossible de charger ton solde.</div>';
+      console.error('loadBalance:',err);
+      const history=document.getElementById('payoutsHistory');
+      if(history) history.innerHTML=`<div class="empty">Impossible de charger le solde. ${escapeHtml(err.message||'')}<br><button class="btn btn-ghost" onclick="loadBalance()">Réessayer</button></div>`;
+      const trend=document.getElementById('balanceTrendWrap');
+      if(trend) trend.innerHTML=`<div class="chart-empty-error">Données financières indisponibles.<br><small>${escapeHtml(err.message||'')}</small><br><button class="btn btn-ghost" onclick="loadBalance()">Réessayer</button></div>`;
     }
   }
 
   let currentAvailableBalance = 0;
+  let balanceRangeDays = 30;
+  let balanceOrdersCache = [];
+  function setBalanceRange(days,button){
+    balanceRangeDays=Number(days);
+    document.querySelectorAll('[data-balance-days]').forEach(el=>el.classList.toggle('active',el===button));
+    renderBalanceTrend(balanceOrdersCache);
+  }
+  function renderBalanceTrend(orders){
+    const chart=document.getElementById('balanceTrendWrap');
+    if(!chart)return;
+    balanceOrdersCache=Array.isArray(orders)?orders:[];
+    const paid=balanceOrdersCache.filter(o=>PAID_STATUSES.includes(o.status));
+    const now=new Date();
+    let buckets=[];
+    if(balanceRangeDays===365){
+      for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);buckets.push({date:d,label:d.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'}),amount:0});}
+      paid.forEach(o=>{const d=new Date(o.created_at),idx=buckets.findIndex(b=>b.date.getFullYear()===d.getFullYear()&&b.date.getMonth()===d.getMonth());if(idx>=0)buckets[idx].amount+=Math.round((Number(o.amount_fcfa)||0)*.9);});
+    }else{
+      const start=new Date(now);start.setHours(0,0,0,0);start.setDate(start.getDate()-(balanceRangeDays-1));
+      for(let i=0;i<balanceRangeDays;i++){const d=new Date(start);d.setDate(start.getDate()+i);buckets.push({date:d,label:d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}),amount:0});}
+      paid.forEach(o=>{const d=new Date(o.created_at);d.setHours(0,0,0,0);const idx=Math.round((d-start)/86400000);if(idx>=0&&idx<buckets.length)buckets[idx].amount+=Math.round((Number(o.amount_fcfa)||0)*.9);});
+    }
+    if(!buckets.some(b=>b.amount>0)){chart.innerHTML='<div class="analytics-empty">Aucun revenu confirmé sur cette période.</div>';return;}
+    const W=760,H=220,L=58,R=14,T=18,B=36,pw=W-L-R,ph=H-T-B,max=Math.max(1,...buckets.map(b=>b.amount));
+    const slot=pw/buckets.length,barW=Math.max(2,Math.min(26,slot*.58));
+    const grid=[0,.5,1].map(v=>{const y=T+ph-v*ph;return `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#edf0ef"/><text x="${L-8}" y="${y+4}" text-anchor="end" fill="#9aa29f" font-size="10">${Math.round(max*v).toLocaleString('fr-FR')}</text>`;}).join('');
+    const bars=buckets.map((b,i)=>{const x=L+i*slot+(slot-barW)/2,h=b.amount/max*ph;return `<rect x="${x.toFixed(1)}" y="${(T+ph-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#e63946" opacity=".85"><title>${b.label} : ${b.amount.toLocaleString('fr-FR')} FCFA</title></rect>`;}).join('');
+    const step=Math.max(1,Math.ceil(buckets.length/7));
+    const labels=buckets.map((b,i)=>i%step===0||i===buckets.length-1?`<text x="${(L+i*slot+slot/2).toFixed(1)}" y="${H-10}" text-anchor="middle" fill="#8d9693" font-size="10">${escapeHtml(b.label)}</text>`:'').join('');
+    chart.innerHTML=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Revenus vendeur après commission">${grid}${bars}${labels}</svg>`;
+  }
   const WITHDRAWAL_STATUS_LABEL = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
   const WITHDRAWAL_STATUS_COLOR = { pending: '#92400E', approved: '#065F46', rejected: '#991B1B' };
   const WITHDRAWAL_STATUS_BG = { pending: '#FEF3C7', approved: '#D1FAE5', rejected: '#FEE2E2' };
@@ -2168,7 +2274,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests?store_id=eq.${currentStore.id}&order=created_at.desc`, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
       });
+      if(!res.ok) throw new Error(`Supabase HTTP ${res.status}: ${(await res.text()).slice(0,180)}`);
       const withdrawals = await res.json();
+      if(!Array.isArray(withdrawals)) throw new Error('Réponse des retraits invalide.');
       if(withdrawals.length === 0){
         el.innerHTML = '<div class="empty">Aucune demande pour l\'instant.</div>';
         return;
@@ -2184,17 +2292,15 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         </div>
       `).join('');
     } catch(err){
-      el.innerHTML = '<div class="empty">Impossible de charger tes demandes.</div>';
+      console.error('loadWithdrawals:',err);
+      el.innerHTML = `<div class="empty">Impossible de charger tes demandes. ${escapeHtml(err.message||'')}<br><button class="btn btn-ghost" onclick="loadWithdrawals()">Réessayer</button></div>`;
     }
   }
 
 
   async function loadHomeStats(){
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${currentStore.id}&select=amount_fcfa,status,customer_phone,product_id,product_name_snapshot,created_at`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
-      });
-      const orders = await res.json();
+      const orders = await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&select=amount_fcfa,status,customer_phone,product_id,product_name_snapshot,created_at`);
 
       const paidOrders = orders.filter(o => PAID_STATUSES.includes(o.status));
       const totalRevenue = paidOrders.reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
@@ -2202,11 +2308,24 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const revenue7d = paidOrders.filter(o => new Date(o.created_at) >= sevenDaysAgo).reduce((sum,o) => sum + Number(o.amount_fcfa), 0);
 
-      const uniqueCustomers = new Set(orders.map(o => o.customer_phone)).size;
+      const uniqueCustomers = new Set(orders.map(o => o.customer_phone).filter(Boolean)).size;
 
       document.getElementById('statTotalRevenue').textContent = totalRevenue.toLocaleString('fr-FR') + ' F';
       document.getElementById('statRevenue7d').textContent = revenue7d.toLocaleString('fr-FR') + ' F';
       document.getElementById('statUniqueCustomers').textContent = uniqueCustomers;
+
+      const recentTarget=document.getElementById('homeRecentOrders');
+      if(recentTarget){
+        const recent=orders.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
+        recentTarget.innerHTML=recent.length?recent.map(o=>`
+          <div class="top-product-row">
+            <div style="flex:1;min-width:0;">
+              <div class="tp-name">${escapeHtml(o.customer_phone||'Client')} · ${escapeHtml(o.product_name_snapshot||'Produit')}</div>
+              <div class="tp-qty">${new Date(o.created_at).toLocaleString('fr-FR')} · ${escapeHtml(o.status||'')}</div>
+            </div>
+            <div class="tp-revenue">${(Number(o.amount_fcfa)||0).toLocaleString('fr-FR')} F</div>
+          </div>`).join(''):'<div class="empty">Aucune commande accessible pour le moment.</div>';
+      }
 
       // Top 5 produits les plus vendus (sur les commandes payées)
       const byProduct = {};
@@ -2238,7 +2357,10 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         `;
       }).join('');
     } catch(err){
-      document.getElementById('topProductsBody').innerHTML = '<div class="empty">Impossible de charger les statistiques.</div>';
+      console.error('loadHomeStats:',err);
+      document.getElementById('topProductsBody').innerHTML = `<div class="empty">Impossible de charger les statistiques. ${escapeHtml(err.message||'')}<br><button class="btn btn-ghost" onclick="loadHomeStats()">Réessayer</button></div>`;
+      const recent=document.getElementById('homeRecentOrders');
+      if(recent)recent.innerHTML=`<div class="empty">Impossible de charger les commandes. <button class="btn btn-ghost" onclick="loadHomeStats()">Réessayer</button></div>`;
     }
   }
 
@@ -2595,7 +2717,14 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?store_id=eq.${currentStore.id}&is_active=eq.true&order=created_at.desc`, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
       });
+      if(!res.ok) throw new Error(`Supabase HTTP ${res.status}: ${(await res.text()).slice(0,180)}`);
       const products = await res.json();
+      if(!Array.isArray(products)) throw new Error('Réponse des produits invalide.');
+      let productViews={};
+      try{
+        const views=await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${encodeURIComponent(currentStore.id)}&select=product_id`);
+        views.forEach(v=>{if(v.product_id)productViews[v.product_id]=(productViews[v.product_id]||0)+1;});
+      }catch(viewErr){console.warn('Consultations des produits indisponibles:',viewErr);}
       currentProducts = products;
       if(products.length === 0){
         grid.innerHTML = '<div class="empty">Aucun produit pour l\'instant. Ajoute le premier ci-dessus !</div>';
@@ -2605,8 +2734,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         <div class="prod-card">
           <img src="${p.image_url}" alt="${p.name}">
           <div class="pc-body">
-            <h4>${p.name}</h4>
+            <h4>${escapeHtml(p.name)}</h4>
             <div class="price">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</div>
+            <div style="font-size:0.68rem;color:#89928f;margin-bottom:7px;">${productViews[p.id]??'—'} consultation(s) enregistrée(s)</div>
             <div style="font-size:0.72rem; font-weight:700; margin-bottom:8px; color:${p.stock_quantity > 5 ? '#059669' : p.stock_quantity > 0 ? '#EA580C' : '#DC2626'};">
               ${p.stock_quantity > 0 ? `${p.stock_quantity} en stock` : 'Rupture de stock'}
             </div>
@@ -2619,7 +2749,8 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         </div>
       `).join('');
     } catch(err){
-      grid.innerHTML = '<div class="empty">Impossible de charger les produits.</div>';
+      console.error('loadProducts:',err);
+      grid.innerHTML = `<div class="empty">Impossible de charger les produits. ${escapeHtml(err.message||'')}<br><button class="btn btn-ghost" onclick="loadProducts()">Réessayer</button></div>`;
     }
   }
 
@@ -2788,55 +2919,206 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     }
   }
 
-  // ---------- Statistiques et commandes ----------
-  // Analytique : graphique calculé avec les commandes réelles Supabase.
+  // ---------- Statistiques commerciales et audience ----------
+  // Toutes les valeurs affichées proviennent des enregistrements Supabase.
   let analyticsRangeDays = 7;
   let analyticsOrdersCache = null;
+  let audienceRangeDays = 7;
+  let audiencePageviewsCache = null;
+
   function setAnalyticsRange(days, button){
-    analyticsRangeDays=days;
-    document.querySelectorAll('.chart-range').forEach(el=>el.classList.toggle('active',el===button));
+    analyticsRangeDays = Number(days);
+    document.querySelectorAll('[data-days]').forEach(el => el.classList.toggle('active', el === button));
     renderAnalyticsChart();
   }
-  async function loadAnalytics(){
-    const chart=document.getElementById('analyticsChartWrap'); if(!chart)return;
-    chart.innerHTML='<div class="analytics-empty">Chargement des données réelles…</div>';
-    try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${currentStore.id}&select=amount_fcfa,status,created_at&order=created_at.asc&limit=5000`,{headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${session.access_token}`}});
-      if(!res.ok)throw new Error('analytics_fetch_failed'); analyticsOrdersCache=await res.json(); renderAnalyticsChart();
-    }catch(err){chart.innerHTML='<div class="analytics-empty">Impossible de charger les analytiques. Vérifie ta connexion puis réessaie.</div>';document.getElementById('analyticsSummary').innerHTML='<div class="empty">Données indisponibles pour le moment.</div>';}
-  }
-  function renderAnalyticsChart(){
-    const chart=document.getElementById('analyticsChartWrap');if(!chart||!Array.isArray(analyticsOrdersCache))return;
-    const start=new Date();start.setHours(0,0,0,0);start.setDate(start.getDate()-(analyticsRangeDays-1));
-    const buckets=[];for(let i=0;i<analyticsRangeDays;i++){const d=new Date(start);d.setDate(start.getDate()+i);buckets.push({date:d,revenue:0});}
-    const paid=analyticsOrdersCache.filter(o=>PAID_STATUSES.includes(o.status));
-    paid.forEach(o=>{const d=new Date(o.created_at);d.setHours(0,0,0,0);const idx=Math.round((d-start)/86400000);if(idx>=0&&idx<buckets.length)buckets[idx].revenue+=Number(o.amount_fcfa)||0;});
-    const total=paid.reduce((s,o)=>s+(Number(o.amount_fcfa)||0),0),count=paid.length,avg=count?Math.round(total/count):0;
-    document.getElementById('analyticsRevenue').textContent=total.toLocaleString('fr-FR')+' F';
-    document.getElementById('analyticsOrders').textContent=count.toLocaleString('fr-FR');
-    document.getElementById('analyticsAverage').textContent=avg.toLocaleString('fr-FR')+' F';
-    const period=paid.filter(o=>new Date(o.created_at)>=start),periodRevenue=period.reduce((s,o)=>s+(Number(o.amount_fcfa)||0),0),pending=analyticsOrdersCache.filter(o=>o.status==='pending').length;
-    if(!period.length)chart.innerHTML='<div class="analytics-empty">Aucune vente confirmée sur cette période.<br>Le graphique se remplira automatiquement dès les premières commandes confirmées.</div>';
-    else{
-      const W=760,H=250,L=55,R=15,T=18,B=38,pw=W-L-R,ph=H-T-B,max=Math.max(1,...buckets.map(b=>b.revenue));
-      const pts=buckets.map((b,i)=>({x:L+(buckets.length===1?pw/2:i*pw/(buckets.length-1)),y:T+ph-(b.revenue/max)*ph,b}));
-      const line=pts.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '),area=`${L},${T+ph} ${line} ${L+pw},${T+ph}`;
-      const grid=[0,.25,.5,.75,1].map(v=>{const y=T+ph-v*ph;return `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#edf0ef"/><text x="${L-8}" y="${y+4}" text-anchor="end" fill="#9aa29f" font-size="10">${Math.round(max*v).toLocaleString('fr-FR')}</text>`;}).join('');
-      const dots=pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#e63946" stroke="#fff" stroke-width="2"><title>${p.b.date.toLocaleDateString('fr-FR')} : ${p.b.revenue.toLocaleString('fr-FR')} FCFA</title></circle>`).join('');
-      const step=Math.max(1,Math.ceil(buckets.length/7)),labels=pts.map((p,i)=>i%step===0||i===pts.length-1?`<text x="${p.x}" y="${H-10}" text-anchor="middle" fill="#8d9693" font-size="10">${p.b.date.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}</text>`:'').join('');
-      chart.innerHTML=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Chiffre d'affaires sur ${analyticsRangeDays} jours">${grid}<polygon points="${area}" fill="#e63946" opacity=".08"/><polyline points="${line}" fill="none" stroke="#e63946" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+
+  async function etaFetchAllRows(url){
+    const all=[];
+    let offset=0;
+    const pageSize=1000;
+    while(true){
+      const res=await fetch(url,{
+        headers:{
+          'apikey':SUPABASE_ANON_KEY,
+          'Authorization':`Bearer ${session.access_token}`,
+          'Range-Unit':'items',
+          'Range':`${offset}-${offset+pageSize-1}`
+        }
+      });
+      if(!res.ok){
+        const detail=await res.text().catch(()=> '');
+        throw new Error(`Supabase HTTP ${res.status}${detail ? ` — ${detail.slice(0,220)}` : ''}`);
+      }
+      const batch=await res.json();
+      if(!Array.isArray(batch))throw new Error('Réponse Supabase inattendue : un tableau était attendu.');
+      all.push(...batch);
+      if(batch.length<pageSize)break;
+      offset+=batch.length;
     }
-    document.getElementById('analyticsSummary').innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px"><div><div style="font-size:19px;font-weight:700">${period.length}</div><div style="font-size:11px;color:#89928f">Ventes confirmées (${analyticsRangeDays} j)</div></div><div><div style="font-size:19px;font-weight:700">${periodRevenue.toLocaleString('fr-FR')} F</div><div style="font-size:11px;color:#89928f">Revenu sur la période</div></div><div><div style="font-size:19px;font-weight:700">${pending}</div><div style="font-size:11px;color:#89928f">Commandes en attente</div></div></div>`;
+    return all;
+  }
+
+  async function loadAnalytics(){
+    const chart = document.getElementById('analyticsChartWrap');
+    const ordersChart = document.getElementById('ordersChartWrap');
+    if(!chart || !currentStore || !session) return;
+    chart.innerHTML = '<div class="analytics-empty">Chargement des commandes…</div>';
+    if(ordersChart) ordersChart.innerHTML = '<div class="analytics-empty">Chargement…</div>';
+    try{
+      const rows = await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&select=amount_fcfa,status,created_at&order=created_at.asc`);
+      analyticsOrdersCache = rows;
+      renderAnalyticsChart();
+    }catch(err){
+      console.error('loadAnalytics:',err);
+      const message = escapeHtml(err.message || 'Erreur inconnue');
+      const errorHtml = `<div class="chart-empty-error">Impossible de charger les analytiques.<br><small>${message}</small><br><button class="btn btn-ghost" onclick="loadAnalytics()">Réessayer</button></div>`;
+      chart.innerHTML = errorHtml;
+      if(ordersChart) ordersChart.innerHTML = errorHtml;
+      const summary = document.getElementById('analyticsSummary');
+      if(summary) summary.innerHTML = errorHtml;
+    }
+  }
+
+  function renderAnalyticsChart(){
+    const chart = document.getElementById('analyticsChartWrap');
+    const ordersChart = document.getElementById('ordersChartWrap');
+    if(!chart || !Array.isArray(analyticsOrdersCache)) return;
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(0,0,0,0);
+    start.setDate(start.getDate() - (analyticsRangeDays - 1));
+    const buckets = [];
+    for(let i=0;i<analyticsRangeDays;i++){
+      const d = new Date(start);
+      d.setDate(start.getDate()+i);
+      buckets.push({date:d,revenue:0,orders:0});
+    }
+    const paid = analyticsOrdersCache.filter(o => PAID_STATUSES.includes(o.status));
+    paid.forEach(o => {
+      const d = new Date(o.created_at);
+      d.setHours(0,0,0,0);
+      const idx = Math.round((d-start)/86400000);
+      if(idx>=0 && idx<buckets.length){
+        buckets[idx].revenue += Number(o.amount_fcfa)||0;
+        buckets[idx].orders += 1;
+      }
+    });
+    const total = paid.reduce((sum,o)=>sum+(Number(o.amount_fcfa)||0),0);
+    const count = paid.length;
+    const avg = count ? Math.round(total/count) : 0;
+    const revEl=document.getElementById('analyticsRevenue');
+    const countEl=document.getElementById('analyticsOrders');
+    const avgEl=document.getElementById('analyticsAverage');
+    if(revEl) revEl.textContent=total.toLocaleString('fr-FR')+' F';
+    if(countEl) countEl.textContent=count.toLocaleString('fr-FR');
+    if(avgEl) avgEl.textContent=avg.toLocaleString('fr-FR')+' F';
+
+    const period = paid.filter(o=>new Date(o.created_at)>=start);
+    const periodRevenue = period.reduce((sum,o)=>sum+(Number(o.amount_fcfa)||0),0);
+    const pending = analyticsOrdersCache.filter(o=>o.status==='pending').length;
+    if(!period.length){
+      chart.innerHTML='<div class="analytics-empty">Aucune vente confirmée sur cette période. Le graphique se remplira dès les premières ventes confirmées.</div>';
+      if(ordersChart) ordersChart.innerHTML='<div class="analytics-empty">Aucune commande confirmée sur cette période.</div>';
+    }else{
+      const W=760,H=250,L=62,R=15,T=18,B=38,pw=W-L-R,ph=H-T-B;
+      const maxRevenue=Math.max(1,...buckets.map(b=>b.revenue));
+      const pts=buckets.map((b,i)=>({x:L+(buckets.length===1?pw/2:i*pw/(buckets.length-1)),y:T+ph-(b.revenue/maxRevenue)*ph,b}));
+      const line=pts.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      const area=`${L},${T+ph} ${line} ${L+pw},${T+ph}`;
+      const grid=[0,.25,.5,.75,1].map(v=>{
+        const y=T+ph-v*ph;
+        return `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#edf0ef"/><text x="${L-8}" y="${y+4}" text-anchor="end" fill="#9aa29f" font-size="10">${Math.round(maxRevenue*v).toLocaleString('fr-FR')}</text>`;
+      }).join('');
+      const dots=pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#e63946" stroke="#fff" stroke-width="2"><title>${p.b.date.toLocaleDateString('fr-FR')} : ${p.b.revenue.toLocaleString('fr-FR')} FCFA</title></circle>`).join('');
+      const step=Math.max(1,Math.ceil(buckets.length/7));
+      const labels=pts.map((p,i)=>i%step===0||i===pts.length-1?`<text x="${p.x}" y="${H-10}" text-anchor="middle" fill="#8d9693" font-size="10">${p.b.date.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}</text>`:'').join('');
+      chart.innerHTML=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Chiffre d'affaires confirmé sur ${analyticsRangeDays} jours">${grid}<polygon points="${area}" fill="#e63946" opacity=".08"/><polyline points="${line}" fill="none" stroke="#e63946" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+
+      if(ordersChart){
+        const maxOrders=Math.max(1,...buckets.map(b=>b.orders));
+        const barW=Math.max(2,Math.min(18,pw/buckets.length*.62));
+        const bars=buckets.map((b,i)=>{
+          const x=L+(buckets.length===1?pw/2:i*pw/(buckets.length-1))-barW/2;
+          const h=(b.orders/maxOrders)*ph;
+          return `<rect x="${x.toFixed(1)}" y="${(T+ph-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#e63946" opacity=".82"><title>${b.date.toLocaleDateString('fr-FR')} : ${b.orders} commande(s) confirmée(s)</title></rect>`;
+        }).join('');
+        const countGrid=[0,.5,1].map(v=>{
+          const y=T+ph-v*ph;
+          return `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#edf0ef"/><text x="${L-8}" y="${y+4}" text-anchor="end" fill="#9aa29f" font-size="10">${Math.round(maxOrders*v)}</text>`;
+        }).join('');
+        ordersChart.innerHTML=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Nombre de commandes confirmées sur ${analyticsRangeDays} jours">${countGrid}${bars}${labels}</svg>`;
+      }
+    }
+    const summary=document.getElementById('analyticsSummary');
+    if(summary) summary.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px"><div><div style="font-size:19px;font-weight:700">${period.length}</div><div style="font-size:11px;color:#89928f">Commandes confirmées (${analyticsRangeDays} j)</div></div><div><div style="font-size:19px;font-weight:700">${periodRevenue.toLocaleString('fr-FR')} F</div><div style="font-size:11px;color:#89928f">Revenu confirmé sur la période</div></div><div><div style="font-size:19px;font-weight:700">${pending}</div><div style="font-size:11px;color:#89928f">Commandes en attente visibles</div></div></div>`;
+  }
+
+  function setAudienceRange(days, button){
+    audienceRangeDays=Number(days);
+    document.querySelectorAll('[data-audience-days]').forEach(el=>el.classList.toggle('active',el===button));
+    renderAudienceChart();
   }
 
   async function loadStats(){
-    try {
-      const pvRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${currentStore.id}&select=id`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Prefer': 'count=exact' },
+    const chart=document.getElementById('audienceChartWrap');
+    if(!chart || !currentStore || !session) return;
+    chart.innerHTML='<div class="analytics-empty">Chargement des visites réelles…</div>';
+    try{
+      const rows=await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${encodeURIComponent(currentStore.id)}&select=created_at&order=created_at.asc`);
+      audiencePageviewsCache=rows;
+      const now=new Date();
+      const todayStart=new Date(now);todayStart.setHours(0,0,0,0);
+      const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+      const yearStart=new Date(now.getFullYear(),0,1);
+      const dated=rows.map(v=>new Date(v.created_at)).filter(d=>!Number.isNaN(d.getTime()));
+      const countFrom=start=>dated.filter(d=>d>=start).length;
+      document.getElementById('visitsToday').textContent=countFrom(todayStart).toLocaleString('fr-FR');
+      document.getElementById('visitsMonth').textContent=countFrom(monthStart).toLocaleString('fr-FR');
+      document.getElementById('visitsYear').textContent=countFrom(yearStart).toLocaleString('fr-FR');
+      document.getElementById('visitsTotal').textContent=rows.length.toLocaleString('fr-FR');
+      renderAudienceChart();
+    }catch(err){
+      console.error('loadStats:',err);
+      const message=escapeHtml(err.message||'Erreur inconnue');
+      chart.innerHTML=`<div class="chart-empty-error">Impossible de charger les visites.<br><small>${message}</small><br><button class="btn btn-ghost" onclick="loadStats()">Réessayer</button></div>`;
+      ['visitsToday','visitsMonth','visitsYear','visitsTotal'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+    }
+  }
+
+  function renderAudienceChart(){
+    const chart=document.getElementById('audienceChartWrap');
+    if(!chart || !Array.isArray(audiencePageviewsCache)) return;
+    const days=audienceRangeDays;
+    const now=new Date();
+    let buckets=[];
+    if(days===365){
+      for(let i=11;i>=0;i--){
+        const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+        buckets.push({date:d,label:d.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'}),count:0});
+      }
+      audiencePageviewsCache.forEach(v=>{
+        const d=new Date(v.created_at);
+        const idx=buckets.findIndex(b=>b.date.getFullYear()===d.getFullYear()&&b.date.getMonth()===d.getMonth());
+        if(idx>=0)buckets[idx].count++;
       });
-      const visitorsCount = pvRes.headers.get('content-range')?.split('/')[1] || (await pvRes.json()).length;
-      document.getElementById('statVisitors').textContent = visitorsCount;
-    } catch(err){ document.getElementById('statVisitors').textContent = '—'; }
+    }else{
+      const start=new Date(now);start.setHours(0,0,0,0);start.setDate(start.getDate()-(days-1));
+      for(let i=0;i<days;i++){const d=new Date(start);d.setDate(start.getDate()+i);buckets.push({date:d,label:d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}),count:0});}
+      audiencePageviewsCache.forEach(v=>{
+        const d=new Date(v.created_at);d.setHours(0,0,0,0);
+        const idx=Math.round((d-start)/86400000);
+        if(idx>=0&&idx<buckets.length)buckets[idx].count++;
+      });
+    }
+    const total=buckets.reduce((sum,b)=>sum+b.count,0);
+    if(!total){chart.innerHTML='<div class="analytics-empty">Aucune visite enregistrée sur cette période.</div>';return;}
+    const W=760,H=220,L=48,R=14,T=18,B=36,pw=W-L-R,ph=H-T-B,max=Math.max(1,...buckets.map(b=>b.count));
+    const slot=pw/buckets.length,barW=Math.max(2,Math.min(28,slot*.58));
+    const grid=[0,.5,1].map(v=>{const y=T+ph-v*ph;return `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#edf0ef"/><text x="${L-8}" y="${y+4}" text-anchor="end" fill="#9aa29f" font-size="10">${Math.round(max*v)}</text>`;}).join('');
+    const bars=buckets.map((b,i)=>{const x=L+i*slot+(slot-barW)/2,h=b.count/max*ph;return `<rect x="${x.toFixed(1)}" y="${(T+ph-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#e63946" opacity=".85"><title>${b.label} : ${b.count} visite(s)</title></rect>`;}).join('');
+    const step=Math.max(1,Math.ceil(buckets.length/7));
+    const labels=buckets.map((b,i)=>i%step===0||i===buckets.length-1?`<text x="${(L+i*slot+slot/2).toFixed(1)}" y="${H-10}" text-anchor="middle" fill="#8d9693" font-size="10">${escapeHtml(b.label)}</text>`:'').join('');
+    chart.innerHTML=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution des visites, ${days===365?'12 mois':days+' jours'}">${grid}${bars}${labels}</svg>`;
   }
 
   // ---------- Codes promo ----------
@@ -2942,44 +3224,41 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   }
 
   async function loadOrders(){
-    const body = document.getElementById('ordersBody');
-    body.innerHTML = '<tr><td colspan="4" class="empty">Chargement…</td></tr>';
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${currentStore.id}&order=created_at.desc&limit=50`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
-      });
-      const orders = await res.json();
-
-      const totalOrders = orders.length;
-      const confirmed = orders.filter(o => o.status === 'confirmed');
-      const revenue = confirmed.reduce((sum, o) => sum + Number(o.amount_fcfa), 0);
-      document.getElementById('statOrders').textContent = totalOrders;
-      document.getElementById('statConfirmed').textContent = confirmed.length;
-      document.getElementById('statRevenue').textContent = revenue.toLocaleString('fr-FR') + " F";
-
-      if(orders.length === 0){
-        body.innerHTML = '<tr><td colspan="4" class="empty">Aucune commande pour l\'instant.</td></tr>';
+    const body=document.getElementById('ordersBody');
+    if(!body||!currentStore||!session)return;
+    body.innerHTML='<tr><td colspan="4" class="empty">Chargement…</td></tr>';
+    try{
+      const orders=await etaFetchAllRows(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&select=id,customer_name,customer_phone,product_name_snapshot,amount_fcfa,status,created_at,variant_selection,delivery_address,delivery_district,delivery_city,buyer_country_code,delivery_zone,logistics_status,tracking_code&order=created_at.desc`);
+      const confirmed=orders.filter(o=>PAID_STATUSES.includes(o.status));
+      const revenue=confirmed.reduce((sum,o)=>sum+(Number(o.amount_fcfa)||0),0);
+      const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+      set('statOrders',orders.length.toLocaleString('fr-FR'));
+      set('statConfirmed',confirmed.length.toLocaleString('fr-FR'));
+      set('statPending',orders.filter(o=>o.status==='pending').length.toLocaleString('fr-FR'));
+      set('statCancelled',orders.filter(o=>o.status==='cancelled').length.toLocaleString('fr-FR'));
+      set('statDelivered',orders.filter(o=>o.status==='delivered').length.toLocaleString('fr-FR'));
+      set('statRevenue',revenue.toLocaleString('fr-FR')+' F');
+      if(!orders.length){
+        body.innerHTML='<tr><td colspan="4" class="empty">Aucune commande accessible pour cette boutique.</td></tr>';
         return;
       }
-      body.innerHTML = orders.map(o => `
+      body.innerHTML=orders.map(o=>`
         <tr style="border-top:1px solid var(--line);">
-          <td style="padding:10px 16px;">${o.customer_name}<br><span style="opacity:0.5; font-size:0.76rem;">${o.customer_phone}</span><br><span style="opacity:0.4; font-size:0.7rem; font-family:monospace;">${o.tracking_code || ''}</span></td>
-          <td style="padding:10px 16px;">${o.product_name_snapshot}${o.variant_selection ? `<br><span style="opacity:0.55; font-size:0.76rem;">${o.variant_selection}</span>` : ''}${o.delivery_address ? `<br><span style="opacity:0.5; font-size:0.72rem;">📍 ${o.delivery_address}, ${o.delivery_district}, ${o.delivery_city}</span>` : ''}${o.buyer_country_code ? `<br><span style="opacity:0.62; font-size:0.72rem;">🌍 Destination : ${o.buyer_country_code}</span>` : ''}${o.delivery_zone ? `<br><span style="opacity:0.62; font-size:0.72rem;">🚚 Acheminement : ${o.delivery_zone}</span>` : ''}${o.logistics_status ? `<br><span style="font-size:0.72rem; font-weight:600; color:#027A48;">📦 Logistique : ${o.logistics_status === 'reserved' ? 'Stock réservé' : o.logistics_status === 'not_routed' ? 'À organiser' : o.logistics_status}</span>` : ''}</td>
-          <td style="padding:10px 16px; font-weight:700;">${Number(o.amount_fcfa).toLocaleString('fr-FR')} F</td>
-          <td style="padding:10px 16px;">
-            <select onchange="updateOrderStatus('${o.id}', this.value)" class="status-tag ${o.status}" style="border:none; cursor:pointer;">
-              <option value="pending" ${o.status==='pending'?'selected':''}>En attente</option>
-              <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmée</option>
-              <option value="preparing" ${o.status==='preparing'?'selected':''}>En préparation</option>
-              <option value="shipped" ${o.status==='shipped'?'selected':''}>Expédiée</option>
-              <option value="delivered" ${o.status==='delivered'?'selected':''}>Livrée</option>
-              <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Annulée</option>
-            </select>
-          </td>
-        </tr>
-      `).join('');
-    } catch(err){
-      body.innerHTML = '<tr><td colspan="4" class="empty">Impossible de charger les commandes.</td></tr>';
+          <td style="padding:10px 16px;">${escapeHtml(o.customer_name||'Client')}<br><span style="opacity:0.5;font-size:0.76rem;">${escapeHtml(o.customer_phone||'')}</span><br><span style="opacity:0.4;font-size:0.7rem;font-family:monospace;">${escapeHtml(o.tracking_code||'')}</span></td>
+          <td style="padding:10px 16px;">${escapeHtml(o.product_name_snapshot||'Produit')}${o.variant_selection?`<br><span style="opacity:0.55;font-size:0.76rem;">${escapeHtml(o.variant_selection)}</span>`:''}${o.delivery_address?`<br><span style="opacity:0.5;font-size:0.72rem;">${escapeHtml([o.delivery_address,o.delivery_district,o.delivery_city].filter(Boolean).join(', '))}</span>`:''}${o.buyer_country_code?`<br><span style="opacity:0.62;font-size:0.72rem;">Destination : ${escapeHtml(o.buyer_country_code)}</span>`:''}${o.delivery_zone?`<br><span style="opacity:0.62;font-size:0.72rem;">Livraison : ${escapeHtml(o.delivery_zone)}</span>`:''}${o.logistics_status?`<br><span style="font-size:0.72rem;font-weight:600;color:#027A48;">Logistique : ${escapeHtml(o.logistics_status)}</span>`:''}</td>
+          <td style="padding:10px 16px;font-weight:700;white-space:nowrap;">${(Number(o.amount_fcfa)||0).toLocaleString('fr-FR')} F</td>
+          <td style="padding:10px 16px;"><select onchange="updateOrderStatus('${o.id}',this.value)" class="status-tag ${escapeHtml(o.status)}" style="border:none;cursor:pointer;">
+            <option value="pending" ${o.status==='pending'?'selected':''}>En attente</option>
+            <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmée</option>
+            <option value="preparing" ${o.status==='preparing'?'selected':''}>En préparation</option>
+            <option value="shipped" ${o.status==='shipped'?'selected':''}>Expédiée</option>
+            <option value="delivered" ${o.status==='delivered'?'selected':''}>Livrée</option>
+            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Annulée</option>
+          </select></td>
+        </tr>`).join('');
+    }catch(err){
+      console.error('loadOrders:',err);
+      body.innerHTML=`<tr><td colspan="4" class="empty">Impossible de charger les commandes.<br><small>${escapeHtml(err.message||'Erreur inconnue')}</small><br><button class="btn btn-ghost" onclick="loadOrders()">Réessayer</button></td></tr>`;
     }
   }
 
@@ -2997,10 +3276,12 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?id=eq.${id}&select=customer_phone,product_name_snapshot`, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
       });
+      if(!orderRes.ok) throw new Error(`Lecture de commande : HTTP ${orderRes.status}`);
       const orderData = await orderRes.json();
       const order = orderData[0];
+      if(!order) throw new Error('Commande introuvable ou non autorisée par Supabase.');
 
-      await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?id=eq.${id}`, {
+      const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_orders?id=eq.${id}`, {
         method: 'PATCH',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
@@ -3008,6 +3289,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         },
         body: JSON.stringify({ status }),
       });
+      if(!updateRes.ok) throw new Error(`Mise à jour refusée par Supabase (HTTP ${updateRes.status}).`);
 
       // Notifie le client du changement de statut
       const notif = STATUS_NOTIFICATIONS[status];
@@ -3027,7 +3309,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
 
       loadOrders();
     } catch(err){
-      alert("Erreur lors de la mise à jour.");
+      console.error('updateOrderStatus:',err);
+      alert(err.message || "Erreur lors de la mise à jour.");
+      loadOrders();
     }
   }
 
