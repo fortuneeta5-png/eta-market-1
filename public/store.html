@@ -912,14 +912,16 @@
   function getOfferState(product){
     const regular = Number(product?.price_fcfa || 0);
     const promo = Number(product?.promo_price_fcfa || 0);
+    const starts = product?.offer_starts_at ? new Date(product.offer_starts_at).getTime() : null;
     const expires = product?.offer_expires_at ? new Date(product.offer_expires_at).getTime() : null;
     const hasLimit = Number.isFinite(Number(product?.offer_limit)) && product.offer_limit !== null && Number(product.offer_limit) > 0;
     const sold = Math.max(0, Number(product?.offer_sold_count || 0));
     const remaining = hasLimit ? Math.max(0, Number(product.offer_limit) - sold) : null;
-    const timeActive = !expires || expires > Date.now();
+    const timeActive = (!starts || starts <= Date.now()) && (!expires || expires > Date.now());
     const quantityActive = !hasLimit || remaining > 0;
     const active = promo > 0 && promo < regular && timeActive && quantityActive;
-    return {active,regular,promo,sold,remaining,limit:hasLimit?Number(product.offer_limit):null,expires};
+    const scheduled = promo > 0 && promo < regular && starts && starts > Date.now() && (!expires || expires > starts) && quantityActive;
+    return {active,scheduled,regular,promo,sold,remaining,limit:hasLimit?Number(product.offer_limit):null,starts,expires};
   }
   function effectiveProductPrice(product){
     const offer=getOfferState(product);
@@ -932,22 +934,27 @@
     const offer=getOfferState(currentProduct);
     const panel=document.getElementById('offerPanel');
     if(!panel) return;
-    if(!offer.active){panel.style.display='none';return;}
+    if(!offer.active && !offer.scheduled){panel.style.display='none';return;}
     panel.style.display='block';
     document.getElementById('offerSoldLabel').textContent='Vendu : '+offer.sold;
     document.getElementById('offerRemainingLabel').textContent=offer.limit===null?'Offre disponible':'Restant : '+offer.remaining;
     const pct=offer.limit===null?0:Math.min(100,Math.max(0,offer.sold/offer.limit*100));
     document.getElementById('offerProgressFill').style.width=pct+'%';
     const countdown=document.getElementById('offerCountdown');
-    if(offer.expires){
-      const diff=Math.max(0,offer.expires-Date.now());
+    const countdownTarget = offer.scheduled ? offer.starts : offer.expires;
+    if(countdownTarget){
+      const diff=Math.max(0,countdownTarget-Date.now());
       const d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),m=Math.floor(diff%3600000/60000),sec=Math.floor(diff%60000/1000);
       document.getElementById('offerDays').textContent=String(d).padStart(2,'0')+'j';
       document.getElementById('offerHours').textContent=String(h).padStart(2,'0')+'h';
       document.getElementById('offerMinutes').textContent=String(m).padStart(2,'0')+'m';
       document.getElementById('offerSeconds').textContent=String(sec).padStart(2,'0')+'s';
       countdown.style.display='flex';
-      if(diff<=0){panel.style.display='none';document.getElementById('pPrice').textContent=fmtBuyer(offer.regular);stopOfferTimer();}
+      countdown.querySelector('span').textContent = offer.scheduled ? 'Début de l’offre dans' : 'Fin de l’offre dans';
+      if(diff<=0){
+        if(offer.scheduled){ updateOfferCountdown(); }
+        else { panel.style.display='none'; renderProductPrice(currentProduct,document.getElementById('pPrice')); stopOfferTimer(); }
+      }
     }else countdown.style.display='none';
   }
   function renderProductPrice(product, element){
@@ -993,7 +1000,7 @@
     stopOfferTimer();
     renderProductPrice(p,document.getElementById('pPrice'));
     updateOfferCountdown();
-    if(getOfferState(p).active && getOfferState(p).expires) offerTimer=setInterval(updateOfferCountdown,1000);
+    if((getOfferState(p).active && getOfferState(p).expires) || getOfferState(p).scheduled) offerTimer=setInterval(updateOfferCountdown,1000);
     document.getElementById('pDesc').textContent = p.description || '';
 
     // Galerie de miniatures (photo principale + photos supplémentaires)
