@@ -3231,5 +3231,143 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
 <script>
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
+
+<style id="etachop-universal-select-style">
+  html { color-scheme: light; }
+  .eta-native-select,
+  select[data-eta-enhanced="1"] {
+    position:absolute!important; width:1px!important; height:1px!important;
+    min-height:1px!important; opacity:0!important; pointer-events:none!important;
+    left:-10000px!important; top:auto!important; clip-path:inset(50%)!important;
+  }
+  .eta-select-wrap { position:relative!important; width:100%!important; min-width:0; }
+  .eta-select-trigger {
+    width:100%; min-height:48px; padding:12px 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    border:1.5px solid #e3e7e6; border-radius:12px;
+    background:#fff!important; color:#252b2a!important;
+    font:500 .92rem inherit; text-align:left; cursor:pointer;
+    box-shadow:none; -webkit-appearance:none; appearance:none;
+  }
+  .eta-select-trigger:focus-visible { outline:2px solid var(--primary,#e63946); outline-offset:2px; }
+  .eta-select-chevron { width:9px;height:9px;flex:none;border-right:2px solid #737b78;border-bottom:2px solid #737b78;transform:rotate(45deg);margin:0 4px 4px 0; }
+  .eta-select-panel {
+    position:fixed!important; z-index:2147483000!important; display:none;
+    background:#fff!important; color:#252b2a!important;
+    border:1px solid #e5e9e7; border-radius:14px; padding:6px;
+    box-shadow:0 14px 36px rgba(20,30,25,.18);
+    max-height:min(52vh,360px); overflow:auto; overscroll-behavior:contain;
+  }
+  .eta-select-panel.open { display:block!important; }
+  .eta-select-option {
+    display:flex; width:100%; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px; border:0!important; border-radius:9px;
+    background:#fff!important; color:#252b2a!important;
+    font:500 .88rem inherit; text-align:left; cursor:pointer;
+  }
+  .eta-select-option[aria-selected="true"] { background:#f2f3f2!important; color:var(--primary,#c52d39)!important; font-weight:700; }
+  .eta-select-check { color:var(--primary,#c52d39); font-weight:900; }
+</style>
+<script id="etachop-universal-select-script">
+(function(){
+  if (window.__etaUniversalSelectsInstalled) return;
+  window.__etaUniversalSelectsInstalled = true;
+  let active = null;
+
+  function close(){
+    if(!active) return;
+    active.panel.classList.remove('open');
+    active.trigger.setAttribute('aria-expanded','false');
+    active = null;
+  }
+  function place(item){
+    const r=item.trigger.getBoundingClientRect();
+    const gap=6, margin=12;
+    const below=window.innerHeight-r.bottom-margin;
+    const above=r.top-margin;
+    const useBelow=below>=Math.min(180,above) || below>=above;
+    const maxH=Math.min(360,window.innerHeight*.52,Math.max(120,useBelow?below:above));
+    item.panel.style.left=Math.max(margin,Math.min(r.left,window.innerWidth-r.width-margin))+'px';
+    item.panel.style.width=Math.min(r.width,window.innerWidth-margin*2)+'px';
+    item.panel.style.maxHeight=maxH+'px';
+    item.panel.style.top=(useBelow?Math.min(window.innerHeight-maxH-margin,r.bottom+gap):Math.max(margin,r.top-maxH-gap))+'px';
+  }
+  function sync(item){
+    const s=item.select;
+    const selected=s.options[s.selectedIndex];
+    item.label.textContent=selected ? selected.textContent.trim() : 'Choisir…';
+    item.panel.replaceChildren();
+    Array.from(s.options).forEach((opt,index)=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='eta-select-option';
+      b.setAttribute('role','option');
+      b.setAttribute('aria-selected',String(index===s.selectedIndex));
+      const label=document.createElement('span'); label.textContent=opt.textContent.trim();
+      b.appendChild(label);
+      if(index===s.selectedIndex){
+        const check=document.createElement('span'); check.className='eta-select-check'; check.textContent='✓'; b.appendChild(check);
+      }
+      b.addEventListener('click',()=>{
+        s.selectedIndex=index;
+        s.dispatchEvent(new Event('change',{bubbles:true}));
+        sync(item); close();
+      });
+      item.panel.appendChild(b);
+    });
+  }
+  function enhance(s){
+    if(!s || s.dataset.etaEnhanced==='1') return;
+    // Keep native selects visually available only as a fallback if a wrapper cannot be made.
+    const wrap=document.createElement('div');
+    wrap.className='eta-select-wrap';
+    s.parentNode.insertBefore(wrap,s);
+    wrap.appendChild(s);
+    s.dataset.etaEnhanced='1';
+    s.classList.add('eta-native-select');
+
+    const trigger=document.createElement('button');
+    trigger.type='button'; trigger.className='eta-select-trigger';
+    trigger.setAttribute('aria-haspopup','listbox');
+    trigger.setAttribute('aria-expanded','false');
+    const label=document.createElement('span');
+    label.style.cssText='min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    label.textContent=s.options[s.selectedIndex]?.textContent?.trim() || 'Choisir…';
+    const arrow=document.createElement('span'); arrow.className='eta-select-chevron';
+    trigger.append(label,arrow); wrap.appendChild(trigger);
+
+    const panel=document.createElement('div');
+    panel.className='eta-select-panel'; panel.setAttribute('role','listbox');
+    document.body.appendChild(panel);
+    const item={select:s,wrap,trigger,label,panel};
+    sync(item);
+
+    trigger.addEventListener('click',()=>{
+      if(active && active.select===s){close();return;}
+      close(); active=item; sync(item); place(item);
+      panel.classList.add('open'); trigger.setAttribute('aria-expanded','true');
+    });
+    s.addEventListener('change',()=>sync(item));
+    new MutationObserver(()=>sync(item)).observe(s,{childList:true,subtree:true,characterData:true});
+    window.addEventListener('resize',()=>{if(active===item)place(item)});
+    window.addEventListener('scroll',()=>{if(active===item)place(item)},true);
+  }
+  function scan(root){
+    if(root.matches && root.matches('select')) enhance(root);
+    if(root.querySelectorAll) root.querySelectorAll('select').forEach(enhance);
+  }
+  document.addEventListener('click',e=>{
+    if(active && !active.panel.contains(e.target) && !active.trigger.contains(e.target)) close();
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape') close();});
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>scan(document));
+  else scan(document);
+  new MutationObserver(records=>{
+    records.forEach(record=>record.addedNodes.forEach(node=>{
+      if(node.nodeType===1) scan(node);
+    }));
+  }).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>
