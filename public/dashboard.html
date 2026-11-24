@@ -2000,11 +2000,11 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       showDashboard();
 
       if(profileType === 'longrich'){
-        alert("Boutique créée. Ta demande de référencement Longrich est enregistrée en attente de vérification par EtaChop.");
+        etaNotify("Boutique créée. Ta demande de référencement Longrich est enregistrée en attente de vérification par EtaChop.");
       } else if(profileType === 'logistics'){
-        alert("Boutique créée. Ta candidature comme partenaire logistique est enregistrée en attente de validation. Tu ne peux pas encore recevoir de missions.");
+        etaNotify("Boutique créée. Ta candidature comme partenaire logistique est enregistrée en attente de validation. Tu ne peux pas encore recevoir de missions.");
       } else {
-        alert("Ta boutique EtaChop a été créée avec succès !");
+        etaNotify("Ta boutique EtaChop a été créée avec succès !");
       }
     } catch(err){
       msg.textContent = err.message || "Une erreur est survenue. Vérifie ta connexion et réessaie.";
@@ -2076,17 +2076,44 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   function renderGreeting(){
     const hour = new Date().getHours();
     const firstName = (session.user.user_metadata && session.user.user_metadata.first_name) || session.user.email.split('@')[0];
-    let title, sub;
+    let title;
+    let phrases;
     if(hour >= 5 && hour < 12){
       title = `Bonjour ${firstName} ! ☀️`;
-      sub = "Votre inspiration matinale est précieuse - vendez quelque chose de spécial !";
+      phrases = [
+        "Une nouvelle journée commence : fais découvrir tes produits à de nouveaux clients.",
+        "Ta boutique est ouverte. Mets en avant ton meilleur produit aujourd’hui !",
+        "Chaque visite peut devenir une vente. Prépare ta boutique pour la journée.",
+        "C’est le bon moment pour vérifier tes commandes et actualiser tes produits.",
+        "Fais un pas de plus aujourd’hui : une belle présentation attire l’attention.",
+        "Tes prochaines ventes commencent par une bonne mise en avant."
+      ];
     } else if(hour >= 12 && hour < 18){
       title = `Bon après-midi ${firstName} !`;
-      sub = "Continuez sur votre lancée et boostez vos ventes aujourd'hui !";
+      phrases = [
+        "Prends un instant pour suivre tes commandes et répondre à tes clients.",
+        "La journée continue : partage le lien de ta boutique autour de toi.",
+        "Un produit bien présenté peut faire toute la différence. As-tu vérifié tes fiches ?",
+        "Profite de ce moment pour préparer une promotion ou mettre à jour ton stock.",
+        "Garde le rythme : chaque échange avec un client compte.",
+        "Regarde tes ventes du jour et repère ce qui intéresse le plus tes clients."
+      ];
     } else {
       title = `Bonsoir ${firstName} ! 🌙`;
-      sub = "Jetez un œil à vos ventes du jour avant de vous reposer.";
+      phrases = [
+        "Avant de terminer ta journée, vérifie tes commandes et tes demandes clients.",
+        "Fais le point sur tes ventes : demain sera une nouvelle occasion de progresser.",
+        "Ta journée s’achève. Pense à mettre à jour les stocks avant demain.",
+        "Un petit bilan aujourd’hui t’aidera à mieux préparer tes ventes de demain.",
+        "Merci de faire grandir EtaChop avec ta boutique. Bonne soirée !",
+        "Prends quelques instants pour consulter l’activité de ta boutique."
+      ];
     }
+    let previous = '';
+    try { previous = localStorage.getItem('etaGreetingLast') || ''; } catch(e) {}
+    const choices = phrases.filter(p => p !== previous);
+    const sub = choices[Math.floor(Math.random() * choices.length)] || phrases[0];
+    try { localStorage.setItem('etaGreetingLast', sub); } catch(e) {}
     document.getElementById('greetingTitle').textContent = title;
     document.getElementById('greetingSub').textContent = sub;
   }
@@ -2701,12 +2728,12 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   function copyProductLink(id){
     const link = `${STORE_URL_BASE}?s=${currentStore.slug}&p=${id}`;
     navigator.clipboard.writeText(link).then(()=>{
-      alert("Lien copié !\n" + link);
+      etaNotify("Lien copié !\n" + link);
     });
   }
 
   async function deleteProduct(id){
-    if(!confirm("Supprimer ce produit ?")) return;
+    if(!(await etaConfirm("Supprimer ce produit ?", "Cette action désactivera le produit de ta boutique."))) return;
     try {
       await fetch(`${SUPABASE_URL}/rest/v1/dp_products?id=eq.${id}`, {
         method: 'PATCH',
@@ -2718,7 +2745,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       });
       loadProducts();
     } catch(err){
-      alert("Erreur lors de la suppression.");
+      etaNotify("Erreur lors de la suppression.");
     }
   }
 
@@ -2805,7 +2832,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   async function addVariantOption(){
     const name = document.getElementById('variantNameInput').value.trim();
     const valuesRaw = document.getElementById('variantValuesInput').value.trim();
-    if(!name || !valuesRaw){ alert("Remplis le nom et les valeurs de la variante."); return; }
+    if(!name || !valuesRaw){ etaNotify("Remplis le nom et les valeurs de la variante."); return; }
     const values = valuesRaw.split(',').map(v => v.trim()).filter(Boolean);
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_product_options`, {
@@ -2818,7 +2845,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('variantValuesInput').value = '';
       loadVariantOptions(editingId);
     } catch(err){
-      alert("Erreur lors de l'ajout de la variante.");
+      etaNotify("Erreur lors de l'ajout de la variante.");
     }
   }
 
@@ -2970,7 +2997,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
     const value = document.getElementById('promoValueInput').value;
     const type = document.getElementById('promoTypeInput').value;
-    if(!code || !value){ alert("Remplis le code et la réduction."); return; }
+    if(!code || !value){ etaNotify("Remplis le code et la réduction."); return; }
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_promo_codes`, {
         method: 'POST',
@@ -2982,12 +3009,12 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('promoValueInput').value = '';
       loadPromoCodes();
     } catch(err){
-      alert("Erreur : ce code existe peut-être déjà.");
+      etaNotify("Erreur : ce code existe peut-être déjà.");
     }
   }
 
   async function deletePromoCode(id){
-    if(!confirm("Supprimer ce code promo ?")) return;
+    if(!(await etaConfirm("Supprimer ce code promo ?", "Le code ne pourra plus être utilisé."))) return;
     await fetch(`${SUPABASE_URL}/rest/v1/dp_promo_codes?id=eq.${id}`, {
       method: 'DELETE',
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
@@ -3019,7 +3046,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   async function addDeliveryZone(){
     const zoneName = document.getElementById('zoneNameInput').value.trim();
     const fee = document.getElementById('zoneFeeInput').value;
-    if(!zoneName || fee === ''){ alert("Remplis le nom de la zone et les frais."); return; }
+    if(!zoneName || fee === ''){ etaNotify("Remplis le nom de la zone et les frais."); return; }
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones`, {
         method: 'POST',
@@ -3031,12 +3058,12 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('zoneFeeInput').value = '';
       loadDeliveryZones();
     } catch(err){
-      alert("Erreur lors de l'ajout de la zone.");
+      etaNotify("Erreur lors de l'ajout de la zone.");
     }
   }
 
   async function deleteDeliveryZone(id){
-    if(!confirm("Supprimer cette zone ?")) return;
+    if(!(await etaConfirm("Supprimer cette zone ?", "Cette zone de livraison sera retirée."))) return;
     await fetch(`${SUPABASE_URL}/rest/v1/dp_delivery_zones?id=eq.${id}`, {
       method: 'DELETE',
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` },
@@ -3118,8 +3145,8 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   function copyEtaText(value){
     if(!value) return;
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(value).then(()=>alert('Copié dans le presse-papiers.')).catch(()=>alert(value));
-    }else{window.prompt('Copie ce texte :',value);}
+      navigator.clipboard.writeText(value).then(()=>etaNotify('Copié dans le presse-papiers.')).catch(()=>etaNotify(value));
+    }else{etaPrompt('Copie ce texte', 'Sélectionne et copie le contenu ci-dessous.', value);}
   }
   function showDeveloperSection(name,button){
     document.querySelectorAll('.developer-panel').forEach(el=>el.classList.remove('active'));
@@ -3143,19 +3170,24 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     catch(e){target.innerHTML=`<div class="empty">${escapeHtml(e.message)}</div>`;}
   }
   async function createEtaApiKey(){
-    const label=window.prompt('Nom de cette clé (ex. Application mobile)');if(!label)return;
-    const environment=window.confirm('Créer une clé de PRODUCTION ?\\nChoisis Annuler pour créer une clé Sandbox.')?'live':'sandbox';
+    const label=await etaPrompt('Nom de cette clé', 'Ex. Application mobile');
+    if(!label) return;
+    const environment=await etaChoose('Environnement de la clé', 'Choisis le type de clé à créer.', [
+      {label:'Sandbox (test)',value:'sandbox'},
+      {label:'Production',value:'live',danger:true}
+    ]);
+    if(!environment) return;
     try{
       const data=await etaDeveloperRequest('keys','POST',{label,environment});
       const box=document.getElementById('etaApiKeyNotice');
       box.style.display='block';box.innerHTML=`<strong>Ta nouvelle clé ${environment==='live'?'Production':'Sandbox'} — copie-la maintenant</strong><code>${escapeHtml(data.secret)}</code><button class="btn btn-primary" onclick="copyEtaText('${data.secret}')">Copier la clé</button><p>${escapeHtml(data.warning)}</p>`;
       loadEtaApiKeys();
-    }catch(e){alert(e.message);}
+    }catch(e){etaNotify(e.message);}
   }
   async function revokeEtaApiKey(id){
-    if(!confirm('Révoquer cette clé ? Les applications qui l’utilisent perdront immédiatement leur accès.'))return;
+    if(!(await etaConfirm('Révoquer cette clé ?', 'Les applications qui l’utilisent perdront immédiatement leur accès.')))return;
     try{await etaDeveloperRequest(`keys?id=${encodeURIComponent(id)}`,'DELETE');loadEtaApiKeys();}
-    catch(e){alert(e.message);}
+    catch(e){etaNotify(e.message);}
   }
   async function loadEtaWebhooks(){
     const target=document.getElementById('etaWebhooksList');if(!target||!currentStore)return;
@@ -3176,9 +3208,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     }catch(e){notice.className='form-msg err';notice.style.display='block';notice.textContent=e.message;}
   }
   async function deleteEtaWebhook(id){
-    if(!confirm('Supprimer ce webhook ?'))return;
+    if(!(await etaConfirm('Supprimer ce webhook ?', 'Ce webhook sera définitivement supprimé.')))return;
     try{await etaDeveloperRequest(`webhooks?id=${encodeURIComponent(id)}`,'DELETE');loadEtaWebhooks();}
-    catch(e){alert(e.message);}
+    catch(e){etaNotify(e.message);}
   }
   async function testEtaWebhook(){
     const target_url=document.getElementById('etaWebhookUrl').value.trim();
@@ -3366,6 +3398,40 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
       if(node.nodeType===1) scan(node);
     }));
   }).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
+<style id="eta-premium-dialog-style">
+.eta-dialog-backdrop{position:fixed;inset:0;z-index:2147483600;background:rgba(17,24,39,.48);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.eta-dialog-backdrop.open{display:flex}.eta-dialog-card{width:min(100%,410px);background:#fff;border:1px solid #edf0ef;border-radius:20px;padding:23px;box-shadow:0 24px 70px rgba(15,23,42,.22);font-family:Poppins,sans-serif;animation:etaDialogIn .16s ease}
+@keyframes etaDialogIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.eta-dialog-mark{width:38px;height:4px;border-radius:8px;background:#e63946;margin-bottom:17px}.eta-dialog-title{font:700 18px Montserrat,sans-serif;color:#202723;margin:0 0 8px}
+.eta-dialog-message{font-size:13px;line-height:1.65;color:#78827e;margin:0 0 18px;white-space:pre-wrap}
+.eta-dialog-input{width:100%;min-height:47px;border:1.5px solid #e2e8e5;border-radius:11px;padding:12px 13px;font:14px Poppins,sans-serif;color:#202723;margin:0 0 18px}
+.eta-dialog-input:focus{outline:2px solid rgba(230,57,70,.18);border-color:#e63946}.eta-dialog-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.eta-dialog-btn{border:1px solid #e5e9e7;border-radius:10px;background:#fff;color:#53605a;padding:11px 15px;font:600 12px Poppins,sans-serif;cursor:pointer}
+.eta-dialog-btn.primary{background:#e63946;border-color:#e63946;color:#fff}.eta-dialog-btn.danger{background:#fff1f2;border-color:#f6cbd0;color:#bd2634}
+.eta-toast{position:fixed;z-index:2147483601;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#202723;color:#fff;border-radius:12px;padding:12px 16px;max-width:calc(100vw - 32px);font:500 12px Poppins,sans-serif;box-shadow:0 10px 28px rgba(0,0,0,.18);transition:.2s}
+.eta-toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+<div class="eta-dialog-backdrop" id="etaDialogBackdrop" aria-hidden="true"><section class="eta-dialog-card" role="dialog" aria-modal="true" aria-labelledby="etaDialogTitle">
+<div class="eta-dialog-mark"></div><h3 class="eta-dialog-title" id="etaDialogTitle">EtaChop</h3><p class="eta-dialog-message" id="etaDialogMessage"></p>
+<input class="eta-dialog-input" id="etaDialogInput" style="display:none" autocomplete="off"><div class="eta-dialog-actions" id="etaDialogActions"></div></section></div>
+<div class="eta-toast" id="etaToast" role="status" aria-live="polite"></div>
+<script id="eta-premium-dialog-script">
+(function(){
+let resolveDialog=null,toastTimer=null;
+const backdrop=document.getElementById('etaDialogBackdrop'),title=document.getElementById('etaDialogTitle'),message=document.getElementById('etaDialogMessage'),input=document.getElementById('etaDialogInput'),actions=document.getElementById('etaDialogActions');
+function closeDialog(value){backdrop.classList.remove('open');backdrop.setAttribute('aria-hidden','true');const done=resolveDialog;resolveDialog=null;if(done)done(value);}
+function openDialog(opts){if(resolveDialog)closeDialog(null);title.textContent=opts.title||'EtaChop';message.textContent=opts.message||'';input.style.display=opts.input?'block':'none';input.value=opts.input?(opts.value||''):'';input.placeholder=opts.placeholder||'';actions.replaceChildren();return new Promise(resolve=>{resolveDialog=resolve;(opts.buttons||[{label:'Fermer',value:true,primary:true}]).forEach(item=>{const b=document.createElement('button');b.type='button';b.className='eta-dialog-btn'+(item.primary?' primary':'')+(item.danger?' danger':'');b.textContent=item.label;b.addEventListener('click',()=>closeDialog(item.value));actions.appendChild(b);});backdrop.classList.add('open');backdrop.setAttribute('aria-hidden','false');if(opts.input)input.focus();});}
+window.etaConfirm=async(text,detail='')=>(await openDialog({title:'Confirmer cette action',message:[text,detail].filter(Boolean).join('\\n\\n'),buttons:[{label:'Annuler',value:false},{label:'Confirmer',value:true,primary:true}]}))===true;
+window.etaPrompt=async(head,detail='',initial='')=>{const result=await openDialog({title:head,message:detail,input:true,value:initial,placeholder:'Saisis ici…',buttons:[{label:'Annuler',value:null},{label:'Valider',value:'__submit__',primary:true}]});return result==='__submit__'?input.value.trim():null;};
+window.etaChoose=async(head,detail,choices)=>await openDialog({title:head,message:detail,buttons:[...(choices||[]).map(c=>({label:c.label,value:c.value,primary:!!c.primary,danger:!!c.danger})),{label:'Annuler',value:null}]});
+window.etaNotify=function(text){const toast=document.getElementById('etaToast');toast.textContent=String(text??'');toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3200);};
+backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeDialog(null);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&backdrop.classList.contains('open'))closeDialog(null);if(e.key==='Enter'&&backdrop.classList.contains('open')&&input.style.display!=='none'){e.preventDefault();actions.querySelector('.primary')?.click();}});
+function removeBulb(root){const nodes=(root||document).querySelectorAll?.('button,a,[role="button"],div')||[];nodes.forEach(el=>{if(el.dataset.etaBulbChecked)return;const txt=(el.innerText||el.textContent||'').trim(),aria=(el.getAttribute('aria-label')||'')+' '+(el.getAttribute('title')||'');const r=el.getBoundingClientRect?.()||{width:999,height:999};if((txt==='💡'||txt==='💡️'||/ampoule|conseil rapide|astuce/i.test(aria))&&r.width<=145&&r.height<=145){el.dataset.etaBulbChecked='1';el.style.setProperty('display','none','important');}});}
+removeBulb(document);new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>{if(n.nodeType===1)removeBulb(n);}))).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
 
