@@ -344,6 +344,26 @@
   .eta-subnav button span{display:block;font-size:1.35rem;margin-bottom:5px}
   .menu-content{display:none}.menu-content.menu-content-active{display:block}
   .order-payment-status{display:inline-flex;padding:6px 10px;border-radius:20px;font-size:.74rem;font-weight:800;white-space:nowrap}
+
+  /* Sélecteurs EtaChop : menus clairs et cohérents sur toute la plateforme */
+  body select, body option, body input[type="date"],
+  body input[type="datetime-local"], body input[type="time"]{
+    color-scheme:light!important;background-color:#fff!important;color:#27332f!important;
+  }
+  body select{
+    appearance:none;-webkit-appearance:none;
+    min-height:46px;padding:12px 42px 12px 14px!important;
+    border:1.5px solid #dfe6e2!important;border-radius:12px!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7772' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")!important;
+    background-repeat:no-repeat!important;background-position:right 14px center!important;
+    box-shadow:0 1px 2px rgba(20,40,32,.04);
+  }
+  body select:focus{outline:2px solid rgba(214,49,64,.16)!important;border-color:var(--primary)!important}
+  body option{background:#fff!important;color:#26332e!important;padding:10px}
+  body .modal, body [role="dialog"], body .sheet,
+  body .form-card, body .panel-form{background:#fff;color:#26332e}
+  body input, body textarea{color-scheme:light}
+
 </style>
 </head>
 <body>
@@ -515,10 +535,8 @@
     <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
     <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
     <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg></span>Produits</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg></span>Analytiques</button>
     <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.8-1-3-1-1.8 0-3 .9-3 2.2s1.2 2 3 2.3 3 .9 3 2.3-1.2 2.3-3.2 2.3c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span>Revenus &amp; solde</button>
     <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon">☷</span>Ma boutique &amp; outils</button>
-    <button class="nav-item" data-tab="settings" onclick="goToTab('settings')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 3 3"/></svg></span>Clés API</button>
     <div class="sidebar-bottom"><div class="sidebar-caption">Compte</div><button class="nav-item" onclick="logout()"><span class="nav-icon">↪</span>Déconnexion</button></div>
   </aside>
   <div class="wrap">
@@ -1028,10 +1046,8 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     <button class="nav-item active" data-tab="home" onclick="goToTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
     <button class="nav-item" data-tab="products" onclick="goToTab('products')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg></span>Produits</button>
     <button class="nav-item" data-tab="sales" onclick="goToTab('sales')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Ventes</button>
-    <button class="nav-item" data-tab="analytics" onclick="goToTab('analytics')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg></span>Stats</button>
     <button class="nav-item" data-tab="balance" onclick="goToTab('balance')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.8-1-3-1-1.8 0-3 .9-3 2.2s1.2 2 3 2.3 3 .9 3 2.3-1.2 2.3-3.2 2.3c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span>Solde</button>
     <button class="nav-item" data-tab="menu" onclick="goToTab('menu')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>Menu</button>
-    <button class="nav-item" data-tab="settings" onclick="goToTab('settings')"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 3 3"/></svg></span>Clés API</button>
   </div>
 </div>
 
