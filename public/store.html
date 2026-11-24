@@ -161,7 +161,7 @@
         <input type="text" id="custName" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
       </div>
       <div style="margin-bottom:16px;">
-        <label for="custPhone" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:700;">Téléphone pour le paiement</label>
+        <label for="custPhone" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:700;">Téléphone de contact</label>
         <div style="display:flex; align-items:center; gap:10px; padding:0 13px; border:1.5px solid var(--line); border-radius:12px; background:#fff;">
           <span id="phoneCountryPrefix" style="font-weight:800; color:var(--accent); white-space:nowrap;">+242</span>
           <span style="width:1px; height:25px; background:var(--line);"></span>
@@ -185,6 +185,7 @@
           <input type="text" id="custDistrict" placeholder="Quartier (ex: Bacongo)" onblur="refreshDeliveryQuote()" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
         </div>
       </div>
+      <div id="buyerPaymentFields">
       <div style="margin-bottom:14px;">
         <label for="buyerCountry" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:600;">Ton pays</label>
         <select id="buyerCountry" onchange="onBuyerCountryChange()" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.92rem; background:#fff;"></select>
@@ -195,6 +196,7 @@
         <select id="buyerNetwork" onchange="selectedNetwork=this.value" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.92rem; background:#fff;"></select>
         <div id="paymentCurrencyHint" style="font-size:0.75rem; opacity:0.6; margin-top:6px;"></div>
       </div>
+      </div><!-- /buyerPaymentFields -->
       <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Zone de livraison</label>
         <select id="zoneSelect" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;" onchange="updateOrderTotal()"></select>
@@ -218,9 +220,10 @@
       </div>
     </div>
     <div id="checkoutSuccess" style="display:none; text-align:center;">
-      <div style="font-size:2.4rem; margin-bottom:10px;">📲</div>
-      <h3 style="font-size:1.1rem; margin-bottom:8px;">Demande de paiement envoyée !</h3>
-      <p style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Valide le paiement sur ton téléphone avec ton code secret Mobile Money pour finaliser ta commande. Sans validation de ta part, la commande ne sera pas traitée.</p>
+      <div id="checkoutSuccessIcon" style="font-size:2.4rem; margin-bottom:10px;">📲</div>
+      <h3 id="checkoutSuccessTitle" style="font-size:1.1rem; margin-bottom:8px;">Demande de paiement envoyée !</h3>
+      <p id="checkoutSuccessText" style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Valide le paiement sur ton téléphone avec ton code secret Mobile Money pour finaliser ta commande. Sans validation de ta part, la commande ne sera pas traitée.</p>
+      <a id="digitalDownloadLink" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="display:none; width:100%; margin-bottom:12px;">Télécharger mon produit</a>
       <a href="/suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
       <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
     </div>
@@ -573,7 +576,15 @@
     deliveryQuote = null;
 
     const isDigital = currentProduct && currentProduct.product_type === 'digital';
+    const isFreeDigital = isDigital && getEffectiveProductPrice(currentProduct) === 0;
     document.getElementById('deliveryAddressBlock').style.display = isDigital ? 'none' : 'block';
+    document.getElementById('buyerPaymentFields').style.display = isFreeDigital ? 'none' : 'block';
+    document.getElementById('confirmOrderBtn').textContent = isFreeDigital ? 'Obtenir gratuitement' : 'Confirmer';
+    document.querySelector('#checkoutForm > p').textContent = isFreeDigital ? 'Renseigne tes coordonnées pour recevoir ton produit numérique gratuitement.' : 'Tu recevras une demande de paiement sur ton téléphone à valider avec ton code secret.';
+    document.getElementById('checkoutSuccessIcon').textContent = '📲';
+    document.getElementById('checkoutSuccessTitle').textContent = 'Demande de paiement envoyée !';
+    document.getElementById('checkoutSuccessText').textContent = 'Valide le paiement sur ton téléphone avec ton code secret Mobile Money pour finaliser ta commande. Sans validation de ta part, la commande ne sera pas traitée.';
+    document.getElementById('digitalDownloadLink').style.display = 'none';
 
     try {
       if(isDigital){
@@ -684,7 +695,8 @@
       deliveryToCharge = deliveryQuote.delivery_payer === 'seller' ? 0 : Number(deliveryQuote.delivery_fee || 0);
     }
     const total = getEffectiveProductPrice(currentProduct) - appliedDiscount + deliveryToCharge;
-    document.getElementById('orderTotalAmt').textContent = fmtBuyer(Math.max(0,total));
+    const isFreeDigital = currentProduct && currentProduct.product_type === 'digital' && total <= 0;
+    document.getElementById('orderTotalAmt').textContent = isFreeDigital ? 'Gratuit' : fmtBuyer(Math.max(0,total));
   }
 
   async function applyPromoCode(){
@@ -746,12 +758,13 @@
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
-    if(!selectedNetwork || !BUYER_COUNTRIES[buyerCountryCode]){
+    const isFreeDigitalOrder = isDigitalOrder && getEffectiveProductPrice(currentProduct) === 0;
+    if(!isFreeDigitalOrder && (!selectedNetwork || !BUYER_COUNTRIES[buyerCountryCode])){
       msg.textContent = "Choisis ton pays et un moyen de paiement disponible."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
-    if(buyerCurrency !== 'XAF' && buyerCurrency !== 'XOF' && !buyerFxReady){
+    if(!isFreeDigitalOrder && buyerCurrency !== 'XAF' && buyerCurrency !== 'XOF' && !buyerFxReady){
       msg.textContent = "Le taux de conversion de cette devise est indisponible. Réessaie ou choisis un autre pays."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
       return;
@@ -769,7 +782,7 @@
     }
     const variantText = Object.entries(selectedVariants).map(([k,v]) => `${k}: ${v}`).join(', ') || null;
 
-    btn.disabled = true; btn.textContent = "Envoi de la demande de paiement…";
+    btn.disabled = true; btn.textContent = isFreeDigitalOrder ? "Préparation du téléchargement…" : "Envoi de la demande de paiement…";
     try {
       const zoneSelect = document.getElementById('zoneSelect');
       const zoneId = (deliveryZones.length > 0 && zoneSelect.value !== '') ? deliveryZones[parseInt(zoneSelect.value,10)].id : null;
@@ -796,6 +809,41 @@
       }
       const orderResult = await res.json();
       const realOrderId = orderResult[0]?.order_id;
+      const trackingCode = orderResult[0]?.tracking_code;
+      if(!realOrderId) throw new Error("La commande n'a pas pu être créée. Réessaie.");
+
+      // Produit numérique gratuit : aucune demande SasPay ne doit être créée.
+      if(isFreeDigitalOrder){
+        if(!trackingCode) throw new Error("Code de commande introuvable. Contacte la boutique.");
+        const downloadRes = await fetch(`${SUPABASE_URL}/functions/v1/digital-download`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+          body:JSON.stringify({order_id:realOrderId,tracking_code:trackingCode})
+        });
+        const downloadData = await downloadRes.json();
+        if(!downloadRes.ok || !downloadData.success || !downloadData.download_url){
+          throw new Error(downloadData.error || "La commande est créée, mais le fichier n'a pas pu être préparé. Contacte la boutique avec ton numéro de commande.");
+        }
+        document.getElementById('checkoutForm').style.display = 'none';
+        document.getElementById('checkoutSuccessIcon').textContent = '✅';
+        document.getElementById('checkoutSuccessTitle').textContent = 'Ton produit est prêt !';
+        document.getElementById('checkoutSuccessText').textContent = downloadData.watermarked
+          ? 'Ton fichier PDF a été personnalisé avec tes informations et celles de la boutique. Le lien de téléchargement est temporaire.'
+          : 'Ta commande gratuite est confirmée. Tu peux télécharger ton produit numérique maintenant.';
+        const downloadLink = document.getElementById('digitalDownloadLink');
+        downloadLink.href = downloadData.download_url;
+        downloadLink.style.display = 'block';
+        downloadLink.textContent = 'Télécharger mon produit';
+        document.getElementById('checkoutSuccess').style.display = 'block';
+        if(typeof subscribeToEtaNotifications === 'function'){
+          subscribeToEtaNotifications('customer', {customerPhone:phone});
+        }
+        fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({subscriberType:'vendor',storeId:currentStore.id,title:'Nouvelle commande gratuite',body:`${name} a obtenu gratuitement : ${currentProduct.name}`,url:'/dashboard.html'})
+        }).catch(()=>{});
+        return;
+      }
 
       btn.textContent = "Envoi de la demande de paiement…";
 
@@ -849,7 +897,7 @@
       msg.textContent = err.message; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
     } finally {
-      btn.disabled = false; btn.textContent = "Confirmer";
+      btn.disabled = false; btn.textContent = (currentProduct && currentProduct.product_type === 'digital' && getEffectiveProductPrice(currentProduct) === 0) ? 'Obtenir gratuitement' : 'Confirmer';
     }
   }
 
@@ -929,7 +977,7 @@
         <div class="card-body">
           <h3>${p.name}</h3>
           <div class="price">
-            ${p.promo_price_fcfa && Number(p.promo_price_fcfa)<Number(p.price_fcfa) ? `<span class="price-old">${fmtBuyer(p.price_fcfa)}</span><span class="price-current">${fmtBuyer(p.promo_price_fcfa)}</span>` : `<span class="price-current">${fmtBuyer(p.price_fcfa)}</span>`}
+            ${getEffectiveProductPrice(p) === 0 ? `<span class="price-current">Gratuit</span>` : (p.promo_price_fcfa && Number(p.promo_price_fcfa)<Number(p.price_fcfa) ? `<span class="price-old">${fmtBuyer(p.price_fcfa)}</span><span class="price-current">${fmtBuyer(p.promo_price_fcfa)}</span>` : `<span class="price-current">${fmtBuyer(p.price_fcfa)}</span>`)}
           </div>
         </div>
       </a>
@@ -948,12 +996,14 @@
     const promoActive = hasPromoPrice && (!startsAt || now>=startsAt) && (!endsAt || now<endsAt);
     const priceNode = document.getElementById('pPrice');
     priceNode.dataset.priceFcfa = Number(promoActive ? p.promo_price_fcfa : p.price_fcfa);
-    priceNode.innerHTML = promoActive
-      ? `<span class="price-old">${fmtBuyer(p.price_fcfa)}</span><span class="price-current">${fmtBuyer(p.promo_price_fcfa)}</span>`
-      : `<span class="price-current">${fmtBuyer(p.price_fcfa)}</span>`;
+    priceNode.innerHTML = Number(promoActive ? p.promo_price_fcfa : p.price_fcfa) === 0
+      ? `<span class="price-current">Gratuit</span>`
+      : (promoActive
+        ? `<span class="price-old">${fmtBuyer(p.price_fcfa)}</span><span class="price-current">${fmtBuyer(p.promo_price_fcfa)}</span>`
+        : `<span class="price-current">${fmtBuyer(p.price_fcfa)}</span>`);
     document.getElementById('pDesc').textContent = p.description || '';
     const buyBtn = document.getElementById('buyBtn');
-    buyBtn.textContent = p.cta_label || 'Acheter maintenant';
+    buyBtn.textContent = getEffectiveProductPrice(p) === 0 ? 'Obtenir gratuitement' : (p.cta_label || 'Acheter maintenant');
     buyBtn.style.backgroundColor = 'var(--accent)';
     buyBtn.style.color = '#fff';
     renderProductOffer(p, promoActive);
@@ -982,12 +1032,12 @@
       stockBadge.textContent = `Plus que ${p.stock_quantity} en stock !`;
       stockBadge.style.color = "#EA580C";
       buyBtn.disabled = false;
-      buyBtn.textContent = p.cta_label || 'Acheter maintenant';
+      buyBtn.textContent = getEffectiveProductPrice(p) === 0 ? 'Obtenir gratuitement' : (p.cta_label || 'Acheter maintenant');
       buyBtn.style.opacity = "1";
     } else {
       stockBadge.textContent = "";
       buyBtn.disabled = false;
-      buyBtn.textContent = p.cta_label || 'Acheter maintenant';
+      buyBtn.textContent = getEffectiveProductPrice(p) === 0 ? 'Obtenir gratuitement' : (p.cta_label || 'Acheter maintenant');
       buyBtn.style.opacity = "1";
     }
 

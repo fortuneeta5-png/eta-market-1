@@ -714,9 +714,10 @@
 
     <!-- ONGLET PRODUITS -->
     <div class="tab-panel" data-tab="products">
-    <div class="panel">
-      <div class="panel-head"><h3>Ajouter un produit</h3></div>
-      <div class="panel-body">
+    <div class="panel" id="productCreatePanel">
+      <div class="panel-head" style="gap:12px;flex-wrap:wrap;"><div><h3>Mes produits</h3><div style="font-size:12px;color:#89918f;margin-top:4px;">Gère tes produits et leurs fichiers</div></div><button class="btn btn-primary" type="button" id="toggleProductFormBtn" onclick="toggleProductForm(true)" style="padding:11px 16px;font-size:12px;">+ Ajouter un produit</button></div>
+      <div class="panel-body" id="productFormBody" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;"><strong id="productFormTitle">Nouveau produit</strong><button type="button" class="btn btn-ghost" onclick="toggleProductForm(false)">Fermer</button></div>
         <label class="upload-zone" id="uploadZone">
           <div id="uploadPlaceholder">
             <div style="font-size:2.4rem; margin-bottom:8px; line-height:1;">📷</div>
@@ -757,8 +758,13 @@
           </div>
         </div>
         <div class="field" id="digitalPriceWrap" style="display:none;">
-          <label>Prix (FCFA)</label>
-          <input type="number" id="pPriceDigital" placeholder="15000">
+          <label>Mode de tarification</label>
+          <div style="display:flex;gap:10px;">
+            <button type="button" class="ptype-btn" id="digitalFreeBtn" onclick="setDigitalPriceMode('free')" style="flex:1;padding:11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-weight:700;">Gratuit</button>
+            <button type="button" class="ptype-btn" id="digitalPaidBtn" onclick="setDigitalPriceMode('paid')" style="flex:1;padding:11px;border:1.5px solid var(--primary);border-radius:10px;background:var(--primary);color:#fff;font-weight:700;">Payant</button>
+          </div>
+          <div id="digitalPaidPriceField" style="margin-top:12px;"><label>Prix (FCFA)</label><input type="number" id="pPriceDigital" min="1" placeholder="Ex : 2 500"></div>
+          <div id="digitalFreeHint" style="display:none;margin-top:8px;padding:10px;background:#effaf3;border-radius:9px;color:#18794e;font-size:12px;">Ce produit sera proposé gratuitement (0 FCFA).</div>
         </div>
         <div class="field" id="digitalFileWrap" style="display:none;">
           <label>Fichier à livrer (PDF, ZIP, lien...)</label>
@@ -771,6 +777,10 @@
             <input type="file" id="digitalFileInput" onchange="previewDigitalFile(event)">
           </label>
         </div>
+        <div class="field" id="watermarkCreateWrap" style="display:none;border:1px solid #e8eeeb;border-radius:12px;padding:14px;">
+          <label style="display:flex;align-items:center;gap:10px;opacity:1;"><input type="checkbox" id="pWatermarkEnabled" style="width:18px;height:18px;accent-color:var(--primary);"> Ajouter un filigrane personnalisé au PDF</label>
+          <div style="font-size:12px;color:#7b8582;line-height:1.6;margin-top:7px;">EtaChop ajoutera automatiquement sur chaque copie téléchargée le nom du client, ses coordonnées, le nom de ta boutique et la référence de commande. Disponible pour les fichiers PDF.</div>
+        </div>
         <div class="field">
           <label>Prix promotionnel (FCFA) — facultatif</label>
           <input type="number" id="pPromoPrice" min="1" placeholder="Ex: 2 000">
@@ -778,11 +788,11 @@
         </div>
         <div class="field">
           <label>Début de l'offre</label>
-          <input type="datetime-local" id="pOfferStart" class="eta-date-input">
+          <input type="hidden" id="pOfferStart" class="eta-date-input">
         </div>
         <div class="field">
           <label>Fin de l'offre</label>
-          <input type="datetime-local" id="pOfferEnd" class="eta-date-input">
+          <input type="hidden" id="pOfferEnd" class="eta-date-input">
         </div>
         <div class="field">
           <label>Quantité limitée pour l'offre (facultatif)</label>
@@ -806,7 +816,7 @@
 
     <div class="panel">
       <div class="panel-head">
-        <h3>Mes produits</h3>
+        <h3>Catalogue</h3>
         <button class="btn-refresh" onclick="loadProducts()">Actualiser</button>
       </div>
       <div class="panel-body">
@@ -1071,6 +1081,22 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       <label>Type de produit</label>
       <div style="display:flex;gap:10px"><button type="button" class="ptype-btn" id="editTypePhysical" onclick="selectEditProductType('physical')">📦 Physique</button><button type="button" class="ptype-btn" id="editTypeDigital" onclick="selectEditProductType('digital')">💾 Numérique</button></div>
     </div>
+    <div class="field" id="editDigitalPriceModeWrap" style="display:none;">
+      <label>Mode de tarification</label>
+      <div style="display:flex;gap:10px;">
+        <button type="button" id="editDigitalFreeBtn" onclick="setEditDigitalPriceMode('free')" style="flex:1;padding:11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-weight:700;">Gratuit</button>
+        <button type="button" id="editDigitalPaidBtn" onclick="setEditDigitalPriceMode('paid')" style="flex:1;padding:11px;border:1.5px solid var(--primary);border-radius:10px;background:var(--primary);color:#fff;font-weight:700;">Payant</button>
+      </div>
+      <div id="editDigitalFreeHint" style="display:none;margin-top:8px;padding:10px;background:#effaf3;border-radius:9px;color:#18794e;font-size:12px;">Produit gratuit — prix fixé à 0 FCFA.</div>
+    </div>
+    <div class="field" id="editDigitalFileWrap" style="display:none;">
+      <label>Fichier numérique à livrer (facultatif si déjà enregistré)</label>
+      <label class="upload-zone" style="padding:14px;"><div id="editDigitalFileName" class="hint">Conserver le fichier actuel ou toucher pour le remplacer</div><input type="file" id="editDigitalFileInput" onchange="previewEditDigitalFile(event)"></label>
+    </div>
+    <div class="field" id="editWatermarkWrap" style="display:none;border:1px solid #e8eeeb;border-radius:12px;padding:14px;">
+      <label style="display:flex;align-items:center;gap:10px;opacity:1;"><input type="checkbox" id="editWatermarkEnabled" style="width:18px;height:18px;accent-color:var(--primary);"> Ajouter un filigrane personnalisé au PDF</label>
+      <div style="font-size:12px;color:#7b8582;line-height:1.6;margin-top:7px;">Nom et coordonnées du client, nom de la boutique et référence de commande sur chaque copie PDF.</div>
+    </div>
     <div class="field">
       <label>Prix (FCFA)</label>
       <input type="number" id="editPrice">
@@ -1080,8 +1106,8 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       <input type="number" id="editStock" min="0">
     </div>
     <div class="field"><label>Prix promotionnel (FCFA)</label><input type="number" id="editPromoPrice" min="1" placeholder="Facultatif"></div>
-    <div class="field"><label>Début de l'offre</label><input type="datetime-local" id="editOfferStart" class="eta-date-input"></div>
-    <div class="field"><label>Fin de l'offre</label><input type="datetime-local" id="editOfferEnd" class="eta-date-input"></div>
+    <div class="field"><label>Début de l'offre</label><input type="hidden" id="editOfferStart" class="eta-date-input"></div>
+    <div class="field"><label>Fin de l'offre</label><input type="hidden" id="editOfferEnd" class="eta-date-input"></div>
     <div class="field"><label>Quantité limitée pour l'offre</label><input type="number" id="editOfferLimit" min="1" placeholder="Facultatif"></div>
     <div class="field"><label>Bouton d'action</label><select id="editCtaLabel" class="eta-native-select"><option>Acheter maintenant</option><option>Profitez de l'offre</option><option>Commander maintenant</option><option>S'inscrire maintenant</option><option>Rejoindre la formation</option><option>Télécharger maintenant</option><option>Réserver ma place</option><option>Obtenir maintenant</option><option>Je profite de l'offre</option></select></div>
     <div class="field">
@@ -1122,6 +1148,41 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   let selectedImageFile = null;
   let selectedProductType = 'physical';
   let selectedDigitalFile = null;
+  let selectedEditDigitalFile = null;
+  let digitalPriceMode = 'paid';
+  let editDigitalPriceMode = 'paid';
+
+  function toggleProductForm(open){
+    const body=document.getElementById('productFormBody');
+    const btn=document.getElementById('toggleProductFormBtn');
+    if(!body)return;
+    body.style.display=open?'block':'none';
+    if(btn)btn.textContent=open?'Fermer le formulaire':'+ Ajouter un produit';
+    if(open){document.getElementById('productFormTitle').textContent='Nouveau produit';body.scrollIntoView({behavior:'smooth',block:'start'});}
+  }
+  function setDigitalPriceMode(mode){
+    digitalPriceMode=mode;
+    const free=mode==='free';
+    document.getElementById('digitalFreeBtn').style.cssText+= '';
+    ['digitalFreeBtn','digitalPaidBtn'].forEach(id=>{const b=document.getElementById(id),active=(id==='digitalFreeBtn')===free;b.style.background=active?'var(--primary)':'#fff';b.style.color=active?'#fff':'inherit';b.style.borderColor=active?'var(--primary)':'var(--line)';});
+    document.getElementById('digitalPaidPriceField').style.display=free?'none':'block';
+    document.getElementById('digitalFreeHint').style.display=free?'block':'none';
+    if(free)document.getElementById('pPriceDigital').value='0';
+    else if(document.getElementById('pPriceDigital').value==='0')document.getElementById('pPriceDigital').value='';
+  }
+  function setEditDigitalPriceMode(mode){
+    editDigitalPriceMode=mode;const free=mode==='free';
+    ['editDigitalFreeBtn','editDigitalPaidBtn'].forEach(id=>{const b=document.getElementById(id),active=(id==='editDigitalFreeBtn')===free;b.style.background=active?'var(--primary)':'#fff';b.style.color=active?'#fff':'inherit';b.style.borderColor=active?'var(--primary)':'var(--line)';});
+    document.getElementById('editPrice').readOnly=free;
+    document.getElementById('editPrice').style.background=free?'#f1f5f4':'#fff';
+    document.getElementById('editDigitalFreeHint').style.display=free?'block':'none';
+    if(free)document.getElementById('editPrice').value='0';
+    else if(document.getElementById('editPrice').value==='0')document.getElementById('editPrice').value='';
+  }
+  function previewEditDigitalFile(event){
+    selectedEditDigitalFile=event.target.files?.[0]||null;
+    if(selectedEditDigitalFile)document.getElementById('editDigitalFileName').textContent='Nouveau fichier : '+selectedEditDigitalFile.name;
+  }
 
   function selectProductType(type, btnEl){
     selectedProductType = type;
@@ -1134,10 +1195,13 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('stockFieldWrap').style.display = 'none';
       document.getElementById('digitalPriceWrap').style.display = 'block';
       document.getElementById('digitalFileWrap').style.display = 'block';
+      document.getElementById('watermarkCreateWrap').style.display = 'block';
+      setDigitalPriceMode(digitalPriceMode);
     } else {
       document.getElementById('stockFieldWrap').style.display = 'grid';
       document.getElementById('digitalPriceWrap').style.display = 'none';
       document.getElementById('digitalFileWrap').style.display = 'none';
+      document.getElementById('watermarkCreateWrap').style.display = 'none';
     }
   }
 
@@ -2577,19 +2641,22 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
 
   async function publishProduct(){
     const name = document.getElementById('pName').value.trim();
-    const price = selectedProductType === 'digital' ? document.getElementById('pPriceDigital').value : document.getElementById('pPrice').value;
+    const price = selectedProductType === 'digital' ? (digitalPriceMode === 'free' ? '0' : document.getElementById('pPriceDigital').value) : document.getElementById('pPrice').value;
     const stock = document.getElementById('pStock').value;
     const description = document.getElementById('pDesc').value.trim();
     const msg = document.getElementById('formMsg');
     const btn = document.getElementById('publishBtn');
 
-    if(!name || !price || !selectedImageFile){
+    if(!name || price === '' || Number(price)<0 || (selectedProductType === 'digital' && digitalPriceMode==='paid' && Number(price)<=0) || !selectedImageFile){
       msg.textContent = "Remplis le nom, le prix et ajoute une photo."; msg.className = "form-msg err"; msg.style.display = "block";
       return;
     }
     if(selectedProductType === 'digital' && !selectedDigitalFile){
       msg.textContent = "Ajoute le fichier à livrer pour ce produit numérique."; msg.className = "form-msg err"; msg.style.display = "block";
       return;
+    }
+    if(selectedProductType==='digital' && document.getElementById('pWatermarkEnabled').checked && !/\.pdf$/i.test(selectedDigitalFile?.name||'')){
+      msg.textContent="Le filigrane personnalisé est disponible uniquement pour les fichiers PDF.";msg.className="form-msg err";msg.style.display="block";return;
     }
     btn.disabled = true; btn.textContent = "Publication…"; msg.style.display = "none";
 
@@ -2626,13 +2693,13 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       if(selectedProductType === 'digital' && selectedDigitalFile){
         const dExt = (selectedDigitalFile.name.split('.').pop() || 'pdf').toLowerCase();
         const dFileName = `${currentStore.id}/digital-${Date.now()}-${Math.random().toString(36).slice(2)}.${dExt}`;
-        const dRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${dFileName}`, {
+        const dRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-digital-private/${dFileName}`, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': selectedDigitalFile.type || 'application/octet-stream' },
           body: selectedDigitalFile,
         });
         if(!dRes.ok) throw new Error("Échec de l'upload du fichier numérique");
-        digitalFileUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${dFileName}`;
+        digitalFileUrl = dFileName;
       }
 
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products`, {
@@ -2646,6 +2713,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
           stock_quantity: selectedProductType === 'digital' ? 999999 : (stock ? parseInt(stock,10) : 999),
           image_url: imageUrl, extra_image_urls: extraUrls,
           product_type: selectedProductType, file_url: digitalFileUrl,
+          watermark_enabled: selectedProductType === 'digital' && document.getElementById('pWatermarkEnabled').checked,
           promo_price_fcfa: document.getElementById('pPromoPrice').value ? parseInt(document.getElementById('pPromoPrice').value,10) : null,
           offer_starts_at: document.getElementById('pOfferStart').value ? new Date(document.getElementById('pOfferStart').value).toISOString() : null,
           offer_expires_at: document.getElementById('pOfferEnd').value ? new Date(document.getElementById('pOfferEnd').value).toISOString() : null,
@@ -2663,6 +2731,8 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('pName').value = '';
       document.getElementById('pPrice').value = '';
       document.getElementById('pPriceDigital').value = '';
+      digitalPriceMode='paid';setDigitalPriceMode('paid');
+      document.getElementById('pWatermarkEnabled').checked=false;
       document.getElementById('pStock').value = '';
       document.getElementById('pDesc').value = '';
       ['pPromoPrice','pOfferStart','pOfferEnd','pOfferLimit'].forEach(id=>document.getElementById(id).value='');
@@ -2681,6 +2751,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       selectedExtraFiles = [];
 
       loadProducts();
+      toggleProductForm(false);
     } catch(err){
       msg.textContent = "❌ " + err.message; msg.className = "form-msg err"; msg.style.display = "block";
     } finally {
@@ -2708,7 +2779,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
           <img src="${p.image_url}" alt="${p.name}">
           <div class="pc-body">
             <h4>${p.name}</h4>
-            <div class="price">${Number(p.price_fcfa).toLocaleString('fr-FR')} FCFA</div>
+            <div class="price">${Number(p.price_fcfa)===0?'Gratuit':Number(p.price_fcfa).toLocaleString('fr-FR')+' FCFA'}</div>
             <div style="font-size:0.72rem; font-weight:700; margin-bottom:8px; color:${p.stock_quantity > 5 ? '#059669' : p.stock_quantity > 0 ? '#EA580C' : '#DC2626'};">
               ${p.stock_quantity > 0 ? `${p.stock_quantity} en stock` : 'Rupture de stock'}
             </div>
@@ -2764,6 +2835,10 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     ['physical','digital'].forEach(t=>{const b=document.getElementById(t==='physical'?'editTypePhysical':'editTypeDigital');if(b){b.style.background=t===type?'var(--primary)':'#fff';b.style.color=t===type?'#fff':'inherit';b.style.border='1.5px solid '+(t===type?'var(--primary)':'var(--line)');b.style.padding='10px 12px';b.style.borderRadius='10px';b.style.fontWeight='700';}});
     document.getElementById('editStockWrap').style.display=type==='digital'?'none':'block';
     document.getElementById('editVariantsSection').style.display=type==='digital'?'none':'block';
+    document.getElementById('editDigitalPriceModeWrap').style.display=type==='digital'?'block':'none';
+    document.getElementById('editDigitalFileWrap').style.display=type==='digital'?'block':'none';
+    document.getElementById('editWatermarkWrap').style.display=type==='digital'?'block':'none';
+    if(type==='physical'){document.getElementById('editPrice').readOnly=false;document.getElementById('editPrice').style.background='#fff';}
   }
   function openEdit(id){
     const p = currentProducts.find(x => x.id === id);
@@ -2772,6 +2847,12 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     document.getElementById('editName').value = p.name;
     document.getElementById('editPrice').value = p.price_fcfa;
     document.getElementById('editStock').value = p.stock_quantity;
+    editDigitalPriceMode=Number(p.price_fcfa)===0?'free':'paid';
+    setEditDigitalPriceMode(editDigitalPriceMode);
+    document.getElementById('editWatermarkEnabled').checked=!!p.watermark_enabled;
+    selectedEditDigitalFile=null;
+    document.getElementById('editDigitalFileInput').value='';
+    document.getElementById('editDigitalFileName').textContent=p.file_url?'Fichier numérique déjà enregistré. Choisis un fichier uniquement pour le remplacer.':'Aucun fichier enregistré.';
     document.getElementById('editDesc').value = p.description || '';
     document.getElementById('editPromoPrice').value = p.promo_price_fcfa || '';
     document.getElementById('editOfferStart').value = toLocalDateTime(p.offer_starts_at);
@@ -2863,14 +2944,17 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   }
   async function saveEdit(){
     const name = document.getElementById('editName').value.trim();
-    const price = document.getElementById('editPrice').value;
+    const price = editingProductType==='digital' && editDigitalPriceMode==='free' ? '0' : document.getElementById('editPrice').value;
     const stock = document.getElementById('editStock').value;
     const description = document.getElementById('editDesc').value.trim();
     const msg = document.getElementById('editMsg');
     const btn = document.getElementById('saveEditBtn');
-    if(!name || !price){
+    if(!name || price === '' || Number(price)<0 || (editingProductType==='digital' && editDigitalPriceMode==='paid' && Number(price)<=0)){
       msg.textContent = "Nom et prix obligatoires."; msg.style.display = "block"; msg.style.color = "#DC2626";
       return;
+    }
+    if(editingProductType==='digital' && document.getElementById('editWatermarkEnabled').checked && selectedEditDigitalFile && !/\.pdf$/i.test(selectedEditDigitalFile.name)){
+      msg.textContent="Le filigrane personnalisé est disponible uniquement pour les fichiers PDF.";msg.style.display="block";msg.style.color="#DC2626";return;
     }
     btn.disabled = true; btn.textContent = "Enregistrement…";
     try {
@@ -2878,6 +2962,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         name, price_fcfa: parseInt(price,10),
         stock_quantity: editingProductType === 'digital' ? 999999 : (parseInt(stock,10) || 0),
         description, product_type: editingProductType,
+        watermark_enabled: editingProductType==='digital' && document.getElementById('editWatermarkEnabled').checked,
         promo_price_fcfa: document.getElementById('editPromoPrice').value ? parseInt(document.getElementById('editPromoPrice').value,10) : null,
         offer_starts_at: document.getElementById('editOfferStart').value ? new Date(document.getElementById('editOfferStart').value).toISOString() : null,
         offer_expires_at: document.getElementById('editOfferEnd').value ? new Date(document.getElementById('editOfferEnd').value).toISOString() : null,
@@ -2885,6 +2970,14 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         cta_label: document.getElementById('editCtaLabel').value,
       };
 
+      if(editingProductType==='digital' && selectedEditDigitalFile){
+        const dExt=(selectedEditDigitalFile.name.split('.').pop()||'pdf').toLowerCase();
+        const dPath=`${currentStore.id}/digital-${Date.now()}-${Math.random().toString(36).slice(2)}.${dExt}`;
+        const dRes=await fetch(`${SUPABASE_URL}/storage/v1/object/dp-digital-private/${dPath}`,{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${session.access_token}`,'Content-Type':selectedEditDigitalFile.type||'application/octet-stream'},body:selectedEditDigitalFile});
+        if(!dRes.ok)throw new Error("Échec de l'upload du fichier numérique");
+        updateBody.file_url=dPath;
+      }
+      if(editingProductType!=='digital'){updateBody.file_url=null;updateBody.watermark_enabled=false;}
       if(selectedEditPhotoFile){
         const ext = (selectedEditPhotoFile.name.split('.').pop() || 'jpg').toLowerCase();
         const fileName = `${currentStore.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -2910,6 +3003,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       });
       if(!res.ok) throw new Error();
       closeEdit();
+      selectedEditDigitalFile=null;
       loadProducts();
     } catch(err){
       msg.textContent = "Erreur lors de l'enregistrement."; msg.style.display = "block"; msg.style.color = "#DC2626";
@@ -3413,6 +3507,24 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 .eta-dialog-btn.primary{background:#e63946;border-color:#e63946;color:#fff}.eta-dialog-btn.danger{background:#fff1f2;border-color:#f6cbd0;color:#bd2634}
 .eta-toast{position:fixed;z-index:2147483601;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#202723;color:#fff;border-radius:12px;padding:12px 16px;max-width:calc(100vw - 32px);font:500 12px Poppins,sans-serif;box-shadow:0 10px 28px rgba(0,0,0,.18);transition:.2s}
 .eta-toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Calendrier EtaChop personnalisé : aucun sélecteur date/heure natif */
+.eta-datetime-wrap{position:relative;width:100%}
+.eta-datetime-value{width:100%;min-height:48px;padding:12px 44px 12px 14px;border:1.5px solid #dfe6e2;border-radius:12px;background:#fff;color:#27332f;text-align:left;font:500 14px Poppins,sans-serif;position:relative}
+.eta-datetime-value:after{content:'▦';position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#d53240;font-size:17px}
+.eta-calendar{display:none;position:absolute;z-index:2147483500;left:0;top:calc(100% + 7px);width:min(340px,calc(100vw - 42px));padding:14px;background:#fff;border:1px solid #e8eeeb;border-radius:16px;box-shadow:0 18px 48px rgba(20,35,29,.18)}
+.eta-calendar.open{display:block}.eta-cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.eta-cal-head strong{font:700 13px Poppins,sans-serif;color:#26332e;text-transform:capitalize}
+.eta-cal-nav{width:32px;height:32px;border:1px solid #e8eeeb;border-radius:9px;background:#fff;color:#48554f;font-size:18px}
+.eta-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.eta-cal-week{font:700 10px Poppins,sans-serif;color:#929c97;padding:5px 0}
+.eta-cal-day{height:34px;border:0;border-radius:9px;background:#fff;color:#34413b;font:500 12px Poppins,sans-serif}
+.eta-cal-day:hover{background:#fff0f1}.eta-cal-day.selected{background:#e63946;color:#fff;font-weight:700}.eta-cal-day.today{border:1px solid #e63946}.eta-cal-day.muted{color:#c3cbc7}
+.eta-cal-time{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid #eef1ef}
+.eta-cal-time label{font:600 11px Poppins,sans-serif;color:#6f7a74}.eta-cal-time input{width:58px;height:36px;border:1px solid #e1e8e4;border-radius:8px;text-align:center;font:600 13px Poppins,sans-serif;color:#26332e}
+.eta-cal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:13px}.eta-cal-actions button{border-radius:9px;padding:9px 13px;font:600 11px Poppins,sans-serif;border:1px solid #e5eae7;background:#fff;color:#5b665f}.eta-cal-actions .apply{background:#e63946;border-color:#e63946;color:#fff}
+@media(max-width:480px){.eta-calendar{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,calc(100vw - 28px));z-index:2147483602}.eta-cal-day{height:38px}}
+
 </style>
 <div class="eta-dialog-backdrop" id="etaDialogBackdrop" aria-hidden="true"><section class="eta-dialog-card" role="dialog" aria-modal="true" aria-labelledby="etaDialogTitle">
 <div class="eta-dialog-mark"></div><h3 class="eta-dialog-title" id="etaDialogTitle">EtaChop</h3><p class="eta-dialog-message" id="etaDialogMessage"></p>
@@ -3432,6 +3544,55 @@ backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeDialog(null);}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&backdrop.classList.contains('open'))closeDialog(null);if(e.key==='Enter'&&backdrop.classList.contains('open')&&input.style.display!=='none'){e.preventDefault();actions.querySelector('.primary')?.click();}});
 function removeBulb(root){const nodes=(root||document).querySelectorAll?.('button,a,[role="button"],div')||[];nodes.forEach(el=>{if(el.dataset.etaBulbChecked)return;const txt=(el.innerText||el.textContent||'').trim(),aria=(el.getAttribute('aria-label')||'')+' '+(el.getAttribute('title')||'');const r=el.getBoundingClientRect?.()||{width:999,height:999};if((txt==='💡'||txt==='💡️'||/ampoule|conseil rapide|astuce/i.test(aria))&&r.width<=145&&r.height<=145){el.dataset.etaBulbChecked='1';el.style.setProperty('display','none','important');}});}
 removeBulb(document);new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>{if(n.nodeType===1)removeBulb(n);}))).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
+
+<script id="eta-custom-datetime-script">
+(function(){
+ const ids=['pOfferStart','pOfferEnd','editOfferStart','editOfferEnd'];
+ const months=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+ const pad=n=>String(n).padStart(2,'0');
+ const parse=v=>{if(!v)return new Date();const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(v);return m?new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]):new Date(v)};
+ const fmt=d=>`${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()} à ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+ let active=null, view=new Date(), chosen=new Date();
+ function close(){document.querySelectorAll('.eta-calendar.open').forEach(x=>x.classList.remove('open'));active=null;}
+ function render(panel){
+   const y=view.getFullYear(),m=view.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();
+   panel.querySelector('.eta-cal-title').textContent=months[m]+' '+y;
+   const grid=panel.querySelector('.eta-cal-grid');grid.innerHTML='';
+   ['Lu','Ma','Me','Je','Ve','Sa','Di'].forEach(w=>{const el=document.createElement('span');el.className='eta-cal-week';el.textContent=w;grid.appendChild(el);});
+   for(let i=0;i<start;i++){const e=document.createElement('span');grid.appendChild(e);}
+   for(let d=1;d<=days;d++){const b=document.createElement('button');b.type='button';b.className='eta-cal-day';b.textContent=d;
+     if(d===chosen.getDate()&&m===chosen.getMonth()&&y===chosen.getFullYear())b.classList.add('selected');
+     const now=new Date();if(d===now.getDate()&&m===now.getMonth()&&y===now.getFullYear())b.classList.add('today');
+     b.addEventListener('click',()=>{chosen.setFullYear(y,m,d);render(panel);});grid.appendChild(b);}
+   panel.querySelector('.eta-hour').value=pad(chosen.getHours());panel.querySelector('.eta-minute').value=pad(chosen.getMinutes());
+ }
+ function open(input,button,panel){
+   close();active={input,button,panel};const d=parse(input.value);chosen=new Date(d);if(Number.isNaN(chosen.getTime()))chosen=new Date();view=new Date(chosen.getFullYear(),chosen.getMonth(),1);render(panel);panel.classList.add('open');
+ }
+ ids.forEach(id=>{
+   const input=document.getElementById(id);if(!input)return;
+   const wrap=document.createElement('div');wrap.className='eta-datetime-wrap';input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
+   input.type='hidden';input.classList.remove('eta-date-input');
+   const button=document.createElement('button');button.type='button';button.className='eta-datetime-value';button.textContent=input.value?fmt(parse(input.value)):'Choisir une date et une heure';wrap.appendChild(button);
+   const panel=document.createElement('div');panel.className='eta-calendar';panel.innerHTML='<div class="eta-cal-head"><button type="button" class="eta-cal-nav prev" aria-label="Mois précédent">‹</button><strong class="eta-cal-title"></strong><button type="button" class="eta-cal-nav next" aria-label="Mois suivant">›</button></div><div class="eta-cal-grid"></div><div class="eta-cal-time"><label>Heure</label><input class="eta-hour" type="text" inputmode="numeric" maxlength="2" value="12" aria-label="Heure"><span>:</span><input class="eta-minute" type="text" inputmode="numeric" maxlength="2" value="00" aria-label="Minutes"></div><div class="eta-cal-actions"><button type="button" class="cancel">Annuler</button><button type="button" class="apply">Valider</button></div>';
+   wrap.appendChild(panel);
+   button.addEventListener('click',()=>{if(active&&active.panel===panel){close();return;}open(input,button,panel);});
+   panel.querySelector('.prev').addEventListener('click',()=>{view.setMonth(view.getMonth()-1);render(panel);});
+   panel.querySelector('.next').addEventListener('click',()=>{view.setMonth(view.getMonth()+1);render(panel);});
+   panel.querySelector('.cancel').addEventListener('click',close);
+   panel.querySelector('.apply').addEventListener('click',()=>{
+     const h=Math.max(0,Math.min(23,parseInt(panel.querySelector('.eta-hour').value,10)||0));
+     const min=Math.max(0,Math.min(59,parseInt(panel.querySelector('.eta-minute').value,10)||0));
+     chosen.setHours(h,min,0,0);input.value=`${chosen.getFullYear()}-${pad(chosen.getMonth()+1)}-${pad(chosen.getDate())}T${pad(h)}:${pad(min)}`;
+     button.textContent=fmt(chosen);input.dispatchEvent(new Event('change',{bubbles:true}));close();
+   });
+   if(input.value){const d=parse(input.value);button.textContent=fmt(d);}
+ });
+ document.addEventListener('click',e=>{if(active&&!active.panel.contains(e.target)&&!active.button.contains(e.target))close();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
 })();
 </script>
 
