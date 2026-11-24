@@ -42,7 +42,6 @@
   .field label{ display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600; }
   .field input, .field select, .field textarea{ width:100%; padding:13px 14px; border-radius:10px; border:1.5px solid var(--line); font-family:'Poppins',sans-serif; font-size:0.95rem; }
   .field textarea.eta-auto-grow{display:block;min-height:92px;line-height:1.55;resize:vertical;overflow-y:hidden;white-space:pre-wrap;overflow-wrap:anywhere;}
-
   .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--primary); outline-offset:1px; border-color:var(--primary); }
   #authBtn{ width:100%; padding:14px; margin-top:6px; }
   .auth-msg{ font-size:0.82rem; margin-top:14px; text-align:center; font-weight:600; display:none; }
@@ -1144,6 +1143,39 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
   const STORE_URL_BASE = window.location.origin + window.location.pathname.replace('dashboard.html', 'store.html');
 
+  // Agrandit automatiquement les champs de description.
+  function etaAutoGrow(el){
+    if(!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.max(el.scrollHeight, 92) + 'px';
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('textarea.eta-auto-grow').forEach(etaAutoGrow);
+  });
+
+  // Requêtes Supabase avec diagnostic par étape et délai maximal.
+  async function etaSupabaseFetch(url, options, label, timeoutMs = 60000){
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const requestOptions = { ...options };
+    if(controller && !requestOptions.signal) requestOptions.signal = controller.signal;
+    const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+    try {
+      let response;
+      try { response = await fetch(url, requestOptions); }
+      catch(err) {
+        if(err && err.name === 'AbortError') throw new Error(label + ' : délai dépassé après ' + Math.round(timeoutMs/1000) + ' secondes. Vérifie ta connexion puis réessaie.');
+        if(err instanceof TypeError) throw new Error(label + ' : le navigateur n’a pas réussi à joindre Supabase (Failed to fetch). Vérifie le réseau et réessaie. Si le problème persiste, il faudra contrôler la réponse CORS du serveur.');
+        throw new Error(label + ' : ' + ((err && err.message) || 'erreur réseau inconnue'));
+      }
+      if(!response.ok){
+        let detail = '';
+        try { detail = (await response.text()).slice(0, 500); } catch(_e) {}
+        throw new Error(label + ' : erreur HTTP ' + response.status + (detail ? ' — ' + detail : ''));
+      }
+      return response;
+    } finally { if(timer) clearTimeout(timer); }
+  }
+
   const COLORS = ["#4F46E5","#E63946","#059669","#EA580C","#DB2777","#0891B2","#7C3AED","#14121F"];
 
   let session = JSON.parse(localStorage.getItem('vendoSession') || 'null');
@@ -1343,11 +1375,11 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       const bodyData = authMode === 'signup'
         ? { email, password, data: { first_name: firstName } }
         : { email, password };
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
+      const res = await etaSupabaseFetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyData),
-      });
+      }, authMode === 'login' ? 'Connexion' : 'Création du compte', 30000);
       const data = await res.json();
       if(!res.ok) throw new Error(data.error_description || data.msg || data.error || "Échec");
 
@@ -1570,14 +1602,15 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       // qu'aucune boutique n'existe.
       await refreshSession();
 
-      const fetchStores = () => fetch(
+      const fetchStores = () => etaSupabaseFetch(
         `${SUPABASE_URL}/rest/v1/dp_stores?vendor_id=eq.${encodeURIComponent(session.user.id)}&select=*&limit=1`,
         {
           headers: {
             'apikey': SUPABASE_ANON_KEY,
             'Authorization': `Bearer ${session.access_token}`
           }
-        }
+        },
+        'Chargement de la boutique', 30000
       );
 
       let res = await fetchStores();
@@ -2560,7 +2593,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       if(selectedLogoFile){
         const ext = (selectedLogoFile.name.split('.').pop() || 'jpg').toLowerCase();
         const fileName = `logos/${currentStore.id}-${Date.now()}.${ext}`;
-        const uploadRes = await etaProductRequest(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
@@ -2643,23 +2676,6 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     });
   }
 
-  async function etaProductRequest(url, options, label){
-    let response;
-    try { response = await fetch(url, options); }
-    catch(err){
-      if(err instanceof TypeError){
-        throw new Error(label + " : connexion impossible avec Supabase. Vérifie le réseau, l'URL et les autorisations CORS. Détail : " + err.message);
-      }
-      throw err;
-    }
-    if(!response.ok){
-      let detail='';
-      try { detail=(await response.text()).slice(0,240); } catch(_e){}
-      throw new Error(label + " : erreur HTTP " + response.status + (detail ? " — " + detail : ""));
-    }
-    return response;
-  }
-
   async function publishProduct(){
     const name = document.getElementById('pName').value.trim();
     const price = selectedProductType === 'digital' ? (digitalPriceMode === 'free' ? '0' : document.getElementById('pPriceDigital').value) : document.getElementById('pPrice').value;
@@ -2685,14 +2701,14 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       const ext = (selectedImageFile.name.split('.').pop() || 'jpg').toLowerCase();
       const fileName = `${currentStore.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
+      const uploadRes = await etaSupabaseFetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': selectedImageFile.type,
+          'Content-Type': selectedImageFile.type || 'application/octet-stream',
         },
         body: selectedImageFile,
-      });
+      }, 'Envoi de la photo principale');
       const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
 
       // Upload des photos supplémentaires, une par une
@@ -2700,11 +2716,11 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       for(const file of selectedExtraFiles){
         const extraExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
         const extraFileName = `${currentStore.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extraExt}`;
-        const extraRes = await etaProductRequest(`${SUPABASE_URL}/storage/v1/object/dp-assets/${extraFileName}`, {
+        await etaSupabaseFetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${extraFileName}`, {
           method: 'POST',
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': file.type },
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': file.type || 'application/octet-stream' },
           body: file,
-        });
+        }, 'Envoi d’une photo supplémentaire');
         extraUrls.push(`${SUPABASE_URL}/storage/v1/object/public/dp-assets/${extraFileName}`);
       }
 
@@ -2713,15 +2729,15 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       if(selectedProductType === 'digital' && selectedDigitalFile){
         const dExt = (selectedDigitalFile.name.split('.').pop() || 'pdf').toLowerCase();
         const dFileName = `${currentStore.id}/digital-${Date.now()}-${Math.random().toString(36).slice(2)}.${dExt}`;
-        const dRes = await etaProductRequest(`${SUPABASE_URL}/storage/v1/object/dp-digital-private/${dFileName}`, {
+        await etaSupabaseFetch(`${SUPABASE_URL}/storage/v1/object/dp-digital-private/${dFileName}`, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': selectedDigitalFile.type || 'application/octet-stream' },
           body: selectedDigitalFile,
-        });
+        }, 'Envoi du fichier numérique (PDF)');
         digitalFileUrl = dFileName;
       }
 
-      const insertRes = await etaProductRequest(`${SUPABASE_URL}/rest/v1/dp_products`, {
+      const insertRes = await etaSupabaseFetch(`${SUPABASE_URL}/rest/v1/dp_products`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
@@ -2739,7 +2755,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
           offer_limit: document.getElementById('pOfferLimit').value ? parseInt(document.getElementById('pOfferLimit').value,10) : null,
           cta_label: document.getElementById('pCtaLabel').value,
         }),
-      });
+      }, 'Enregistrement du produit dans le catalogue');
       const productData = await insertRes.json();
 
       const productLink = `https://${currentStore.slug}.etachop.com/${productData[0].id}`;
@@ -2753,6 +2769,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       document.getElementById('pWatermarkEnabled').checked=false;
       document.getElementById('pStock').value = '';
       document.getElementById('pDesc').value = '';
+      etaAutoGrow(document.getElementById('pDesc'));
       ['pPromoPrice','pOfferStart','pOfferEnd','pOfferLimit'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('pCtaLabel').value='Acheter maintenant';
       document.getElementById('imagePreview').style.display = 'none';
@@ -3614,15 +3631,5 @@ removeBulb(document);new MutationObserver(records=>records.forEach(r=>r.addedNod
 })();
 </script>
 
-<script>
-  function etaAutoGrow(el){
-    if(!el) return;
-    el.style.height='auto';
-    el.style.height=Math.max(el.scrollHeight,92)+'px';
-  }
-  document.addEventListener('DOMContentLoaded',()=>{
-    document.querySelectorAll('textarea.eta-auto-grow').forEach(etaAutoGrow);
-  });
-</script>
 </body>
 </html>
