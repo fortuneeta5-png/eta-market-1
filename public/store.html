@@ -6,12 +6,16 @@
 <title>Boutique — EtaChop</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E63946">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="48x48" href="etachop-icon-48.png">
+<link rel="apple-touch-icon" href="etachop-icon-180.png">
+<link rel="manifest" href="site.webmanifest">
 <link rel="apple-touch-icon" href="file_000002b4c81f4b36e79506179463b.png">
 <meta property="og:title" content="Boutique sur EtaChop">
 <meta property="og:description" content="Découvre cette boutique et ses produits sur EtaChop.">
-<meta property="og:image" content="https://etachop.com/arrière plan bleu.png">
+<meta property="og:image" content="https://etachop.com/etachop-logo.png">
 <meta property="og:type" content="website">
-<link rel="icon" type="image/png" href="arrière plan bleu.png">
+<link rel="icon" type="image/png" sizes="48x48" href="etachop-icon-48.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -70,17 +74,24 @@
     text-decoration:none; font-size:1.6rem; z-index:70;
   }
 
-  /* Présentation des offres : fond blanc, sans encadré jaune */
-  .offer-panel{display:none;background:#fff;border:1px solid #edf0ee;border-radius:14px;padding:14px 0;margin:10px 0 16px;color:var(--ink)}
+  /* Offre sans encadré : les informations occupent toute la largeur disponible. */
+  .offer-panel{display:none;background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;margin:12px 0 18px!important;color:var(--ink);box-shadow:none!important;width:100%;}
   .offer-panel.active{display:block}
-  .offer-stock-head{display:flex;justify-content:space-between;gap:12px;font-size:.82rem;font-weight:700;margin-bottom:9px}
-  .offer-stock-track{height:9px;background:#ecefed;border-radius:99px;overflow:hidden}
-  .offer-stock-fill{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .25s ease}
-  .offer-caption{font-size:.82rem;color:var(--accent);font-weight:700;margin-top:9px}
-  .offer-countdown{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;align-items:center}
-  .offer-countdown-label{width:100%;font-size:.82rem;font-weight:700;color:#555;margin-bottom:2px}
-  .offer-time{min-width:48px;padding:7px 8px;border-radius:9px;background:#f4f5f5;color:#1d2522;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
-  .offer-time small{display:block;font-size:.58rem;font-weight:600;color:#737c78}
+  .offer-stock-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.82rem;font-weight:700;margin-bottom:8px;color:var(--ink)}
+  .offer-stock-track{height:8px;background:#ecefed;border-radius:99px;overflow:hidden;width:100%}
+  .offer-stock-fill{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .35s ease}
+  .offer-caption{font-size:.8rem;color:var(--ink);font-weight:700;margin-top:8px}
+  .offer-countdown{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;align-items:center;width:100%}
+  .offer-countdown-label{width:100%;font-size:.8rem;font-weight:700;color:var(--ink);margin-bottom:1px}
+  .offer-time{min-width:52px;padding:7px 9px;border-radius:7px;background:#f3f3f3;color:#111;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+  .offer-time small{display:block;font-size:.58rem;font-weight:600;color:#333}
+  .payment-methods-preview{margin:15px 0 8px;width:100%;}
+  .payment-methods-title{display:block;font-size:.76rem;font-weight:700;color:#111;margin-bottom:8px;}
+  .payment-method-logos{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .payment-logo{height:34px;min-width:55px;padding:5px 9px;display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid #e8e8e8;border-radius:6px;background:#fff;color:#111;font-size:10px;font-weight:800;}
+  .payment-logo img{width:23px;height:20px;object-fit:contain;}
+  .payment-logo .payment-fallback{font-size:10px;font-weight:800;color:#111;white-space:nowrap;}
+  @media(max-width:480px){.offer-stock-head{font-size:.76rem}.offer-time{min-width:48px;padding:7px 6px}.payment-logo{min-width:48px;padding:5px 7px}}
   .product-info .price{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:8px 0 12px;color:var(--accent)}
   .card-body .price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
   .price-old{font-size:.88rem;color:#9aa19e;text-decoration:line-through;font-weight:500}
@@ -107,7 +118,7 @@
   <h1 id="storeName">Chargement…</h1>
   <p id="storeDesc"></p>
   <div class="powered" id="poweredBadge" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:100px; margin-top:16px;">
-    <img src="arrière plan blanc.png" alt="EtaChop" style="height:32px;">
+    <img src="etachop-logo.png" alt="EtaChop" style="height:42px;width:104px;object-fit:contain;">
     <span>Propulsé par EtaChop</span>
   </div>
 </div>
@@ -142,6 +153,10 @@
         </div>
         <div id="stockBadge" style="font-size:0.82rem; font-weight:700; margin-bottom:14px;"></div>
         <div id="variantsWrap" style="display:none; margin-bottom:16px;"></div>
+        <div id="paymentMethodsPreview" class="payment-methods-preview" aria-live="polite">
+          <span class="payment-methods-title">Moyens de paiement disponibles</span>
+          <div id="paymentMethodLogos" class="payment-method-logos"></div>
+        </div>
         <button class="btn btn-primary" id="buyBtn" onclick="openCheckout()">Acheter maintenant</button>
         <p id="pDesc"></p>
       </div>
@@ -404,7 +419,33 @@
     select.innerHTML = country.networks.map(([code,label]) => `<option value="${code}">${label}</option>`).join('');
     selectedNetwork = country.networks[0]?.[0] || '';
     select.value = selectedNetwork;
+    renderPaymentMethodsPreview();
   }
+
+  function renderPaymentMethodsPreview(){
+    const wrap=document.getElementById('paymentMethodsPreview');
+    const list=document.getElementById('paymentMethodLogos');
+    if(!wrap || !list) return;
+    const country=BUYER_COUNTRIES[buyerCountryCode];
+    const methods=country && Array.isArray(country.networks) ? country.networks : [];
+    if(!methods.length){wrap.style.display='none';return;}
+    wrap.style.display='block';
+    const brands=[
+      ['mtn','mtn'],['airtel','airtel'],['orange','orange'],['moov','moov'],['wave','wave'],
+      ['mpesa','safaricom'],['vodacom','vodacom'],['djamo','djamo'],['paydunya','paydunya'],
+      ['visa','visa'],['mastercard','mastercard'],['safaricom','safaricom'],['free money','free'],
+      ['wizall','wizall'],['expresso','expresso'],['celtiis','celtiis'],['mixx','mixx']
+    ];
+    list.innerHTML=methods.map(([code,label])=>{
+      const hay=(String(code)+' '+String(label)).toLowerCase();
+      const found=brands.find(([key])=>hay.includes(key));
+      const slug=found?found[1]:'';
+      const fallback=String(label).split(/[\s/]+/)[0].slice(0,12);
+      const img=slug?`<img src="https://cdn.simpleicons.org/${slug}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">`:'';
+      return `<span class="payment-logo">${img}<span class="payment-fallback" ${slug?'style="display:none"':''}>${fallback}</span></span>`;
+    }).join('');
+  }
+
   async function onBuyerCountryChange(){
     buyerCountryCode = document.getElementById('buyerCountry').value;
     deliveryQuote = null;
@@ -1006,7 +1047,6 @@
     buyBtn.textContent = getEffectiveProductPrice(p) === 0 ? 'Obtenir gratuitement' : (p.cta_label || 'Acheter maintenant');
     buyBtn.style.backgroundColor = 'var(--accent)';
     buyBtn.style.color = '#fff';
-    renderProductOffer(p, promoActive);
 
     // Galerie de miniatures (photo principale + photos supplémentaires)
     const allImages = [p.image_url, ...(p.extra_image_urls || [])];
@@ -1020,26 +1060,26 @@
       thumbRow.innerHTML = '';
     }
 
-    // Stock
+    // Stock réellement disponible (stock_quantity est décrémenté par l'enregistrement d'une commande).
     const stockBadge = document.getElementById('stockBadge');
-    if(p.stock_quantity <= 0){
+    const stockTracked = p.stock_quantity !== null && p.stock_quantity !== undefined && Number.isFinite(Number(p.stock_quantity));
+    const stockRemaining = stockTracked ? Math.max(0, Number(p.stock_quantity)) : null;
+    if(stockTracked && stockRemaining <= 0){
       stockBadge.textContent = "Rupture de stock";
-      stockBadge.style.color = "#DC2626";
+      stockBadge.style.color = "#c62828";
       buyBtn.disabled = true;
       buyBtn.textContent = "Indisponible";
-      buyBtn.style.opacity = "0.5";
-    } else if(p.stock_quantity <= 5){
-      stockBadge.textContent = `Plus que ${p.stock_quantity} en stock !`;
-      stockBadge.style.color = "#EA580C";
-      buyBtn.disabled = false;
-      buyBtn.textContent = getEffectiveProductPrice(p) === 0 ? 'Obtenir gratuitement' : (p.cta_label || 'Acheter maintenant');
-      buyBtn.style.opacity = "1";
+      buyBtn.style.opacity = "0.55";
     } else {
-      stockBadge.textContent = "";
+      stockBadge.textContent = stockTracked ? `${stockRemaining} article${stockRemaining>1?'s':''} disponible${stockRemaining>1?'s':''}` : "";
+      stockBadge.style.color = "#111";
       buyBtn.disabled = false;
       buyBtn.textContent = getEffectiveProductPrice(p) === 0 ? 'Obtenir gratuitement' : (p.cta_label || 'Acheter maintenant');
       buyBtn.style.opacity = "1";
     }
+    renderPaymentMethodsPreview();
+    if(getEffectiveProductPrice(p)===0){const pm=document.getElementById('paymentMethodsPreview');if(pm)pm.style.display='none';}
+    renderProductOffer(p, promoActive);
 
     loadVariants(p.id);
   }
@@ -1052,15 +1092,18 @@
     const starts = p.offer_starts_at ? new Date(p.offer_starts_at).getTime() : 0;
     const ends = p.offer_expires_at ? new Date(p.offer_expires_at).getTime() : 0;
     const limit = Number(p.offer_limit || 0);
-    const sold = Number(p.offer_sold_count || 0);
-    const remaining = limit>0 ? Math.max(0,limit-sold) : null;
+    const recordedSold = Number(p.offer_sold_count || 0);
+    // offer_sold_count est incrémenté côté base à la confirmation de chaque commande payée.
+    const remaining = limit>0 ? Math.max(0,limit-recordedSold) : null;
+    const sold = recordedSold;
     const showPanel = promoActive && (ends>0 || limit>0);
     if(!showPanel){ panel.classList.remove('active'); return; }
     panel.classList.add('active');
     if(limit>0){
       document.getElementById('offerSold').textContent = `Vendu : ${sold}`;
       document.getElementById('offerRemaining').textContent = `Restant : ${remaining}`;
-      document.getElementById('offerStockFill').style.width = `${Math.min(100,Math.max(0,sold/limit*100))}%`;
+      const progress = limit>0 ? Math.min(100,Math.max(0,(remaining/limit)*100)) : 0;
+      document.getElementById('offerStockFill').style.width = `${progress}%`;
       document.getElementById('offerStockFill').style.background = 'var(--accent)';
       document.getElementById('offerSold').parentElement.style.display = 'flex';
       document.querySelector('.offer-stock-track').style.display = 'block';
@@ -1068,7 +1111,11 @@
       document.getElementById('offerSold').parentElement.style.display = 'none';
       document.querySelector('.offer-stock-track').style.display = 'none';
     }
-    document.getElementById('offerCaption').textContent = limit>0 ? 'Offre à durée limitée' : 'Promotion en cours';
+    document.getElementById('offerCaption').textContent = limit>0 ? (remaining<=0 ? 'Quantité de l’offre épuisée' : 'Offre à durée limitée') : 'Promotion en cours';
+    if(limit>0 && remaining<=0){
+      const buy=document.getElementById('buyBtn');
+      if(buy){buy.disabled=true;buy.textContent='Offre épuisée';buy.style.opacity='.55';}
+    }
     const countdown = document.getElementById('offerCountdown');
     if(ends>0){
       countdown.style.display='flex';
