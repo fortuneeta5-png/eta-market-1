@@ -41,6 +41,8 @@
   .field{ margin-bottom:16px; }
   .field label{ display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600; }
   .field input, .field select, .field textarea{ width:100%; padding:13px 14px; border-radius:10px; border:1.5px solid var(--line); font-family:'Poppins',sans-serif; font-size:0.95rem; }
+  .field textarea.eta-auto-grow{display:block;min-height:92px;line-height:1.55;resize:vertical;overflow-y:hidden;white-space:pre-wrap;overflow-wrap:anywhere;}
+
   .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--primary); outline-offset:1px; border-color:var(--primary); }
   #authBtn{ width:100%; padding:14px; margin-top:6px; }
   .auth-msg{ font-size:0.82rem; margin-top:14px; text-align:center; font-weight:600; display:none; }
@@ -808,7 +810,7 @@
         </div>
         <div class="field">
           <label>Description</label>
-          <textarea id="pDesc" rows="2" placeholder="Décris ton produit en une phrase"></textarea>
+          <textarea id="pDesc" class="eta-auto-grow" rows="2" placeholder="Décris ton produit en une phrase" oninput="etaAutoGrow(this)"></textarea>
         </div>
 
         <button class="btn btn-primary" id="publishBtn" style="width:100%;" onclick="publishProduct()">Publier le produit</button>
@@ -1114,7 +1116,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     <div class="field"><label>Bouton d'action</label><select id="editCtaLabel" class="eta-native-select"><option>Acheter maintenant</option><option>Profitez de l'offre</option><option>Commander maintenant</option><option>S'inscrire maintenant</option><option>Rejoindre la formation</option><option>Télécharger maintenant</option><option>Réserver ma place</option><option>Obtenir maintenant</option><option>Je profite de l'offre</option></select></div>
     <div class="field">
       <label>Description</label>
-      <textarea id="editDesc" rows="2"></textarea>
+      <textarea id="editDesc" class="eta-auto-grow" rows="2" oninput="etaAutoGrow(this)"></textarea>
     </div>
 
     <div id="editVariantsSection" style="border-top:1px solid var(--line); margin:18px 0 14px; padding-top:14px;">
@@ -2558,7 +2560,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       if(selectedLogoFile){
         const ext = (selectedLogoFile.name.split('.').pop() || 'jpg').toLowerCase();
         const fileName = `logos/${currentStore.id}-${Date.now()}.${ext}`;
-        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
+        const uploadRes = await etaProductRequest(`${SUPABASE_URL}/storage/v1/object/dp-assets/${fileName}`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
@@ -2641,6 +2643,23 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     });
   }
 
+  async function etaProductRequest(url, options, label){
+    let response;
+    try { response = await fetch(url, options); }
+    catch(err){
+      if(err instanceof TypeError){
+        throw new Error(label + " : connexion impossible avec Supabase. Vérifie le réseau, l'URL et les autorisations CORS. Détail : " + err.message);
+      }
+      throw err;
+    }
+    if(!response.ok){
+      let detail='';
+      try { detail=(await response.text()).slice(0,240); } catch(_e){}
+      throw new Error(label + " : erreur HTTP " + response.status + (detail ? " — " + detail : ""));
+    }
+    return response;
+  }
+
   async function publishProduct(){
     const name = document.getElementById('pName').value.trim();
     const price = selectedProductType === 'digital' ? (digitalPriceMode === 'free' ? '0' : document.getElementById('pPriceDigital').value) : document.getElementById('pPrice').value;
@@ -2674,7 +2693,6 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         },
         body: selectedImageFile,
       });
-      if(!uploadRes.ok) throw new Error("Échec de l'upload de la photo");
       const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/dp-assets/${fileName}`;
 
       // Upload des photos supplémentaires, une par une
@@ -2682,12 +2700,12 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       for(const file of selectedExtraFiles){
         const extraExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
         const extraFileName = `${currentStore.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extraExt}`;
-        const extraRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-assets/${extraFileName}`, {
+        const extraRes = await etaProductRequest(`${SUPABASE_URL}/storage/v1/object/dp-assets/${extraFileName}`, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': file.type },
           body: file,
         });
-        if(extraRes.ok) extraUrls.push(`${SUPABASE_URL}/storage/v1/object/public/dp-assets/${extraFileName}`);
+        extraUrls.push(`${SUPABASE_URL}/storage/v1/object/public/dp-assets/${extraFileName}`);
       }
 
       // Upload du fichier numérique si applicable
@@ -2695,16 +2713,15 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       if(selectedProductType === 'digital' && selectedDigitalFile){
         const dExt = (selectedDigitalFile.name.split('.').pop() || 'pdf').toLowerCase();
         const dFileName = `${currentStore.id}/digital-${Date.now()}-${Math.random().toString(36).slice(2)}.${dExt}`;
-        const dRes = await fetch(`${SUPABASE_URL}/storage/v1/object/dp-digital-private/${dFileName}`, {
+        const dRes = await etaProductRequest(`${SUPABASE_URL}/storage/v1/object/dp-digital-private/${dFileName}`, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': selectedDigitalFile.type || 'application/octet-stream' },
           body: selectedDigitalFile,
         });
-        if(!dRes.ok) throw new Error("Échec de l'upload du fichier numérique");
         digitalFileUrl = dFileName;
       }
 
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products`, {
+      const insertRes = await etaProductRequest(`${SUPABASE_URL}/rest/v1/dp_products`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}`,
@@ -2724,7 +2741,6 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
         }),
       });
       const productData = await insertRes.json();
-      if(!insertRes.ok) throw new Error(productData.message || "Échec de la publication");
 
       const productLink = `https://${currentStore.slug}.etachop.com/${productData[0].id}`;
       msg.innerHTML = `✅ Produit publié !<br><span style="font-family:monospace; font-size:0.78rem; word-break:break-all;">${productLink}</span>`;
@@ -3598,5 +3614,15 @@ removeBulb(document);new MutationObserver(records=>records.forEach(r=>r.addedNod
 })();
 </script>
 
+<script>
+  function etaAutoGrow(el){
+    if(!el) return;
+    el.style.height='auto';
+    el.style.height=Math.max(el.scrollHeight,92)+'px';
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('textarea.eta-auto-grow').forEach(etaAutoGrow);
+  });
+</script>
 </body>
 </html>
