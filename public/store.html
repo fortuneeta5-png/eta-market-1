@@ -240,7 +240,7 @@
       <h3 id="checkoutSuccessTitle" style="font-size:1.1rem; margin-bottom:8px;">Demande de paiement envoyée !</h3>
       <p id="checkoutSuccessText" style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Valide le paiement sur ton téléphone avec ton code secret Mobile Money pour finaliser ta commande. Sans validation de ta part, la commande ne sera pas traitée.</p>
       <a id="digitalDownloadLink" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="display:none; width:100%; margin-bottom:12px;">Télécharger mon produit</a>
-      <a href="/suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
+      <a href="/suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre mes commandes par e-mail →</a>
       <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
     </div>
   </div>
@@ -803,6 +803,11 @@
       return;
     }
     const isDigitalOrder = currentProduct && currentProduct.product_type === 'digital';
+    if(isDigitalOrder && !email){
+      msg.textContent = "Ton adresse e-mail est obligatoire pour recevoir et retrouver ton produit numérique."; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
     if(!isDigitalOrder && (!address || !city || !district)){
       msg.textContent = "L'adresse de livraison complète (adresse, ville, quartier) est obligatoire."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
@@ -878,7 +883,9 @@
         const downloadObjectUrl=URL.createObjectURL(downloadBlob);
         const downloadLink=document.createElement('a');
         downloadLink.href=downloadObjectUrl;
-        downloadLink.download=(currentProduct.name||'produit').replace(/[^a-z0-9-_ ]/gi,'').trim()+'.pdf';
+        const disposition=downloadRes.headers.get('Content-Disposition')||'';
+        const filenameMatch=disposition.match(/filename\s*=\s*"?([^";]+)"?/i);
+        downloadLink.download=filenameMatch?filenameMatch[1]:((currentProduct.name||'produit').replace(/[^a-z0-9-_ ]/gi,'').trim()||'produit');
         document.body.appendChild(downloadLink);downloadLink.click();downloadLink.remove();
         setTimeout(()=>URL.revokeObjectURL(downloadObjectUrl),60000);
         // Notification e-mail du vendeur (best effort)
@@ -890,8 +897,8 @@
         document.getElementById('checkoutSuccessIcon').textContent = '✅';
         document.getElementById('checkoutSuccessTitle').textContent = 'Félicitations ! Ton produit est prêt 🎉';
         document.getElementById('checkoutSuccessText').textContent = 'Félicitations ! Ta commande gratuite est confirmée. Le téléchargement de ton fichier vient de démarrer.';
-        const downloadLink = document.getElementById('digitalDownloadLink');
-        downloadLink.style.display = 'none';
+        const successDownloadLink = document.getElementById('digitalDownloadLink');
+        successDownloadLink.style.display = 'none';
         document.getElementById('checkoutSuccess').style.display = 'block';
         if(typeof subscribeToEtaNotifications === 'function'){
           subscribeToEtaNotifications('customer', {customerPhone:phone});
