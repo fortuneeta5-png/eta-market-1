@@ -876,14 +876,14 @@
         }
         document.getElementById('checkoutForm').style.display = 'none';
         document.getElementById('checkoutSuccessIcon').textContent = '✅';
-        document.getElementById('checkoutSuccessTitle').textContent = 'Ton produit est prêt !';
+        document.getElementById('checkoutSuccessTitle').textContent = 'Félicitations ! Ton produit est prêt 🎉';
         document.getElementById('checkoutSuccessText').textContent = downloadData.watermarked
-          ? 'Ton fichier PDF a été personnalisé avec tes informations et celles de la boutique. Le lien de téléchargement est temporaire.'
-          : 'Ta commande gratuite est confirmée. Tu peux télécharger ton produit numérique maintenant.';
+          ? 'Félicitations ! Ton achat est confirmé. Ton PDF a été personnalisé. Le lien de téléchargement sécurisé est temporaire.'
+          : 'Félicitations ! Ta commande gratuite est confirmée. Ton produit numérique est prêt à être téléchargé.';
         const downloadLink = document.getElementById('digitalDownloadLink');
         downloadLink.href = downloadData.download_url;
         downloadLink.style.display = 'block';
-        downloadLink.textContent = 'Télécharger mon produit';
+        downloadLink.textContent = 'Accéder à mon téléchargement';
         document.getElementById('checkoutSuccess').style.display = 'block';
         if(typeof subscribeToEtaNotifications === 'function'){
           subscribeToEtaNotifications('customer', {customerPhone:phone});

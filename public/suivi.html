@@ -2,145 +2,51 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Suivre ma commande — EtaChop</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="arrière plan bleu.png">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Suivre mes commandes — EtaChop</title>
+<link rel="icon" href="etachop-icon-48.png">
 <style>
-  :root{ --red:#E63946; --black:#1D1D1D; --line:rgba(29,29,29,0.12); }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{ background:#FAFAFA; color:var(--black); font-family:'Poppins',sans-serif; min-height:100vh; overflow-wrap:break-word; }
-  h1,h2{ font-family:'Montserrat',sans-serif; font-weight:800; }
-
-  header{ background:var(--black); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:8px; }
-  .logo{ font-weight:900; font-size:1.1rem; }
-  .logo span{ color:var(--red); }
-
-  .wrap{ max-width:520px; margin:0 auto; padding:36px 20px 70px; }
-  h1{ font-size:1.4rem; margin-bottom:6px; text-align:center; }
-  .sub{ text-align:center; font-size:0.88rem; opacity:0.6; margin-bottom:26px; }
-
-  .search-box{ display:flex; gap:8px; margin-bottom:30px; }
-  .search-box input{ flex:1; padding:14px 16px; border-radius:12px; border:1.5px solid var(--line); font-size:1rem; }
-  .search-box button{ background:var(--red); color:#fff; border:none; padding:0 20px; border-radius:12px; font-weight:700; cursor:pointer; }
-
-  .order-card{ background:#fff; border-radius:16px; padding:20px; box-shadow:0 4px 16px rgba(0,0,0,0.06); margin-bottom:16px; }
-  .order-card h3{ font-size:1rem; margin-bottom:2px; }
-  .order-card .store-name{ font-size:0.8rem; opacity:0.55; margin-bottom:14px; }
-
-  .timeline{ margin:16px 0; }
-  .step{ display:flex; align-items:center; gap:10px; padding:6px 0; opacity:0.35; }
-  .step.done{ opacity:1; }
-  .step .dot{ width:10px; height:10px; border-radius:50%; background:var(--line); flex:none; }
-  .step.done .dot{ background:var(--red); }
-  .step .label{ font-size:0.82rem; font-weight:600; }
-
-  .detail-row{ display:flex; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); font-size:0.82rem; }
-  .detail-row span:first-child{ opacity:0.55; }
-  .detail-row span:last-child{ font-weight:600; text-align:right; }
-
-  .empty-msg{ text-align:center; padding:30px 20px; opacity:0.5; font-size:0.88rem; display:none; }
-  .site-logo-text{ display:inline-block; padding:2px; }
-  .site-logo-text img{ height:40px; display:block; }
-  @media(min-width:768px){ .site-logo-text img{ height:50px; } }
+*{box-sizing:border-box}body{margin:0;background:#f7f7f8;color:#191919;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{background:white;padding:14px 20px;border-bottom:1px solid #eee}header img{height:42px;max-width:150px;object-fit:contain}
+main{max-width:620px;margin:28px auto;padding:0 16px 40px}.panel{background:white;border:1px solid #eee;border-radius:18px;padding:22px;box-shadow:0 8px 30px #00000008}
+h1{font-size:24px;margin:0 0 8px}p{color:#666;font-size:14px;line-height:1.55}.field{margin:18px 0}.field label{display:block;font-weight:650;margin-bottom:7px}
+input{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px}.btn{background:#e63946;color:white;border:0;border-radius:12px;padding:13px 18px;font-weight:700;font-size:15px;width:100%;cursor:pointer}.btn:disabled{opacity:.55}
+.msg{padding:12px;border-radius:10px;background:#f8f0f0;color:#a42a35;font-size:14px;margin:12px 0;display:none}.order{border:1px solid #eee;padding:16px;border-radius:14px;margin:14px 0}.order h3{margin:0 0 8px}.green{background:#09865f}.small{font-size:12px;color:#777}.hide{display:none}@media(max-width:480px){main{margin:18px auto}.panel{padding:18px}}
 </style>
 </head>
 <body>
-
-<header>
-  <a href="explore.html" class="site-logo-text"><img src="arrière plan noir.png" alt="EtaChop"></a>
-</header>
-
-<div class="wrap">
-  <h1>Suivre mes commandes</h1>
-  <div class="sub">Entre le numéro de téléphone utilisé lors de ta commande</div>
-
-  <div class="search-box">
-    <input type="tel" id="phoneInput" placeholder="Ex: 06 XXX XX XX">
-    <button onclick="trackOrders()">Suivre</button>
-  </div>
-
-  <div class="empty-msg" id="emptyMsg">Aucune commande trouvée avec ce numéro.</div>
-
-  <div id="ordersContainer"></div>
-</div>
-
+<header><a href="explore.html"><img src="etachop-logo.png" alt="EtaChop"></a></header>
+<main><section class="panel">
+<h1>Suivre mes commandes</h1>
+<p>Vérifie ton adresse e-mail pour accéder en toute sécurité aux commandes qui lui sont associées.</p>
+<div id="emailStep"><div class="field"><label for="email">Adresse e-mail</label><input type="email" autocomplete="email" id="email" placeholder="nom@exemple.com"></div><button class="btn" id="send">Envoyer le code</button></div>
+<div id="codeStep" class="hide"><div class="field"><label for="code">Code reçu par e-mail</label><input inputmode="numeric" autocomplete="one-time-code" id="code" placeholder="Code de vérification"></div><button class="btn" id="verify">Vérifier le code</button><p class="small">Vérifie également tes courriers indésirables.</p></div>
+<div id="message" class="msg"></div><div id="orders"></div><button id="logout" class="btn hide" style="background:#555;margin-top:12px">Changer d'adresse e-mail</button>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
-
-  const STEPS = [
-    { key: 'pending', label: 'Commande reçue' },
-    { key: 'confirmed', label: 'Confirmée' },
-    { key: 'preparing', label: 'En préparation' },
-    { key: 'shipped', label: 'Expédiée' },
-    { key: 'delivered', label: 'Livrée' },
-  ];
-
-  async function trackOrders(){
-    const phone = document.getElementById('phoneInput').value.trim();
-    document.getElementById('ordersContainer').innerHTML = '';
-    document.getElementById('emptyMsg').style.display = 'none';
-    if(!phone) return;
-
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/track_orders_by_phone`, {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_phone: phone }),
-      });
-      const data = await res.json();
-      if(!res.ok || !data || data.length === 0){
-        document.getElementById('emptyMsg').style.display = 'block';
-        return;
-      }
-      document.getElementById('ordersContainer').innerHTML = data.map(renderOrder).join('');
-    } catch(err){
-      document.getElementById('emptyMsg').style.display = 'block';
-    }
-  }
-
-  function renderOrder(order){
-    const date = new Date(order.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-    const amount = Number(order.amount_fcfa).toLocaleString('fr-FR') + ' FCFA';
-
-    let timelineHtml;
-    if(order.status === 'cancelled'){
-      timelineHtml = '<div class="step done" style="color:#DC2626;"><div class="dot" style="background:#DC2626;"></div><div class="label">Commande annulée</div></div>';
-    } else {
-      const currentIndex = STEPS.findIndex(s => s.key === order.status);
-      timelineHtml = STEPS.map((s, i) => `
-        <div class="step ${i <= currentIndex ? 'done' : ''}">
-          <div class="dot"></div>
-          <div class="label">${s.label}</div>
-        </div>
-      `).join('');
-    }
-
-    return `
-      <div class="order-card">
-        <h3>${order.product_name}</h3>
-        <div class="store-name">Chez ${order.store_name}</div>
-        <div class="timeline">${timelineHtml}</div>
-        <div class="detail-row"><span>Montant</span><span>${amount}</span></div>
-        ${order.delivery_zone ? `<div class="detail-row"><span>Livraison</span><span>${order.delivery_zone}</span></div>` : ''}
-        ${order.variant_selection ? `<div class="detail-row"><span>Choix</span><span>${order.variant_selection}</span></div>` : ''}
-        <div class="detail-row"><span>Commandé le</span><span>${date}</span></div>
-        ${order.product_type === 'digital' && order.file_url && order.status !== 'pending' && order.status !== 'cancelled' ? `
-          <a href="${order.file_url}" target="_blank" style="display:block; text-align:center; margin-top:14px; padding:12px; background:#059669; color:#fff; border-radius:10px; font-weight:700; text-decoration:none;">📥 Télécharger mon fichier</a>
-        ` : ''}
-        ${order.product_type === 'digital' && order.status === 'pending' ? `
-          <div style="margin-top:14px; padding:10px; background:#FEF3C7; color:#92400E; border-radius:10px; font-size:0.82rem; text-align:center;">Le lien de téléchargement apparaîtra ici une fois le paiement confirmé.</div>
-        ` : ''}
-      </div>
-    `;
-  }
-
-  document.getElementById('phoneInput').addEventListener('keypress', e => {
-    if(e.key === 'Enter') trackOrders();
-  });
-</script>
-
-</body>
-</html>
+const SUPABASE_URL="https://reghryppfweynclehwgv.supabase.co";
+const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY_HERE";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let currentEmail="";
+const $=id=>document.getElementById(id);
+function showMsg(t){$('message').textContent=t;$('message').style.display='block'}
+function clearMsg(){$('message').style.display='none'}
+$('send').onclick=async()=>{clearMsg();currentEmail=$('email').value.trim().toLowerCase();if(!currentEmail){showMsg("Saisis ton adresse e-mail.");return}
+$('send').disabled=true;try{const {error}=await sb.auth.signInWithOtp({email:currentEmail,options:{shouldCreateUser:true}});if(error)throw error;
+$('emailStep').classList.add('hide');$('codeStep').classList.remove('hide');showMsg("Si cette adresse est enregistrée, un code vient d'être envoyé.");}
+catch(e){showMsg(e.message||"Impossible d'envoyer le code.");}finally{$('send').disabled=false}};
+$('verify').onclick=async()=>{clearMsg();const token=$('code').value.trim();if(!token){showMsg("Saisis le code reçu.");return}
+$('verify').disabled=true;try{const {data,error}=await sb.auth.verifyOtp({email:currentEmail||$('email').value.trim(),token,type:'email'});if(error)throw error;if(!data.session)throw new Error("Code incorrect ou expiré.");
+$('codeStep').classList.add('hide');$('logout').classList.remove('hide');await loadOrders();}
+catch(e){showMsg(e.message||"Code invalide.");}finally{$('verify').disabled=false}};
+async function loadOrders(){clearMsg();$('orders').innerHTML="";try{const {data,error}=await sb.rpc('track_orders_by_verified_email');if(error)throw error;if(!data||!data.length){showMsg("Aucune commande associée à cette adresse vérifiée.");return}
+$('orders').innerHTML=data.map(o=>{const digital=o.product_type==='digital',date=new Date(o.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}),amount=Number(o.amount_fcfa||0).toLocaleString('fr-FR')+' FCFA';
+let status=digital?(o.status==='cancelled'?'Annulée':o.status==='pending'?'En attente':'Confirmée'):(o.status==='cancelled'?'Annulée':o.status==='pending'?'Commande reçue':o.status==='confirmed'?'Confirmée':o.status==='preparing'?'En préparation':o.status==='shipped'?'Expédiée':o.status==='delivered'?'Livrée':o.status);
+return '<div class="order"><h3>'+esc(o.product_name)+'</h3><p>'+esc(o.store_name||'EtaChop')+' · '+date+'</p><p><b>'+amount+'</b></p><p>Statut : <b>'+esc(status)+'</b></p>'+(!digital&&o.delivery_zone?'<p>Livraison : '+esc(o.delivery_zone)+'</p>':'')+(!digital&&o.variant_selection?'<p>Options : '+esc(o.variant_selection)+'</p>':'')+(digital&&o.status!=='pending'&&o.status!=='cancelled'?'<button class="btn green" onclick="downloadOrder(\\''+o.order_id+'\\',\\''+o.tracking_code+'\\')">Télécharger mon fichier</button>':'')+'</div>';}).join('');}
+catch(e){showMsg("Impossible de charger les commandes. "+(e.message||""));}}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function downloadOrder(order_id,tracking_code){try{const res=await fetch(SUPABASE_URL+'/functions/v1/digital-download',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({order_id,tracking_code})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Téléchargement indisponible');if(!data.download_url)throw new Error('Le lien de téléchargement est absent.');const a=document.createElement('a');a.href=data.download_url;a.download='';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();}
+catch(e){showMsg(e.message||'Impossible de préparer le téléchargement.');}}
+$('logout').onclick=async()=>{await sb.auth.signOut();$('orders').innerHTML='';$('logout').classList.add('hide');$('codeStep').classList.add('hide');$('emailStep').classList.remove('hide');$('email').value=currentEmail;$('code').value='';clearMsg()};
+</script></body></html>

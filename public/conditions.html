@@ -1,128 +1,19 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conditions & Politiques — EtaChop</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="arrière plan bleu.png">
-<style>
-  :root{
-    --red:#E63946; --red-dark:#B4222D; --black:#1D1D1D; --line:rgba(29,29,29,0.12);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{ background:#FAFAFA; color:var(--black); font-family:'Poppins',sans-serif; line-height:1.65; overflow-wrap:break-word; }
-  h1,h2{ font-family:'Montserrat',sans-serif; font-weight:800; }
-  a{ color:var(--red); }
-
-  header{ background:var(--black); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:8px; }
-  .logo{ font-weight:900; font-size:1.1rem; }
-  .logo span{ color:var(--red); }
-
-  .wrap{ max-width:760px; margin:0 auto; padding:36px 20px 70px; }
-  h1{ font-size:1.5rem; margin-bottom:6px; }
-  .updated{ font-size:0.82rem; opacity:0.55; margin-bottom:30px; }
-
-  .tabs{ display:flex; gap:8px; margin-bottom:30px; background:#fff; padding:5px; border-radius:100px; border:1px solid var(--line); }
-  .tab-btn{ flex:1; text-align:center; padding:10px; border-radius:100px; font-size:0.85rem; font-weight:600; cursor:pointer; background:none; border:none; font-family:'Poppins',sans-serif; }
-  .tab-btn.active{ background:var(--red); color:#fff; }
-
-  section{ display:none; }
-  section.active{ display:block; }
-  h2{ font-size:1.1rem; margin:26px 0 10px; }
-  h2:first-child{ margin-top:0; }
-  p, li{ font-size:0.92rem; opacity:0.85; margin-bottom:10px; }
-  ul{ padding-left:20px; margin-bottom:14px; }
-  .note{ background:#FDEDEE; border-left:3px solid var(--red); padding:14px 16px; border-radius:8px; font-size:0.86rem; margin:16px 0; }
-  .site-logo-text{ display:inline-block; padding:2px; }
-  .site-logo-text img{ height:40px; display:block; }
-  @media(min-width:768px){ .site-logo-text img{ height:50px; } }
-</style>
-</head>
-<body>
-
-<header>
-  <a href="explore.html" class="site-logo-text"><img src="arrière plan noir.png" alt="EtaChop"></a>
-</header>
-
-<div class="wrap">
-  <h1>Conditions & Politiques</h1>
-  <div class="updated">Dernière mise à jour : Juillet 2026</div>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('cgu')">Conditions d'utilisation</button>
-    <button class="tab-btn" onclick="showTab('livraison')">Livraison & Retours</button>
-  </div>
-
-  <!-- CGU -->
-  <section id="cgu" class="active">
-    <h2>1. Présentation</h2>
-    <p>EtaChop est une plateforme de commerce en ligne basée à Brazzaville, République du Congo, permettant à des vendeurs indépendants ("Vendeurs") de créer leur boutique en ligne et de vendre des produits physiques à des clients ("Clients"). EtaChop agit comme intermédiaire technique entre Vendeurs et Clients.</p>
-
-    <h2>2. Inscription des vendeurs</h2>
-    <p>Tout Vendeur souhaitant créer une boutique sur EtaChop doit fournir des informations exactes (email, nom de boutique). Chaque Vendeur est seul responsable du contenu de sa boutique, de l'exactitude des descriptions produits, des prix affichés, et du respect des lois congolaises applicables à son activité commerciale.</p>
-
-    <h2>3. Abonnement</h2>
-    <p>L'utilisation de la plateforme est gratuite pendant une période d'essai de 7 jours à compter de la création de la boutique. Passé ce délai, l'accès à la boutique est soumis à un abonnement mensuel de 5 000 FCFA, payable via les moyens indiqués sur la plateforme. Le défaut de paiement peut entraîner la suspension temporaire de la visibilité de la boutique.</p>
-
-    <h2>4. Commandes et paiement</h2>
-    <p>Les Clients passent commande directement auprès des Vendeurs via leur boutique EtaChop. Le paiement s'effectue selon les modalités indiquées par chaque Vendeur (Mobile Money MTN ou Airtel, ou autre moyen convenu). EtaChop n'est pas partie au contrat de vente entre le Vendeur et le Client, et décline toute responsabilité quant à la qualité, la conformité ou la livraison effective des produits vendus.</p>
-
-    <h2>5. Responsabilités du vendeur</h2>
-    <ul>
-      <li>Fournir des descriptions et photos fidèles de ses produits</li>
-      <li>Maintenir à jour son stock disponible</li>
-      <li>Traiter les commandes reçues dans un délai raisonnable</li>
-      <li>Assurer un service client de qualité envers ses acheteurs</li>
-      <li>Respecter la réglementation congolaise applicable à son activité (patente, TVA le cas échéant)</li>
-    </ul>
-
-    <h2>6. Avis clients</h2>
-    <p>Les avis publiés sur les boutiques doivent refléter une expérience d'achat réelle. EtaChop se réserve le droit de retirer tout avis manifestement frauduleux, diffamatoire ou sans rapport avec une transaction réelle.</p>
-
-    <h2>7. Propriété intellectuelle</h2>
-    <p>Chaque Vendeur conserve la propriété des contenus qu'il publie (photos, descriptions, logo). En publiant du contenu sur EtaChop, le Vendeur garantit détenir les droits nécessaires à sa diffusion.</p>
-
-    <h2>8. Modification des conditions</h2>
-    <p>EtaChop se réserve le droit de modifier les présentes conditions à tout moment. Les Vendeurs seront informés de toute modification substantielle.</p>
-
-    <h2>9. Contact</h2>
-    <p>Pour toute question relative à ces conditions, contactez l'équipe EtaChop via les coordonnées disponibles sur la plateforme.</p>
-  </section>
-
-  <!-- LIVRAISON & RETOURS -->
-  <section id="livraison">
-    <h2>1. Livraison</h2>
-    <p>Chaque Vendeur définit librement ses zones de livraison et les frais associés, visibles au moment de la commande. Les délais de livraison sont communiqués directement par le Vendeur au Client lors de la confirmation de commande.</p>
-
-    <div class="note">
-      EtaChop n'effectue pas elle-même les livraisons — chaque Vendeur organise sa propre logistique (livraison en main propre, coursier, point de retrait).
-    </div>
-
-    <h2>2. Confirmation de commande</h2>
-    <p>Après passation d'une commande, le Vendeur contacte le Client pour confirmer les modalités de paiement et de livraison. Le Client est invité à vérifier les coordonnées communiquées avant de finaliser tout paiement.</p>
-
-    <h2>3. Retours et remboursements</h2>
-    <p>Les conditions de retour et de remboursement sont propres à chaque Vendeur. Il est recommandé au Client de vérifier ces conditions directement auprès du Vendeur avant l'achat, notamment en cas de produit non conforme ou défectueux.</p>
-    <p>En cas de litige entre un Client et un Vendeur, EtaChop peut, à sa discrétion, faciliter la mise en relation mais n'est pas garante du remboursement.</p>
-
-    <h2>4. Produits non livrés</h2>
-    <p>Si un Client ne reçoit pas sa commande après paiement confirmé, il est invité à contacter directement le Vendeur concerné via les coordonnées fournies lors de la commande.</p>
-
-    <h2>5. Rupture de stock</h2>
-    <p>Si un produit devient indisponible après une commande, le Vendeur s'engage à en informer le Client dans les meilleurs délais et à proposer une alternative ou un remboursement.</p>
-  </section>
-</div>
-
-<script>
-  function showTab(id){
-    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    event.target.classList.add('active');
-  }
-</script>
-
-</body>
-</html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conditions & politiques — EtaChop</title><link rel="icon" href="etachop-icon-48.png">
+<style>*{box-sizing:border-box}body{margin:0;background:#fafafa;color:#222;font-family:system-ui,Arial,sans-serif;line-height:1.65}header{background:#fff;border-bottom:1px solid #eee;padding:14px 20px}header img{height:42px;max-width:150px;object-fit:contain}.wrap{max-width:800px;margin:30px auto;padding:0 18px 60px}.panel{background:white;border:1px solid #eee;border-radius:16px;padding:22px}h1{font-size:24px}h2{font-size:19px;margin-top:26px}p,li{font-size:15px;color:#555}ul{padding-left:22px}.updated{font-size:13px;color:#888}a{color:#e63946}</style></head>
+<body><header><a href="explore.html"><img src="etachop-logo.png" alt="EtaChop"></a></header><main class="wrap"><article class="panel">
+<h1>Conditions d'utilisation et politiques</h1><p class="updated">Dernière mise à jour : novembre 2026</p>
+<h2>1. À propos d'EtaChop</h2><p>EtaChop est une plateforme permettant aux vendeurs de créer une boutique en ligne et de présenter ou vendre des produits physiques et numériques. EtaChop fournit les outils techniques de création de boutique, de gestion de commande et, selon les fonctionnalités disponibles, de paiement ou de remise de fichiers.</p>
+<h2>2. Comptes et vendeurs</h2><p>Les vendeurs doivent fournir des informations exactes et protéger leurs identifiants. Ils sont responsables des contenus, prix, descriptions, droits sur les fichiers et images, disponibilité des produits et respect des lois applicables.</p>
+<h2>3. Commandes et paiements</h2><p>Les conditions de vente, prix, frais et moyens de paiement sont présentés au client avant validation. Une commande payante n'est considérée comme payée qu'après confirmation du paiement par le système ou le prestataire concerné. Les commandes gratuites ne nécessitent aucun paiement.</p>
+<h2>4. Produits numériques</h2><p>Les vendeurs doivent disposer des droits nécessaires sur les fichiers proposés. Lorsqu'une commande numérique est confirmée ou gratuite et validée, le client peut accéder au fichier selon les modalités prévues par EtaChop. Les liens de téléchargement peuvent être temporaires et ne doivent pas être partagés publiquement.</p>
+<h2>5. Produits physiques et livraison</h2><p>Les vendeurs indiquent les zones, frais et modalités de livraison. Ils sont responsables de la préparation, de l'expédition, de la communication avec les clients et du traitement des demandes liées à leurs produits.</p>
+<h2>6. Retours, remboursements et litiges</h2><p>Les modalités de retour ou remboursement sont communiquées par le vendeur, sous réserve des lois applicables. EtaChop peut faciliter la communication mais ne remplace pas les obligations légales du vendeur ou du prestataire de paiement.</p>
+<h2>7. Contenus et propriété intellectuelle</h2><p>Les vendeurs garantissent qu'ils disposent des droits nécessaires pour publier leurs contenus. Il est interdit de publier des contenus illégaux, trompeurs, contrefaits ou portant atteinte aux droits de tiers.</p>
+<h2>8. Sécurité</h2><p>EtaChop peut mettre en place des vérifications d'identité, de commande, de paiement ou d'accès aux fichiers pour protéger les utilisateurs et limiter les abus. Les utilisateurs doivent signaler toute activité suspecte.</p>
+<h2>9. Suspension</h2><p>EtaChop peut restreindre ou suspendre l'accès à une boutique ou à un compte en cas de violation des présentes conditions, d'activité frauduleuse ou de risque pour la plateforme ou ses utilisateurs.</p>
+<h2>10. Modifications</h2><p>Ces conditions peuvent évoluer. La version publiée sur la plateforme fait foi à compter de sa mise en ligne.</p>
+<h2>11. Contact</h2><p>Pour toute question ou réclamation, utilise les coordonnées de contact affichées sur EtaChop.</p>
+<h2>12. Livraison & retours</h2><p>Pour les produits physiques, les modalités sont définies par le vendeur. Pour les produits numériques, la remise du fichier intervient selon les règles de confirmation de commande et les modalités d'accès prévues sur EtaChop.</p>
+</article></main></body></html>
