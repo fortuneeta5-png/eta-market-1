@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<base href="/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boutique — EtaChop</title>
@@ -291,14 +292,22 @@
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
 
   const params = new URLSearchParams(window.location.search);
+  const pathSegments = window.location.pathname.split('/').filter(Boolean).map(part => {
+    try { return decodeURIComponent(part); } catch(err) { return part; }
+  });
   let slug = params.get('s');
   const hostParts = window.location.hostname.split('.');
   const onVendorSubdomain = hostParts.length > 2 && hostParts[0] !== 'www';
   if(!slug && onVendorSubdomain){
-    // Pas de ?s=... dans le lien : on regarde si on est sur nomboutique.etachop.com
+    // Compatibilité avec les anciennes boutiques sur sous-domaine.
     slug = hostParts[0];
   }
-  const productId = params.get('p');
+  // Sur GitHub Pages, 404.html sert de routeur pour /nom-boutique/nom-produit.
+  // Une URL avec un seul segment ouvre la boutique ; deux segments ouvrent le produit.
+  let pathProductSlug = null;
+  if(!slug && !onVendorSubdomain && pathSegments.length >= 1) slug = pathSegments[0];
+  if(!onVendorSubdomain && pathSegments.length >= 2) pathProductSlug = pathSegments[1];
+  const productId = params.get('p') || (onVendorSubdomain && pathSegments.length ? pathSegments[0] : null); // Compatibilité avec les anciens liens UUID.
   let currentStore = null;
   let currentProduct = null;
 
@@ -942,6 +951,16 @@
     }
   }
 
+  function etaSlugify(value){
+    return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  }
+
+  function etaProductSlug(product, products){
+    const base = etaSlugify(product && product.name) || 'produit';
+    const matches = (products || []).filter(item => etaSlugify(item.name) === base);
+    return matches.length > 1 ? `${base}-${String(product.id).slice(0,6)}` : base;
+  }
+
   async function init(){
     if(!slug){
       document.getElementById('storeName').textContent = "Boutique introuvable";
@@ -979,7 +998,7 @@
       document.getElementById('whatsappBtn').style.display = 'flex';
     }
     document.title = store.name + " — EtaChop";
-    document.getElementById('backLink').href = onVendorSubdomain ? '/' : `?s=${slug}`;
+    document.getElementById('backLink').href = onVendorSubdomain ? '/' : `/${encodeURIComponent(slug)}`;
     loadMarketingPixels(store);
 
     const prodRes = await fetch(`${SUPABASE_URL}/rest/v1/dp_products?store_id=eq.${store.id}&is_active=eq.true&order=created_at.desc`, {
@@ -989,15 +1008,16 @@
     // Prépare la devise locale avant le rendu des prix de la boutique.
     if(!buyerCountryInitialized){ buyerCountryInitialized = true; await detectBuyerCountry(); }
 
-    if(productId){
-      const p = products.find(x => x.id === productId);
-      if(p){
-        currentProduct = p;
-        logPageview(store.id, p.id);
-        showProduct(p);
-        loadReviews();
-        return;
-      }
+    let selectedProduct = productId ? products.find(x => x.id === productId) : null;
+    if(!selectedProduct && pathProductSlug){
+      selectedProduct = products.find(x => etaProductSlug(x, products) === pathProductSlug);
+    }
+    if(selectedProduct){
+      currentProduct = selectedProduct;
+      logPageview(store.id, selectedProduct.id);
+      showProduct(selectedProduct);
+      loadReviews();
+      return;
     }
     logPageview(store.id, null);
     showGrid(products);
@@ -1013,7 +1033,7 @@
       return;
     }
     grid.innerHTML = products.map(p => `
-      <a class="card" href="${onVendorSubdomain ? '/' + p.id : '?s=' + slug + '&p=' + p.id}">
+      <a class="card" href="/${encodeURIComponent(slug)}/${encodeURIComponent(etaProductSlug(p, products))}">
         <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}"></div>
         <div class="card-body">
           <h3>${p.name}</h3>

@@ -1141,7 +1141,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
 <script>
   const SUPABASE_URL = "https://reghryppfweynclehwgv.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
-  const STORE_URL_BASE = window.location.origin + window.location.pathname.replace('dashboard.html', 'store.html');
+  // URL publique absolue : le tableau de bord peut être servi sous /dashboard
+  // (sans extension), auquel cas un simple replace() renverrait vers /dashboard.
+  const STORE_URL_BASE = new URL('/', window.location.origin).href;
 
   // Agrandit automatiquement les champs de description.
   function etaAutoGrow(el){
@@ -1733,9 +1735,19 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   function slugify(text){
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
   }
+
+  function etaProductSlug(product, products = currentProducts){
+    const base = slugify(product && product.name ? product.name : '') || 'produit';
+    const matches = (products || []).filter(item => slugify(item.name || '') === base);
+    return matches.length > 1 ? `${base}-${String(product.id).slice(0,6)}` : base;
+  }
+
+  function etaPublicStoreUrl(){
+    return `${STORE_URL_BASE}${encodeURIComponent(currentStore.slug)}`;
+  }
   function updateSlugPreview(){
     const name = document.getElementById('storeName').value;
-    document.getElementById('slugPreview').textContent = name ? STORE_URL_BASE + "?s=" + slugify(name) : "";
+    document.getElementById('slugPreview').textContent = name ? STORE_URL_BASE + slugify(name) : "";
   }
 
   let slugCheckTimeout = null;
@@ -2139,7 +2151,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
     } else {
       document.getElementById('bannerLogo').style.display = 'none';
     }
-    document.getElementById('storeLinkText').textContent = `${currentStore.slug}.etachop.com`;
+    document.getElementById('storeLinkText').textContent = `www.etachop.com/${currentStore.slug}`;
     document.getElementById('fbPixelInput').value = currentStore.fb_pixel_id || '';
     document.getElementById('tiktokPixelInput').value = currentStore.tiktok_pixel_id || '';
     document.getElementById('googleAdsInput').value = currentStore.google_ads_id || '';
@@ -2456,7 +2468,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   }
 
   function copyStoreLink(){
-    const link = `https://${currentStore.slug}.etachop.com`;
+    const link = etaPublicStoreUrl();
     navigator.clipboard.writeText(link).then(()=>{
       const btn = event.target;
       const old = btn.textContent;
@@ -2758,7 +2770,7 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
       }, 'Enregistrement du produit dans le catalogue');
       const productData = await insertRes.json();
 
-      const productLink = `https://${currentStore.slug}.etachop.com/${productData[0].id}`;
+      const productLink = `${etaPublicStoreUrl()}/${encodeURIComponent(etaProductSlug(productData[0], [...currentProducts, productData[0]]))}`;
       msg.innerHTML = `✅ Produit publié !<br><span style="font-family:monospace; font-size:0.78rem; word-break:break-all;">${productLink}</span>`;
       msg.className = "form-msg ok"; msg.style.display = "block";
 
@@ -2832,7 +2844,9 @@ const result = await response.json();</code><button onclick="copyEtaText('const 
   }
 
   function copyProductLink(id){
-    const link = `${STORE_URL_BASE}?s=${currentStore.slug}&p=${id}`;
+    const product = currentProducts.find(item => item.id === id);
+    if(!product){ etaNotify('Produit introuvable. Actualise la liste puis réessaie.'); return; }
+    const link = `${etaPublicStoreUrl()}/${encodeURIComponent(etaProductSlug(product, currentProducts))}`;
     navigator.clipboard.writeText(link).then(()=>{
       etaNotify("Lien copié !\n" + link);
     });
