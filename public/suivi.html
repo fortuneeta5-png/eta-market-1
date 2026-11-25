@@ -26,7 +26,7 @@ input{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL="https://reghryppfweynclehwgv.supabase.co";
-const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY_HERE";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2hyeXBwZndleW5jbGVod2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NzU5OTEsImV4cCI6MjA5OTE1MTk5MX0.8AjXK3mQeu0JfzaFrj6dENVJOtouldRiMi2ESWA2IzM";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 let currentEmail="";
 const $=id=>document.getElementById(id);
@@ -46,7 +46,7 @@ let status=digital?(o.status==='cancelled'?'Annulée':o.status==='pending'?'En a
 return '<div class="order"><h3>'+esc(o.product_name)+'</h3><p>'+esc(o.store_name||'EtaChop')+' · '+date+'</p><p><b>'+amount+'</b></p><p>Statut : <b>'+esc(status)+'</b></p>'+(!digital&&o.delivery_zone?'<p>Livraison : '+esc(o.delivery_zone)+'</p>':'')+(!digital&&o.variant_selection?'<p>Options : '+esc(o.variant_selection)+'</p>':'')+(digital&&o.status!=='pending'&&o.status!=='cancelled'?'<button class="btn green" onclick="downloadOrder(\\''+o.order_id+'\\',\\''+o.tracking_code+'\\')">Télécharger mon fichier</button>':'')+'</div>';}).join('');}
 catch(e){showMsg("Impossible de charger les commandes. "+(e.message||""));}}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function downloadOrder(order_id,tracking_code){try{const res=await fetch(SUPABASE_URL+'/functions/v1/digital-download',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({order_id,tracking_code})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Téléchargement indisponible');if(!data.download_url)throw new Error('Le lien de téléchargement est absent.');const a=document.createElement('a');a.href=data.download_url;a.download='';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();}
+async function downloadOrder(order_id,tracking_code){try{const res=await fetch(SUPABASE_URL+'/functions/v1/digital-download',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({order_id,tracking_code})});if(!res.ok){const data=await res.json().catch(()=>({}));throw new Error(data.error||'Téléchargement indisponible');}const blob=await res.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='EtaChop-produit-'+order_id+'.pdf';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
 catch(e){showMsg(e.message||'Impossible de préparer le téléchargement.');}}
 $('logout').onclick=async()=>{await sb.auth.signOut();$('orders').innerHTML='';$('logout').classList.add('hide');$('codeStep').classList.add('hide');$('emailStep').classList.remove('hide');$('email').value=currentEmail;$('code').value='';clearMsg()};
 </script></body></html>
