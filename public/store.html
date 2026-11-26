@@ -240,7 +240,7 @@
       <h3 id="checkoutSuccessTitle" style="font-size:1.1rem; margin-bottom:8px;">Demande de paiement envoyée !</h3>
       <p id="checkoutSuccessText" style="font-size:0.85rem; opacity:0.65; margin-bottom:18px;">Valide le paiement sur ton téléphone avec ton code secret Mobile Money pour finaliser ta commande. Sans validation de ta part, la commande ne sera pas traitée.</p>
       <a id="digitalDownloadLink" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="display:none; width:100%; margin-bottom:12px;">Télécharger mon produit</a>
-      <a href="/suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre mes commandes par e-mail →</a>
+      <a href="/suivi.html" style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--accent); font-weight:600;">Suivre ma commande avec mon numéro →</a>
       <button class="btn btn-primary" style="width:100%;" onclick="closeCheckout()">Fermer</button>
     </div>
   </div>
@@ -803,11 +803,6 @@
       return;
     }
     const isDigitalOrder = currentProduct && currentProduct.product_type === 'digital';
-    if(isDigitalOrder && !email){
-      msg.textContent = "Ton adresse e-mail est obligatoire pour recevoir et retrouver ton produit numérique."; msg.style.display = "block";
-      msg.scrollIntoView({behavior:"smooth", block:"center"});
-      return;
-    }
     if(!isDigitalOrder && (!address || !city || !district)){
       msg.textContent = "L'adresse de livraison complète (adresse, ville, quartier) est obligatoire."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
@@ -883,9 +878,7 @@
         const downloadObjectUrl=URL.createObjectURL(downloadBlob);
         const downloadLink=document.createElement('a');
         downloadLink.href=downloadObjectUrl;
-        const disposition=downloadRes.headers.get('Content-Disposition')||'';
-        const filenameMatch=disposition.match(/filename\s*=\s*"?([^";]+)"?/i);
-        downloadLink.download=filenameMatch?filenameMatch[1]:((currentProduct.name||'produit').replace(/[^a-z0-9-_ ]/gi,'').trim()||'produit');
+        downloadLink.download=(currentProduct.name||'produit').replace(/[^a-z0-9-_ ]/gi,'').trim()+'.pdf';
         document.body.appendChild(downloadLink);downloadLink.click();downloadLink.remove();
         setTimeout(()=>URL.revokeObjectURL(downloadObjectUrl),60000);
         // Notification e-mail du vendeur (best effort)
@@ -1047,9 +1040,9 @@
       grid.innerHTML = '<div class="empty">Cette boutique n\'a pas encore de produits.</div>';
       return;
     }
-    grid.innerHTML = products.map(p => `
+    grid.innerHTML = products.map((p, imageIndex) => `
       <a class="card" href="/${encodeURIComponent(slug)}/${encodeURIComponent(etaProductSlug(p, products))}">
-        <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}"></div>
+        <div class="img-wrap"><img src="${p.image_url}" alt="${p.name}" loading="eager" decoding="async" fetchpriority="${imageIndex < 2 ? 'high' : 'auto'}"></div>
         <div class="card-body">
           <h3>${p.name}</h3>
           <div class="price">
@@ -1064,6 +1057,9 @@
     document.getElementById('gridView').style.display = 'none';
     document.getElementById('productView').style.display = 'block';
     document.getElementById('pImg').src = p.image_url;
+    document.getElementById('pImg').loading = 'eager';
+    document.getElementById('pImg').decoding = 'async';
+    document.getElementById('pImg').fetchPriority = 'high';
     document.getElementById('pName').textContent = p.name;
     const now = Date.now();
     const startsAt = p.offer_starts_at ? new Date(p.offer_starts_at).getTime() : 0;

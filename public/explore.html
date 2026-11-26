@@ -81,8 +81,20 @@ header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid 
 </main>
 <footer><div class="container footer-row"><a class="footer-brand" href="explore.html"><img src="etachop-logo.png" alt="EtaChop"></a><nav class="footer-links"><a href="dashboard.html?auth=login">Connexion</a><a href="dashboard.html?auth=signup">Créer une boutique</a><a href="conditions.html">Conditions & politiques</a></nav></div></footer>
 <script>
-(()=>{const btn=document.getElementById('menuBtn'),nav=document.querySelector('.nav-links');if(!btn||!nav)return;btn.addEventListener('click',()=>{let panel=document.getElementById('mobileNav');panel.hidden=!panel.hidden;if(!panel.dataset.ready){panel.innerHTML=nav.innerHTML+'<a href="dashboard.html?auth=login">Connexion</a>';panel.style.cssText='position:absolute;top:64px;left:0;right:0;background:#fff;padding:15px 20px;border-bottom:1px solid #eee;display:grid;gap:14px';panel.dataset.ready='1';}btn.setAttribute('aria-expanded',String(!panel.hidden));});})();
+(()=>{
+ const btn=document.getElementById('menuBtn'),nav=document.querySelector('.nav-links'),panel=document.getElementById('mobileNav');
+ if(!btn||!nav||!panel)return;
+ function close(){panel.hidden=true;btn.setAttribute('aria-expanded','false');btn.textContent='☰';btn.setAttribute('aria-label','Ouvrir le menu');}
+ function open(){
+  panel.innerHTML='<div style="display:flex;justify-content:flex-end;align-items:center"><button type="button" id="mobileNavClose" aria-label="Fermer le menu" style="border:1px solid #ddd;border-radius:8px;background:#fff;color:#111;font-size:28px;line-height:1;width:42px;height:42px;padding:0;cursor:pointer">×</button></div>'+nav.innerHTML+'<a href="dashboard.html?auth=login" style="font-weight:700;padding:8px 0">Connexion</a><a class="btn btn-red" href="dashboard.html?auth=signup">Créer ma boutique</a>';
+  panel.style.cssText='position:absolute;top:64px;left:0;right:0;background:#fff;padding:15px 20px 20px;border-bottom:1px solid #eee;display:grid;gap:14px;box-shadow:0 8px 18px rgba(0,0,0,.08);z-index:30';
+  panel.hidden=false;btn.setAttribute('aria-expanded','true');btn.textContent='×';btn.setAttribute('aria-label','Fermer le menu');
+  panel.querySelector('#mobileNavClose').addEventListener('click',close);panel.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
+ }
+ btn.addEventListener('click',()=>panel.hidden?open():close());
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)close();});
+})();
 </script>
-<script src="assistant.js"></script><script>if(typeof initEtaAssistant==='function')initEtaAssistant('both');</script>
+
 <script src="install-banner.js"></script><script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}</script>
 </body></html>
