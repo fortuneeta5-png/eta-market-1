@@ -3633,5 +3633,354 @@ removeBulb(document);new MutationObserver(records=>records.forEach(r=>r.addedNod
 })();
 </script>
 
+
+<script>
+/* EtaChop — Statistiques vendeur et affichage des devises intégrées directement au tableau de bord. */
+(() => {
+  'use strict';
+
+  const moneyCache = {};
+  const currencyNames = { XAF: 'FCFA', XOF: 'FCFA', CDF: 'CDF', USD: 'USD' };
+  const paidStatuses = ['confirmed', 'preparing', 'shipped', 'delivered'];
+  const failedStatuses = ['failed', 'failure', 'declined', 'expired', 'error'];
+  const abandonedStatuses = ['abandoned', 'aborted', 'cancelled', 'canceled'];
+
+  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  const escapeHtml = (value) => String(value ?? '—').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+
+  function sellerCurrency() {
+    const country = String(currentStore?.country_code || 'CG').toUpperCase();
+    const map = { CG: 'XAF', CM: 'XAF', GA: 'XAF', CD: 'CDF', CI: 'XOF', SN: 'XOF' };
+    return String(currentStore?.currency_code || map[country] || 'XAF').toUpperCase();
+  }
+
+  async function sellerRate() {
+    const currency = sellerCurrency();
+    if (currency === 'XAF' || currency === 'XOF') return 1;
+    if (!moneyCache[currency]) {
+      moneyCache[currency] = (typeof etaGetFxRate === 'function')
+        ? etaGetFxRate(currency)
+        : Promise.reject(new Error('Taux de change indisponible'));
+    }
+    try { return await moneyCache[currency]; }
+    catch (e) { delete moneyCache[currency]; return 1; }
+  }
+
+  async function sellerMoney(value) {
+    const currency = sellerCurrency();
+    const rate = await sellerRate();
+    const amount = Number(value || 0) * rate;
+    const digits = currency === 'USD' ? 2 : 0;
+    const formatted = amount.toLocaleString('fr-FR', {
+      minimumFractionDigits: 0, maximumFractionDigits: digits
+    });
+    return formatted + ' ' + (currencyNames[currency] || currency);
+  }
+
+  function paymentState(order) {
+    const payments = Array.isArray(order.dp_payments) ? order.dp_payments : [];
+    const states = payments.map(p => String(p.status || '').toLowerCase());
+    const status = String(order.status || '').toLowerCase();
+    if (paidStatuses.includes(status) || states.some(s =>
+      ['paid', 'success', 'successful', 'confirmed', 'completed', 'succeeded'].includes(s))) {
+      return { key: 'paid', label: 'Réglée / Confirmée' };
+    }
+    if (abandonedStatuses.includes(status) || states.some(s =>
+      ['abandoned', 'cancelled', 'canceled', 'aborted'].includes(s))) {
+      return { key: 'abandoned', label: 'Abandonnée' };
+    }
+    if (failedStatuses.includes(status) || states.some(s => failedStatuses.includes(s))) {
+      return { key: 'failed', label: 'Échouée' };
+    }
+    return { key: 'pending', label: 'En attente' };
+  }
+
+  function addStyles() {
+    if (document.getElementById('etaStatisticsAddonStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'etaStatisticsAddonStyles';
+    style.textContent = `
+      #etaStatisticsPanel .eta-stat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 18px}
+      #etaStatisticsPanel .eta-stat-head h2{margin:0;font-size:1.35rem}
+      #etaStatisticsPanel .eta-stat-head p{margin:4px 0 0;color:#89918f;font-size:.85rem}
+      #etaStatisticsPanel .eta-stat-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:15px}
+      #etaStatisticsPanel .eta-stat-kpi{background:#fff;border:1px solid var(--line,#e8e8e8);border-radius:14px;padding:15px;min-width:0}
+      #etaStatisticsPanel .eta-stat-kpi strong{display:block;font-size:1.2rem;overflow-wrap:anywhere}
+      #etaStatisticsPanel .eta-stat-kpi span{display:block;color:#89918f;font-size:.75rem;margin-top:5px}
+      #etaStatisticsPanel .eta-stat-tabs{display:flex;gap:7px;overflow-x:auto;padding:5px 0 13px;scrollbar-width:thin}
+      #etaStatisticsPanel .eta-stat-tabs button,#etaStatisticsPanel .eta-filter button{white-space:nowrap;border:1px solid var(--line,#e8e8e8);background:#fff;color:inherit;border-radius:9px;padding:9px 13px;font-weight:650;font-size:.78rem}
+      #etaStatisticsPanel .eta-stat-tabs button.active,#etaStatisticsPanel .eta-filter button.active{background:var(--primary,#e63946);border-color:var(--primary,#e63946);color:#fff}
+      #etaStatisticsPanel .eta-stat-section{display:none}
+      #etaStatisticsPanel .eta-stat-section.active{display:block}
+      #etaStatisticsPanel .eta-order{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;text-align:left;background:#fff;border:0;border-bottom:1px solid var(--line,#eee);padding:13px 15px;color:inherit;cursor:pointer}
+      #etaStatisticsPanel .eta-order:active{background:#f8f8f8}
+      #etaStatisticsPanel .eta-order-main{min-width:0;flex:1}
+      #etaStatisticsPanel .eta-order-main strong,#etaStatisticsPanel .eta-order-main small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      #etaStatisticsPanel .eta-order-main small{color:#89918f;font-size:.74rem;margin-top:3px}
+      #etaStatisticsPanel .eta-order-side{text-align:right;white-space:nowrap}
+      #etaStatisticsPanel .eta-order-side strong{display:block;font-size:.88rem}
+      #etaStatisticsPanel .eta-order-side small{font-size:.7rem;color:#89918f}
+      #etaStatisticsPanel .eta-filter{display:flex;gap:6px;overflow:auto;padding:12px 0}
+      #etaOrderDetailOverlay{position:fixed;inset:0;z-index:9999;background:rgba(12,18,16,.58);display:none;align-items:center;justify-content:center;padding:16px}
+      #etaOrderDetailOverlay.open{display:flex}
+      #etaOrderDetailOverlay .eta-detail-card{background:#fff;color:#171717;border-radius:16px;width:min(540px,100%);max-height:88vh;overflow:auto;padding:18px}
+      #etaOrderDetailOverlay .eta-detail-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #eee;padding-bottom:12px;margin-bottom:8px}
+      #etaOrderDetailOverlay .eta-detail-head h3{margin:0;font-size:1rem}
+      #etaOrderDetailOverlay .eta-detail-close{border:0;background:#f3f4f4;border-radius:8px;padding:8px 11px;font-size:1.1rem}
+      #etaOrderDetailOverlay .eta-detail-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #eee;font-size:.83rem}
+      #etaOrderDetailOverlay .eta-detail-row span{color:#858b89}
+      #etaOrderDetailOverlay .eta-detail-row strong{text-align:right;overflow-wrap:anywhere;max-width:65%}
+      @media(min-width:700px){#etaStatisticsPanel .eta-stat-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function ensurePanel() {
+    if (document.getElementById('etaStatisticsPanel')) return;
+    const wrap = document.querySelector('#dashboard .wrap');
+    if (!wrap) return;
+    const panel = document.createElement('section');
+    panel.id = 'etaStatisticsPanel';
+    panel.className = 'tab-panel';
+    panel.dataset.tab = 'statistics';
+    panel.innerHTML = `
+      <div class="eta-stat-head">
+        <div><h2>Statistiques</h2><p>Les performances de ta boutique en un coup d’œil.</p></div>
+        <button type="button" class="btn btn-primary" id="etaOpenBalance">Solde</button>
+      </div>
+      <div class="eta-stat-kpis">
+        <div class="eta-stat-kpi"><strong id="etaKpiSales">—</strong><span>Ventes confirmées</span></div>
+        <div class="eta-stat-kpi"><strong id="etaKpiVisits">—</strong><span>Visites</span></div>
+        <div class="eta-stat-kpi"><strong id="etaKpiClients">—</strong><span>Clients</span></div>
+        <div class="eta-stat-kpi"><strong id="etaKpiConversion">—</strong><span>Taux de conversion</span></div>
+      </div>
+      <div class="eta-stat-tabs">
+        <button type="button" class="active" data-stat-tab="summary">Résumé</button>
+        <button type="button" data-stat-tab="sales">Ventes</button>
+        <button type="button" data-stat-tab="visits">Visites</button>
+        <button type="button" data-stat-tab="clients">Clients</button>
+        <button type="button" data-stat-tab="conversion">Taux de conversion</button>
+      </div>
+      <section class="eta-stat-section active" data-stat-section="summary">
+        <div class="panel"><div class="panel-head"><h3>Résumé de l’activité</h3></div>
+          <div class="panel-body" id="etaSummaryBody">Chargement des statistiques…</div></div>
+      </section>
+      <section class="eta-stat-section" data-stat-section="sales">
+        <div class="panel"><div class="panel-head"><h3>Ventes et commandes</h3><button type="button" class="btn-refresh" id="etaRefreshSales">Actualiser</button></div>
+          <div class="panel-body">
+            <div class="eta-filter">
+              <button type="button" class="active" data-order-filter="all">Toutes</button>
+              <button type="button" data-order-filter="paid">Réglées / Confirmées</button>
+              <button type="button" data-order-filter="abandoned">Abandonnées</button>
+              <button type="button" data-order-filter="failed">Échouées</button>
+            </div>
+            <div id="etaSalesList">Chargement…</div>
+          </div>
+        </div>
+      </section>
+      <section class="eta-stat-section" data-stat-section="visits"><div class="panel"><div class="panel-head"><h3>Visites</h3></div><div class="panel-body" id="etaVisitsBody">—</div></div></section>
+      <section class="eta-stat-section" data-stat-section="clients"><div class="panel"><div class="panel-head"><h3>Clients</h3></div><div class="panel-body" id="etaClientsBody">—</div></div></section>
+      <section class="eta-stat-section" data-stat-section="conversion"><div class="panel"><div class="panel-head"><h3>Taux de conversion</h3></div><div class="panel-body" id="etaConversionBody">—</div></div></section>
+    `;
+    wrap.appendChild(panel);
+
+    const overlay = document.createElement('div');
+    overlay.id = 'etaOrderDetailOverlay';
+    overlay.innerHTML = `<div class="eta-detail-card" role="dialog" aria-modal="true" aria-labelledby="etaOrderDetailTitle">
+      <div class="eta-detail-head"><h3 id="etaOrderDetailTitle">Détails de la vente</h3><button type="button" class="eta-detail-close" aria-label="Fermer">×</button></div>
+      <div id="etaOrderDetailContent"></div></div>`;
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeOrderDetail(); });
+    overlay.querySelector('.eta-detail-close').addEventListener('click', closeOrderDetail);
+    document.body.appendChild(overlay);
+
+    panel.querySelector('#etaOpenBalance').addEventListener('click', () => window.goToTab('balance'));
+    panel.querySelectorAll('[data-stat-tab]').forEach(btn => btn.addEventListener('click', () => {
+      panel.querySelectorAll('[data-stat-tab]').forEach(b => b.classList.toggle('active', b === btn));
+      panel.querySelectorAll('[data-stat-section]').forEach(section => {
+        section.classList.toggle('active', section.dataset.statSection === btn.dataset.statTab);
+      });
+      if (btn.dataset.statTab === 'sales') renderSalesList();
+    }));
+    panel.querySelectorAll('[data-order-filter]').forEach(btn => btn.addEventListener('click', () => {
+      panel.querySelectorAll('[data-order-filter]').forEach(b => b.classList.toggle('active', b === btn));
+      renderSalesList(btn.dataset.orderFilter);
+    }));
+    panel.querySelector('#etaRefreshSales').addEventListener('click', refreshStatistics);
+  }
+
+  let orderCache = [];
+  let visitsCache = 0;
+
+  async function refreshStatistics() {
+    if (!currentStore?.id || !session?.access_token) return;
+    ensurePanel();
+    try {
+      const headers = { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}` };
+      const [ordersResponse, visitsResponse, payoutsResponse, pendingResponse] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/dp_orders?store_id=eq.${encodeURIComponent(currentStore.id)}&select=*,dp_payments(status,paid_at)&order=created_at.desc&limit=1000`, { headers }),
+        fetch(`${SUPABASE_URL}/rest/v1/dp_pageviews?store_id=eq.${encodeURIComponent(currentStore.id)}&select=id`, {
+          headers: { ...headers, Prefer: 'count=exact' }
+        }),
+        fetch(`${SUPABASE_URL}/rest/v1/dp_payouts?store_id=eq.${encodeURIComponent(currentStore.id)}&select=amount_fcfa`, { headers }),
+        fetch(`${SUPABASE_URL}/rest/v1/dp_withdrawal_requests?store_id=eq.${encodeURIComponent(currentStore.id)}&status=eq.pending&select=amount_fcfa`, { headers })
+      ]);
+      if (!ordersResponse.ok) throw new Error('Impossible de charger les commandes.');
+      const orders = await ordersResponse.json();
+      const visits = visitsResponse.ok ? await visitsResponse.json() : [];
+      const payouts = payoutsResponse.ok ? await payoutsResponse.json() : [];
+      const pendingWithdrawals = pendingResponse.ok ? await pendingResponse.json() : [];
+      orderCache = orders.map(order => ({ ...order, __payment: paymentState(order) }));
+      visitsCache = Number(visitsResponse.headers.get('content-range')?.split('/')[1] || visits.length);
+      const paid = orderCache.filter(o => o.__payment.key === 'paid');
+      const revenue = paid.reduce((sum, o) => sum + Number(o.amount_fcfa || 0), 0);
+      const clients = new Set(orderCache.map(o => o.customer_phone || o.customer_email || o.customer_name).filter(Boolean)).size;
+      const conversion = visitsCache ? paid.length / visitsCache * 100 : 0;
+      const [revenueText] = await Promise.all([sellerMoney(revenue)]);
+      const currency = sellerCurrency();
+
+      document.getElementById('etaKpiSales').textContent = revenueText;
+      document.getElementById('etaKpiVisits').textContent = visitsCache.toLocaleString('fr-FR');
+      document.getElementById('etaKpiClients').textContent = clients.toLocaleString('fr-FR');
+      document.getElementById('etaKpiConversion').textContent = conversion.toFixed(2).replace('.', ',') + ' %';
+      document.getElementById('etaSummaryBody').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+          <div><small style="color:#89918f">Chiffre d’affaires confirmé</small><strong style="display:block">${escapeHtml(revenueText)}</strong></div>
+          <div><small style="color:#89918f">Visites</small><strong style="display:block">${visitsCache.toLocaleString('fr-FR')}</strong></div>
+          <div><small style="color:#89918f">Clients</small><strong style="display:block">${clients.toLocaleString('fr-FR')}</strong></div>
+          <div><small style="color:#89918f">Taux de conversion</small><strong style="display:block">${conversion.toFixed(2).replace('.', ',')} %</strong></div>
+        </div><p style="color:#89918f;font-size:.75rem;margin:16px 0 0">Devise de la boutique : ${escapeHtml(currency)}</p>`;
+      document.getElementById('etaVisitsBody').textContent = `${visitsCache.toLocaleString('fr-FR')} visite(s) enregistrée(s).`;
+      document.getElementById('etaClientsBody').textContent = `${clients.toLocaleString('fr-FR')} client(s) distinct(s) ayant passé au moins une commande.`;
+      document.getElementById('etaConversionBody').textContent = `${conversion.toFixed(2).replace('.', ',')} % — ${paid.length} commande(s) confirmée(s) pour ${visitsCache.toLocaleString('fr-FR')} visite(s).`;
+
+      // Met également à jour les montants déjà visibles sur le tableau de bord.
+      const homeTotal = document.getElementById('statTotalRevenue');
+      if (homeTotal) homeTotal.textContent = await sellerMoney(orderCache.filter(o => paidStatuses.includes(o.status)).reduce((n, o) => n + Number(o.amount_fcfa || 0), 0));
+      const home7d = document.getElementById('statRevenue7d');
+      if (home7d) {
+        const since = Date.now() - 7 * 86400000;
+        const total7d = orderCache.filter(o => paidStatuses.includes(o.status) && new Date(o.created_at).getTime() >= since).reduce((n, o) => n + Number(o.amount_fcfa || 0), 0);
+        home7d.textContent = await sellerMoney(total7d);
+      }
+      const salesAmount = document.getElementById('statRevenue');
+      if (salesAmount) salesAmount.textContent = await sellerMoney(revenue);
+      const totalPaidOut = payouts.reduce((sum, payout) => sum + Number(payout.amount_fcfa || 0), 0);
+      const pendingTotal = pendingWithdrawals.reduce((sum, withdrawal) => sum + Number(withdrawal.amount_fcfa || 0), 0);
+      const totalSales = orderCache.filter(o => paidStatuses.includes(o.status)).reduce((n, o) => n + Number(o.amount_fcfa || 0), 0);
+      const vendorShare = Math.round(totalSales * 0.9);
+      const balanceValues = {
+        statTotalSales: totalSales,
+        statCommission: totalSales - vendorShare,
+        statPaidOut: totalPaidOut,
+        statBalanceOwed: vendorShare - totalPaidOut - pendingTotal
+      };
+      for (const [id, value] of Object.entries(balanceValues)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = await sellerMoney(value);
+      }
+      renderSalesList();
+    } catch (error) {
+      const summary = document.getElementById('etaSummaryBody');
+      if (summary) summary.textContent = error.message || 'Impossible de charger les statistiques. Réessaie.';
+    }
+  }
+
+  async function renderSalesList(filter = document.querySelector('[data-order-filter].active')?.dataset.orderFilter || 'all') {
+    const target = document.getElementById('etaSalesList');
+    if (!target) return;
+    const list = filter === 'all' ? orderCache : orderCache.filter(o => o.__payment.key === filter);
+    if (!list.length) {
+      target.innerHTML = '<div class="empty">Aucune vente dans cette catégorie.</div>';
+      return;
+    }
+    const html = [];
+    for (const order of list) {
+      html.push(`<button class="eta-order" type="button" data-order-id="${escapeHtml(order.id)}">
+        <span class="eta-order-main"><strong>${escapeHtml(order.customer_name || 'Client')}</strong>
+        <small>${escapeHtml(order.product_name_snapshot || 'Produit')} · ${escapeHtml(order.tracking_code || '')}</small></span>
+        <span class="eta-order-side"><strong>${escapeHtml(await sellerMoney(order.amount_fcfa))}</strong>
+        <small>${escapeHtml(order.__payment.label)}</small></span></button>`);
+    }
+    target.innerHTML = html.join('');
+    target.querySelectorAll('[data-order-id]').forEach(button => button.addEventListener('click', () => {
+      const order = orderCache.find(o => String(o.id) === button.dataset.orderId);
+      if (order) showOrderDetail(order);
+    }));
+  }
+
+  async function showOrderDetail(order) {
+    const content = document.getElementById('etaOrderDetailContent');
+    const payments = Array.isArray(order.dp_payments) ? order.dp_payments : [];
+    const rows = [
+      ['Client', order.customer_name], ['Téléphone', order.customer_phone],
+      ['E-mail', order.customer_email], ['Produit', order.product_name_snapshot],
+      ['Montant', await sellerMoney(order.amount_fcfa)], ['Référence', order.tracking_code || order.id],
+      ['Date', order.created_at ? new Date(order.created_at).toLocaleString('fr-FR') : '—'],
+      ['Statut', order.__payment.label], ['Paiement', payments.map(p => p.status).filter(Boolean).join(', ')],
+      ['Adresse', order.delivery_address], ['Quartier', order.delivery_district],
+      ['Ville', order.delivery_city], ['Pays client', order.buyer_country_code],
+      ['Mode de livraison', order.delivery_zone], ['Suivi logistique', order.logistics_status]
+    ];
+    content.innerHTML = rows.filter(([, value]) => value !== null && value !== undefined && value !== '')
+      .map(([label, value]) => `<div class="eta-detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('');
+    document.getElementById('etaOrderDetailOverlay').classList.add('open');
+  }
+
+  function closeOrderDetail() {
+    document.getElementById('etaOrderDetailOverlay')?.classList.remove('open');
+  }
+
+  function setupNavigation() {
+    document.querySelectorAll('.nav-item[data-tab="balance"]').forEach(button => {
+      button.dataset.tab = 'statistics';
+      button.setAttribute('onclick', "goToTab('statistics')");
+      button.innerHTML = '<span class="nav-icon">▥</span>Statistiques';
+    });
+    if (typeof window.goToTab === 'function' && !window.goToTab.__etaWrapped) {
+      const original = window.goToTab;
+      const wrapped = function(tabName) {
+        original(tabName);
+        if (tabName === 'statistics') refreshStatistics();
+      };
+      wrapped.__etaWrapped = true;
+      window.goToTab = wrapped;
+    }
+    if (typeof window.showDashboard === 'function' && !window.showDashboard.__etaWrapped) {
+      const originalShow = window.showDashboard;
+      const wrappedShow = function(...args) {
+        const result = originalShow.apply(this, args);
+        setTimeout(() => { ensurePanel(); refreshStatistics(); }, 900);
+        return result;
+      };
+      wrappedShow.__etaWrapped = true;
+      window.showDashboard = wrappedShow;
+    }
+  }
+
+  async function boot() {
+    addStyles();
+    ensurePanel();
+    setupNavigation();
+    for (let i = 0; i < 20; i++) {
+      if (currentStore?.id && session?.access_token) {
+        ensurePanel();
+        setupNavigation();
+        refreshStatistics();
+        return;
+      }
+      await wait(400);
+      ensurePanel();
+      setupNavigation();
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOrderDetail(); });
+})();
+</script>
+
 </body>
 </html>
