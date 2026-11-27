@@ -201,17 +201,18 @@
           <input type="text" id="custDistrict" placeholder="Quartier (ex: Bacongo)" onblur="refreshDeliveryQuote()" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.95rem;">
         </div>
       </div>
-      <div id="buyerPaymentFields">
-      <div style="margin-bottom:14px;">
-        <label for="buyerCountry" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:600;">Ton pays</label>
+      <!-- Le pays reste visible même pour une commande numérique gratuite. -->
+      <div id="buyerCountryField" style="margin-bottom:14px;">
+        <label for="buyerCountry" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:600;">Choisir ton pays</label>
         <select id="buyerCountry" onchange="onBuyerCountryChange()" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.92rem; background:#fff;"></select>
-        <div id="countryDetectHint" style="font-size:0.72rem; opacity:0.55; margin-top:5px;">Pays détecté automatiquement — tu peux le modifier.</div>
+        <div id="countryDetectHint" style="font-size:0.72rem; opacity:0.55; margin-top:5px;">Choisis ton pays : le drapeau et l'indicatif téléphonique seront mis à jour automatiquement.</div>
       </div>
-      <div style="margin-bottom:18px;">
-        <label for="buyerNetwork" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:600;">Moyen de paiement</label>
-        <select id="buyerNetwork" onchange="selectedNetwork=this.value" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.92rem; background:#fff;"></select>
-        <div id="paymentCurrencyHint" style="font-size:0.75rem; opacity:0.6; margin-top:6px;"></div>
-      </div>
+      <div id="buyerPaymentFields">
+        <div style="margin-bottom:18px;">
+          <label for="buyerNetwork" style="display:block; font-size:0.78rem; opacity:0.7; margin-bottom:6px; font-weight:600;">Moyen de paiement</label>
+          <select id="buyerNetwork" onchange="selectedNetwork=this.value" style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:0.92rem; background:#fff;"></select>
+          <div id="paymentCurrencyHint" style="font-size:0.75rem; opacity:0.6; margin-top:6px;"></div>
+        </div>
       </div><!-- /buyerPaymentFields -->
       <div id="zoneFieldWrap" style="margin-bottom:18px; display:none;">
         <label style="display:block; font-size:0.78rem; opacity:0.6; margin-bottom:6px; font-weight:600;">Zone de livraison</label>
@@ -415,10 +416,16 @@
     if(hint) hint.textContent = buyerFxReady ? ('Prix affichés en ' + currencyLabel(buyerCurrency) + '. Le vendeur reçoit le montant de référence en FCFA.') : 'Conversion momentanément indisponible : prix affichés en FCFA.';
     if(document.getElementById('orderTotalAmt') && currentProduct) updateOrderTotal();
   }
+  function countryFlag(code){
+    const iso = code === 'CD_USD' ? 'CD' : code;
+    if(!/^[A-Z]{2}$/.test(iso)) return '🌍';
+    return String.fromCodePoint(...[...iso].map(ch => 127397 + ch.charCodeAt(0)));
+  }
+
   function renderBuyerCountryOptions(){
     const select = document.getElementById('buyerCountry');
     if(!select) return;
-    select.innerHTML = Object.entries(BUYER_COUNTRIES).map(([code,c]) => `<option value="${code}">${c.name} (${currencyLabel(c.currency)})</option>`).join('');
+    select.innerHTML = Object.entries(BUYER_COUNTRIES).map(([code,c]) => `<option value="${code}">${countryFlag(code)} ${c.name} (${currencyLabel(c.currency)})</option>`).join('');
     select.value = buyerCountryCode;
   }
   function renderBuyerNetworks(){
@@ -809,6 +816,11 @@
       return;
     }
     const isFreeDigitalOrder = isDigitalOrder && getEffectiveProductPrice(currentProduct) === 0;
+    if(!BUYER_COUNTRIES[buyerCountryCode]){
+      msg.textContent = "Choisis ton pays pour afficher le bon indicatif téléphonique."; msg.style.display = "block";
+      msg.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
     if(!isFreeDigitalOrder && (!selectedNetwork || !BUYER_COUNTRIES[buyerCountryCode])){
       msg.textContent = "Choisis ton pays et un moyen de paiement disponible."; msg.style.display = "block";
       msg.scrollIntoView({behavior:"smooth", block:"center"});
